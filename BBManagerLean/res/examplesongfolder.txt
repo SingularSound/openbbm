@@ -1,0 +1,395 @@
+Metal1	-1	100	-1
+   Metal1 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+         Intro212	0	0	-1
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal1 - Part 1	4	-10	-1
+      Main Drum Loop	1	0	-1
+         MetalIntro212	0	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+         Ride2	0	0	-1
+   Metal1 - Part 2	4	10	-1
+      Main Drum Loop	1	0	-1
+         MetalLoop212	0	0	-1
+      Drum Fill	8	0	0
+         MetalDF212	0	0	-1
+      Transition Fill	1	0	-1
+         MetalTF212	0	0	-1
+      Foot Switch Effect	1	0	-1
+         Crash1	0	0	-1
+   Metal1 - Part 3	4	-20	-1
+      Main Drum Loop	1	0	-1
+         MetalLoop213	0	0	-1
+      Drum Fill	8	0	1
+         MetalDF213	0	0	-1
+         MetalDF116	0	0	-1
+         MetalDF112	0	0	-1
+         MetalDF113	0	0	-1
+         MetalDF114	0	0	-1
+         MetalDF115	0	0	-1
+         MetalDF116	0	0	-1
+         MetalDF117	0	0	-1
+      Transition Fill	1	0	-1
+         MetalTF213	0	0	-1
+      Foot Switch Effect	1	0	-1
+         Crash2	0	0	-1
+   Metal1 - Part 4	4	20	-1
+      Main Drum Loop	1	0	-1
+         MetalLoop212	0	0	-1
+      Drum Fill	8	0	1
+         MetalDF212	0	0	-1
+      Transition Fill	1	0	-1
+         MetalTF212	0	0	-1
+      Foot Switch Effect	1	0	-1
+         Crash1	0	0	-1
+   Metal1 - Part 5	4	5	-1
+      Main Drum Loop	1	0	-1
+         MetalOutro212	0	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+         Ride2	0	0	-1
+   Metal1 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal2	-1	120	-1
+   Metal2 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal2 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+         MetalLoop212	0	0	-1
+      Drum Fill	8	0	1
+         MetalDF213	0	0	-1
+         MetalDF116	0	0	-1
+         MetalDF112	0	0	-1
+         MetalDF113	0	0	-1
+         MetalDF114	0	0	-1
+         MetalDF115	0	0	-1
+         MetalDF116	0	0	-1
+      Transition Fill	1	0	-1
+         MetalTF212	0	0	-1
+      Foot Switch Effect	1	0	-1
+         Crash1	0	0	-1
+   Metal2 - Part 2	4	60	-1
+      Main Drum Loop	1	0	-1
+         MetalLoop213	0	0	-1
+      Drum Fill	8	0	0
+         MetalDF213	0	0	-1
+         MetalDF116	0	0	-1
+         MetalDF112	0	0	-1
+      Transition Fill	1	0	-1
+         MetalTF213	0	0	-1
+      Foot Switch Effect	1	0	-1
+         Crash2	0	0	-1
+   Metal2 - Part 3	4	0	-1
+      Main Drum Loop	1	0	-1
+         MetalLoop212	0	0	-1
+      Drum Fill	8	0	1
+         MetalDF212	0	0	-1
+      Transition Fill	1	0	-1
+         MetalTF212	0	0	-1
+      Foot Switch Effect	1	0	-1
+         Crash1	0	0	-1
+   Metal2 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+         Outro212	0	0	-1
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+Metal3	-1	60	-1
+   Metal3 - Intro	4	0	-1
+      Dummy	0	0	-1
+      Intro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1
+   Metal3 - Part 1	4	0	-1
+      Main Drum Loop	1	0	-1
+      Drum Fill	8	0	0
+      Transition Fill	1	0	-1
+      Foot Switch Effect	1	0	-1
+   Metal3 - Outro	4	0	-1
+      Dummy	0	0	-1
+      Outro Fill	1	0	0
+      Dummy	0	0	-1
+      Dummy	0	0	-1

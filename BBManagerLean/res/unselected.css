@@ -1,0 +1,39 @@
+﻿SongWidget{
+   background: rgb(51, 51, 51);
+}
+
+SongWidget QLabel{
+   color: rgb(127, 127, 127);
+}
+
+QMessageBox QLabel{
+   color: default;
+}
+
+QDialog QLabel{
+   color: default;
+}
+
+QProgressDialog QLabel{
+   color: default;
+}
+
+SongTitleWidget QLineEdit#titleEdit{
+   color: rgb(127, 127, 127);
+}
+
+SongTitleWidget{
+   background: rgb(51, 51, 51);
+}
+
+SongPartWidget{
+   background: rgb(51, 51, 51);
+}
+
+MoveHandleWidget QLabel{
+   color: rgb(127, 127, 127);
+}
+
+DeleteHandleWidget{
+   background: rgba(0, 0, 0, 0);
+}

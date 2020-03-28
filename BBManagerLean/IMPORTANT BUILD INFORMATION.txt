@@ -1,0 +1,5 @@
+When building a release for customer, it is IMPERATIVE to
+- Update version.h
+- CLEAN first before building.
+
+If clean build is not performed, the version information will NOT get updated!!!!

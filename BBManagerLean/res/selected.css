@@ -1,0 +1,41 @@
+﻿SongWidget{
+   /*background: rgb(25, 77, 128);*/
+   background: rgb(107, 128, 148);
+}
+
+SongWidget QLabel{
+   color: white;
+}
+
+QMessageBox QLabel{
+   color: default;
+}
+
+QDialog QLabel{
+   color: default;
+}
+
+QProgressDialog QLabel{
+   color: default;
+}
+
+SongTitleWidget QLineEdit#titleEdit{
+   color: white;
+}
+
+SongTitleWidget{
+   background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(159, 159, 159, 255), stop:1 rgba(95, 95, 95, 255));
+}
+
+SongPartWidget{
+   /*background: rgb(25, 77, 128);*/
+   background: rgb(107, 128, 148);
+}
+
+MoveHandleWidget QLabel{
+   color: white;
+}
+
+DeleteHandleWidget{
+   background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(159, 159, 159, 255), stop:1 rgba(95, 95, 95, 255));
+}

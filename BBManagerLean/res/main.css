@@ -1,0 +1,324 @@
+﻿MainWindow{
+   background: black;
+}
+
+QSplitter::handle{
+   background: black;
+}
+
+QLabel#titleBar{
+   background: qlineargradient(spread:pad, x1:0, y1:0.4, x2:0, y2:0.5, stop:0 rgba(114, 114, 114, 255), stop:1 rgba(89, 89, 89, 255));
+   padding-top : 2px;
+   padding-bottom : 2px;
+   padding-left : 5px;
+   padding-right : 5px;
+
+}
+
+
+#VMPedal, #VMEffect{
+   border-style: outset;
+   border-width: 0px;
+}
+
+#VMPedal{
+   border-top-left-radius: 5%;
+   border-top-right-radius: 5%;
+   border-bottom-left-radius: 18%;
+   border-bottom-right-radius: 18%;
+}
+
+#VMEffect{
+   border-radius: 97%;
+}
+body
+{
+
+}
+#VMPedal:hover, #VMEffect:hover{
+   background: rgba(255, 255, 255, 46);
+
+}
+
+#VMPedal:pressed, #VMEffect:pressed{
+   background: rgba(255, 255, 255, 20);
+}
+
+VirtualMachinePanel{
+   background: rgb(46, 46, 46);
+}
+
+
+ProjectExplorerPanel{
+   background: rgb(46, 46, 46);
+}
+
+PlaybackPanel{
+   background: rgb(46, 46, 46);
+}
+
+BeatsPanel{
+   background: rgb(46, 46, 46);
+}
+
+#DrumsetPanel, #DrumsetScrollArea{
+   background: rgb(46, 46, 46);
+}
+
+SongFolderView{
+   background: rgb(30, 30, 30);
+   border-style: solid;
+   border-width: 1px;
+   border-color: rgb(191, 191, 191);
+}
+
+SongFolderView QHeaderView::section{
+   color: white;
+   background: qlineargradient(spread:pad, x1:0, y1:0.4, x2:0, y2:0.5, stop:0 rgba(114, 114, 114, 255), stop:1 rgba(89, 89, 89, 255));
+}
+
+NewSongWidget{
+   background: rgb(30, 30, 30);
+   border-top-style: solid;
+   border-bottom-style: solid;
+   border-left-style: none;
+   border-right-style: none;
+   border-top-width: 1px;
+   border-bottom-width: 1px;
+   border-top-color: black;
+   border-bottom-color: black;
+}
+
+
+SongWidget{
+   background: rgb(51, 51, 51);
+   border-style: solid;
+   border-width: 1px;
+   border-color: black;
+}
+
+SongWidget QLabel{
+   color: rgb(127, 127, 127);
+}
+
+SongTitleWidget{
+   background: rgb(51, 51, 51);
+   border-style: solid;
+   border-width: 1px;
+   border-color: rgb(191, 191, 191);
+}
+
+SongTitleWidget QLineEdit#titleEdit{
+   color: rgb(127, 127, 127);
+   background: rgb(89, 89, 89);
+   border-radius: 4px;
+   border-style: none;
+   padding-left: 5px;
+   padding-right: 5px;
+}
+
+SongTitleWidget QLabel#numberLabel{
+   background: rgb(89, 89, 89);
+   border-radius: 4px;
+   border-style: none;
+   padding-left: 5px;
+   padding-right: 5px;
+}
+
+SongPartWidget{
+   background: rgb(51, 51, 51);
+   border-top-style: solid;
+   border-bottom-style: solid;
+   border-left-style: none;
+   border-right-style: none;
+   border-top-width: 1px;
+   border-bottom-width: 1px;
+   border-top-color: black;
+   border-bottom-color: black;
+}
+
+PartColumnWidget{
+   background: rgba(0, 0, 0, 0);
+   /*border-top-style: solid;
+   border-bottom-style: solid;*/
+   border-left-style: solid;
+   border-right-style: solid;
+   /*border-top-width: 1px;
+   border-bottom-width: 1px;*/
+   border-left-width: 1px;
+   border-right-width: 1px;
+   /*border-top-color: rgb(0, 0, 0);
+   border-bottom-color: rgb(0, 0, 0);*/
+   border-left-color: rgb(191, 191, 191);
+   border-right-color: rgb(191, 191, 191);
+}
+
+QLabel{
+   color: white;
+   background: rgba(0, 0, 0, 0);
+}
+
+ProjectExplorerPanel QLabel{
+   color: default;
+}
+
+QMessageBox QLabel{
+   color: default;
+}
+
+QDialog QLabel{
+   color: default;
+}
+QProgressDialog QLabel{
+   color: default;
+}
+
+MoveHandleWidget{
+   background: rgba(0, 0, 0, 255);
+   border-style: solid;
+   border-width: 1px;
+   border-color: rgb(191, 191, 191);
+}
+
+MoveHandleWidget QLabel{
+   color: rgb(127, 127, 127);
+   background: rgba(0, 0, 0, 0);
+   border-color: rgb(0, 0, 0);
+   border: 0px solid rgb(0, 0, 0);
+}
+
+DeleteHandleWidget{
+   background: rgba(0, 0, 0, 0);
+   border-style: solid;
+   border-width: 1px;
+   border-color: rgb(191, 191, 191);
+}
+
+QPushButton#upButton{
+   color: white;
+   background: rgba(0, 0, 0, 0);
+   border-style: none;
+   image: url(:/images/images/UpArrow.png);
+}
+
+QPushButton#upButton:hover{
+   image: url(:/images/images/UpArrow-hover.png);
+}
+
+QPushButton#upButton:pressed{
+   image: url(:/images/images/UpArrow-clicked.png);
+}
+
+QPushButton#upButton:disabled{
+   image: url(:/images/images/UpArrow-disabled.png);
+}
+
+QPushButton#downButton{
+   color: white;
+   background: rgba(0, 0, 0, 0);
+   border-style: none;
+   image: url(:/images/images/DownArrow.png);
+}
+
+QPushButton#downButton:hover{
+   image: url(:/images/images/DownArrow-hover.png);
+}
+
+QPushButton#downButton:pressed{
+   image: url(:/images/images/DownArrow-clicked.png);
+}
+
+QPushButton#downButton:disabled{
+   image: url(:/images/images/DownArrow-disabled.png);
+}
+
+QPushButton#loopCountButton{
+   color: white;
+   background: rgba(0, 0, 0, 0);
+   border-style: none;
+   /*image: url(:/images/images/App_Icon_64_2.png);*/
+}
+
+
+QPushButton#deleteButton{
+   color: white;
+   background: rgba(0, 0, 0, 0);
+   border-style: none;
+   image: url(:/images/images/CloseButton.png);
+}
+
+QPushButton#deleteButton:hover{
+   image: url(:/images/images/CloseButton-hover.png);
+}
+
+QPushButton#deleteButton:pressed{
+   image: url(:/images/images/CloseButton-clicked.png);
+}
+
+QPushButton#deleteButton:disabled{
+   image: url(:/images/images/CloseButton-disabled.png);
+}
+
+QPushButton#playButton{
+color: white;
+background: rgba(0, 0, 0, 0);
+border-style: none;
+image: url(:/images/images/play-normal.png);
+}
+
+QPushButton#playButton:hover{
+image: url(:/images/images/play-hover.png);
+}
+
+QPushButton#playButton:pressed{
+image: url(:/images/images/play-clicked.png);
+}
+
+QPushButton#playButton:disabled{
+image: url(:/images/images/play-disabled.png);
+}
+
+QPushButton#beatFileButton{
+   background: qlineargradient(spread:pad, x1:0, y1:0.4, x2:0, y2:0.5, stop:0 rgba(114, 114, 114, 255), stop:1 rgba(89, 89, 89, 255));
+   border-radius: 6px;
+   border-style: outset;
+   border-width: 1px;
+   border-color: rgb(15, 15, 15);
+}
+
+QPushButton#beatFileButton:pressed{
+   background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(114, 114, 114, 255), stop:1 rgba(89, 89, 89, 255));
+   border-radius: 6px;
+   border-style: inset;
+   border-width: 2px;
+   border-color: rgb(15, 15, 15);
+}
+
+QPushButton#beatFileButton:disabled{
+   color: black;
+}
+
+/*QProgressBar {
+    border: 1px solid black;
+    text-align: top;
+    padding: 1px;
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+    background: QLinearGradient( x1: 0, y1: 0, x2: 1, y2: 0,
+    stop: 0 #fff,
+    stop: 0.4999 #eee,
+    stop: 0.5 #ddd,
+    stop: 1 #eee );
+    width: 15px;
+}
+
+QProgressBar::chunk {
+    background: QLinearGradient( x1: 0, y1: 0, x2: 1, y2: 0,
+    stop: 0 #78d,
+    stop: 0.4999 #46a,
+    stop: 0.5 #45a,
+    stop: 1 #238 );
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+    border: 1px solid black;*/
+

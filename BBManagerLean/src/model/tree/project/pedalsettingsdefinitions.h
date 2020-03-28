@@ -1,0 +1,57 @@
+#ifndef PEDALSETTINGSDEFINITIONS_H
+#define PEDALSETTINGSDEFINITIONS_H
+
+
+
+
+typedef enum {
+   FOOTSWITCH_TYPE                     =  0,
+   FOOTSWITCH_ORDER                    =  1,
+   MAIN_UNPAUSE_MODE_TAP               =  2,
+   MAIN_UNPAUSE_MODE_HOLD              =  3,
+   ACTIVE_PAUSE                        =  4,
+   PRIMARY_FOOTSWITCH_ACTION_PLAYING   =  5,
+   PRIMARY_FOOTSWITCH_ACTION_STOPPED   =  6,
+   SECONDARY_FOOTWTWICH_ACTION_PLAYING =  7,
+   SECONDARY_FOOTSWITCH_ACTION_STOPPED =  8,
+   FOOTSWITCH_DETECTOR                 =  9,
+   EXIT_CMD                            = 10,
+   INFO_CMD                            = 11,
+   NUMBER_OF_KEY                       = 12
+}SETTINGS_main_key_enum;
+
+typedef enum {
+    PERMANENT,
+    MOMENTARY,
+    NUM_OF_FOOTSWITCH_TYPE
+} FOOTSWITCH_TYPE_params;
+
+typedef enum {
+    FOOTSWITCH_SWAP_FALSE,
+    FOOTSWITCH_SWAP_TRUE,
+    NUM_OF_FOOTSWITCH_SWAP
+}FOOTSWITCH_SWAP_params;
+
+typedef enum {
+    MAIN_UNPAUSE_TO_INTRO,
+    MAIN_UNPAUSE_TO_FILL,
+    NUM_OF_MAIN_UNPAUSE
+}MAIN_UNPAUSE_params;
+
+typedef enum {
+    STOPPED_NO_ACTION,
+    STOPPED_ACCENT_HIT,
+    STOPPED_SONG_ADVANCE,
+    STOPPED_TAP_TEMPO,
+    STOPPED_SONG_BACK,
+    NUM_STOPPED_ACTION
+}STOPPED_ACTION_params;
+
+typedef enum {
+    PLAYING_NO_ACTION       = 0,
+    PLAYING_ACCENT_HIT      = 1,
+    PLAYING_TAP_TEMPO       = 2,
+    PLAYING_PAUSE_UNPAUSE   = 3,
+    NUM_PLAYING_ACTION      = 4
+}PLAYING_ACTION_params;
+#endif // PEDALSETTINGSDEFINITIONS_H

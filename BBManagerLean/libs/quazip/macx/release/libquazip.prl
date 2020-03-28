@@ -1,0 +1,5 @@
+QMAKE_PRL_BUILD_DIR = /Users/iajrz/projects/singularsound/bbmanager/quazip/quazip
+QMAKE_PRO_INPUT = quazip.pro
+QMAKE_PRL_TARGET = libquazip.1.0.0.dylib
+QMAKE_PRL_CONFIG = lex yacc exceptions depend_includepath testcase_targets import_plugins import_qpa_plugin asset_catalogs rez file_copies qmake_use qt warn_on release link_prl app_bundle incremental global_init_link_order lib_version_first sdk clang_pch_style shared qt_framework release macos osx macx mac darwin unix posix gcc clang llvm qt warn_on create_prl no_install_prl create_pc have_target dll c++11 objective_c thread moc resources
+QMAKE_PRL_VERSION = 1.0.0
