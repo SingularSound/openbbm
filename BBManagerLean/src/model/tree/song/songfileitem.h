@@ -45,6 +45,7 @@ public:
 
     bool& hasUnsavedChanges() { return m_UnsavedChanges; }
     inline QString fileName() { return m_FileName; }
+    std::list<int> *GetAutoPilotSequence();
 private:
    void saveFile();
    void verifyFile();

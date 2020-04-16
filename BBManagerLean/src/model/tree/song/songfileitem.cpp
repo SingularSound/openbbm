@@ -358,10 +358,15 @@ void SongFileItem::verifyAutoPilot()
         QString answer = apdm->getPartModel(i)->verifyPartValid(nbFill);
         if(!answer.isEmpty())
         {
-            //Not Valid.
-            answer = QString("\n\nIn Part #%1:\n").arg(i+1) + answer;
+            if(answer.contains("Trigger at value > Drum")){
+                //means its nonsequential, needs to be organize
+                //apdm->reOrderAutoPilot(nbFill);
+            }else{
+                //Not Valid.
+                answer = QString("\n\nIn Part #%1:\n").arg(i+1) + answer;
+                warningMsg += answer;
+            }
         }
-        warningMsg += answer;
     }
 
     if(warningMsg.isEmpty()) {
@@ -1081,4 +1086,28 @@ void SongFileItem::replaceDrumset(const QString &oldLongName, DrmFileItem *p_drm
    model()->itemDataChanged(this, DEFAULT_DRM);
 
    // No need to re-hash until saved
+}
+
+std::list<int> *SongFileItem::GetAutoPilotSequence(){
+    std::list<int>  *sequenceidxs = new std::list<int>;
+
+        SongFileModel * sfm = static_cast<SongFileModel *>(filePart());
+        AutoPilotDataModel* apdm = static_cast<AutoPilotDataModel *>(sfm->getAutoPilotDataModel());
+        SongModel * sm = static_cast<SongFileModel *>(filePart())->getSongModel();
+        std::list<int> *sequence = new std::list<int>;
+
+       // bool nonsequential =false;
+        int nbPart = sm->nPart();
+        for(int i = 0; i < nbPart; i++)
+        {
+            int nbFill = sm->part(i)->nbDrumFills();
+            for(int j = 0; j < nbFill; j++){
+                //Get drumfill sequence order
+                sequence->push_back((int)apdm->getPartModel(i)->getDrumFill(j)->getPlayAt());
+                if(apdm->getPartModel(i)->getDrumFill(j)->getPlayAt() < apdm->getPartModel(i)->getDrumFill(j+1)->getPlayAt()){
+                    //nonsequential =true;
+                }
+            }
+        }
+    return sequenceidxs;
 }
