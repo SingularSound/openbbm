@@ -1392,7 +1392,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         case DRUMFILL_REQUEST:
             // If there is drum fills in the current part
             if (CurrPartPtr->nDrumFill > 0) {
-
                 DrumFillStartSyncTick = CalculateStartBarSyncTick(MasterTick,
                         MAIN_LOOP_PTR(CurrPartPtr)->barLength,
                         AutopilotCueFill ? MAIN_LOOP_PTR(CurrPartPtr)->barLength : MAIN_LOOP_PTR(CurrPartPtr)->trigPos);
@@ -1417,6 +1416,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 DrumFillStartSyncTick -= DrumFillPickUpSyncTickLength;
 
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
+            }
+            //Extends the section on autopilot
+            if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
+                MAIN_LOOP_PTR(CurrPartPtr)->index = 0;
             }
             break;
 
