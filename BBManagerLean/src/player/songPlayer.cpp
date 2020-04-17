@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <QDebug>
+#include <algorithm>
 
 
 #include "../model/filegraph/songfile.h"
@@ -1125,7 +1126,9 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 				AutopilotCueFill = TRUE;
 				AutopilotAction = FALSE;
 		}
-    }
+        SongPlayer_AutoPilotSequence();
+
+    }//end if AP
 
 
     if (PlayerStatus == PAUSED) {
@@ -2731,3 +2734,36 @@ void SongPlayer_ButtonCallback(BUTTON_EVENT event, unsigned long long time)
 
 }
 
+void SongPlayer_AutoPilotSequence(void)
+{
+    bool nonsequential = false;
+    QMap<uint32_t,int> idxsequence;
+
+    int nbPart = CurrSongFilePtr->song.nPart;
+    for(int i = 0; i < nbPart; i++){
+        int nbFill =CurrSongFilePtr->song.part[i].nDrumFill;
+        for(int j = 0; j < nbFill; j++){
+            //Save the drumfillindex value for the playAt value
+            idxsequence[APPtr->part[i].drumFill[j].playAt] = CurrSongPtr->part[i].drumFillIndex[j];
+            if(APPtr->part[i].drumFill[j].playAt > APPtr->part[i].drumFill[j+1].playAt){
+                nonsequential = true;
+            }
+        }
+        if(nonsequential){
+            //order autopilot
+            std::sort( APPtr->part[i].drumFill,  APPtr->part[i].drumFill + nbFill,
+                                      [](AUTOPILOT_AutoPilotDataFillStruct const & a, AUTOPILOT_AutoPilotDataFillStruct const & b) -> bool
+                                      { return a.playAt < b.playAt; } );
+
+            //order song drumfills
+           for(int i = 0; i < nbPart; i++){
+                //ir cambiando acorde al map con los indices
+                for(int j = 0; j < nbFill; j++){
+                    CurrSongPtr->part[i].drumFillIndex[j] = idxsequence.first();
+                    idxsequence.remove(idxsequence.firstKey());
+                }
+            }
+           //clear the sequence for nextpart
+        }
+    }
+}

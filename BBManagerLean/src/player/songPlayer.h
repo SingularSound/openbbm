@@ -74,6 +74,7 @@ void SongPlayer_externalStart(void);
 void SongPlayer_externalStop(void);
 int SongPlayer_getBeatInbar(int32_t *startBeat);
 int SongPlayer_getMasterTick(void);
+void SongPlayer_AutoPilotSequence(void);
 
 
 int SongPlayer_getTimeSignature(TimeSignature * timeSignature);

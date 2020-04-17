@@ -919,7 +919,7 @@ void SoundManager_LoadDrumset(char* file, uint32_t size)
 
 
 
-    // Complete for all the intrumsnets
+    // Complete for all the instruments
     for (i = 0; i < MIDIPARSER_NUMBER_OF_INSTRUMENTS; i++){
         if (Drumset.inst[i].nVel){
             if (Drumset.inst[i].volume == 0)Drumset.inst[i].volume = 100;
