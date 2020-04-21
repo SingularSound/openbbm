@@ -198,6 +198,7 @@ public:
     void    addAPSettingInQueue(QList<int> settings);
     void clearAPSettingQueue();
     bool APSettingIsEmpty();
+    void MoveModelChildren(AbstractTreeItem *item, QList<int> idxs);
 public slots:
    void itemDataChanged(AbstractTreeItem * item, int column);
    void itemDataChanged(AbstractTreeItem * item, int leftColumn, int rightColumn);

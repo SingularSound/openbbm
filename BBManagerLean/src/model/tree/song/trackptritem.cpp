@@ -252,6 +252,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
             partModel->getDrumFill(drumFillIndex)->setPlayAt(value.at(0).toInt());
             partModel->getDrumFill(drumFillIndex)->setPlayFor(value.at(1).toInt());
+            AutoPilotSequence();
         }
     }
     auto ppp = parent()->parent()->parent();
@@ -259,7 +260,48 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
     model()->itemDataChanged(ppp, SAVE);
 }
 
+void TrackPtrItem::AutoPilotSequence()
+{
+    bool nonsequential = false;
+    QMap<uint32_t,int> idxsequence;
+    TrackArrayItem  * tai = static_cast<TrackArrayItem *>(parent());
+    SongPartItem    * spi = static_cast<SongPartItem*>(tai->parent());
+    SongPartModel   * spm = static_cast<SongPartModel*>(spi->filePart());
+    SongFileItem    * sfi = static_cast<SongFileItem*>(spi->parent());
+    SongFileModel   * sfm  = static_cast<SongFileModel*>(sfi->filePart());
+    QList<int> idxs;
 
+    AutoPilotDataModel *apdm = static_cast<AutoPilotDataModel*>(sfm->getAutoPilotDataModel());
+    int partRow = tai->parent()->row();
+    AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
+    int nbFill =spm->nbDrumFills();
+
+    for(int j = 0; j < nbFill; j++){
+            //use the playAt value as key so the order goes accordingly to the AP configured
+            idxsequence[partModel->getDrumFill(j)->getPlayAt()] = spm->drumFillList()[j]->index();
+            if(partModel->getDrumFill(j)->getPlayAt() > partModel->getDrumFill(j+1)->getPlayAt()){
+                nonsequential = true;
+            }
+    }
+    if(nonsequential){
+        for(int i = 0; i < nbFill; i++){
+            //fills index order before changing the list
+            foreach(SongTrack * o, spm->drumFillList())
+            {
+                if(o->index() ==idxsequence.first())
+                {
+                    idxs.append(spm->drumFillList().indexOf(o));
+                    break;
+                }
+            }
+            partModel->getDrumFill(i)->setPlayAt(idxsequence.keys()[i]);
+            spm->drumFillList()[i]->setIndex(idxsequence.values()[i]);
+           // idxsequence.remove(idxsequence.firstKey());
+        }
+       auto ppp = parent()->parent()->parent();
+       model()->MoveModelChildren(ppp, idxs);
+    }
+}
 
 QList<QVariant> TrackPtrItem::autoPilotValues()
 {
