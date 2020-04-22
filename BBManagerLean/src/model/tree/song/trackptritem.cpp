@@ -296,9 +296,8 @@ void TrackPtrItem::AutoPilotSequence()
             }
             partModel->getDrumFill(i)->setPlayAt(idxsequence.keys()[i]);
             spm->drumFillList()[i]->setIndex(idxsequence.values()[i]);
-           // idxsequence.remove(idxsequence.firstKey());
         }
-       auto ppp = parent()->parent()->parent();
+       auto ppp = parent();
        model()->MoveModelChildren(ppp, idxs);
     }
 }
