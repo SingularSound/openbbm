@@ -2688,7 +2688,6 @@ QFileInfo BeatsProjectModel::createProjectFolderForProjectFile(const QFileInfo &
 }
 void BeatsProjectModel::MoveModelChildren(AbstractTreeItem * item, QList<int> idxs)
 {
-    AbstractTreeItem *p_Parent = item->parent();
-    p_Parent->changeChildrenOrder(idxs);
+    item->changeChildrenOrder(idxs);
 }
 
