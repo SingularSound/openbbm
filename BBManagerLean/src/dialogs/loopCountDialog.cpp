@@ -23,17 +23,7 @@ LoopCountDialog::LoopCountDialog(QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0,0,0,0);
     integerButton = new QPushButton();
-    integerButton->setFlat(true);
-    integerButton->setObjectName("loopCountButton");
-    if (loopCount>1000)
-        loopCount = 0;
-    
-    integerButton->setText(QString("Loop\n")+QString::number(loopCount));
 
-    connect(integerButton, SIGNAL(clicked()), this, SLOT(setInteger()));
-    mainLayout->addWidget(integerButton, 0, nullptr);
-
-    setToolTip(tr("Loop Count"));
 }
 
 void LoopCountDialog::setInteger()
