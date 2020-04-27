@@ -46,11 +46,8 @@ typedef enum{
     DRUMFILL_WAITING_TRIG               =   16,
     DRUMFILL_ACTIVE                     =   17,
 	
-#ifdef am335x
-    COUNT_IN_TO_MAIN                    =   18,
-#else
 	SINGLE_TRACK_PLAYER                 =   18,
-#endif
+
 
     N_PLAYER_STATUS                     =   19,
 }SongPlayer_PlayerStatus;

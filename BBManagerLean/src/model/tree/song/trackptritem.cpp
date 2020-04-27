@@ -252,7 +252,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
             partModel->getDrumFill(drumFillIndex)->setPlayAt(value.at(0).toInt());
             partModel->getDrumFill(drumFillIndex)->setPlayFor(value.at(1).toInt());
-            AutoPilotSequence();
+           // AutoPilotSequence();
         }
     }
     auto ppp = parent()->parent()->parent();
