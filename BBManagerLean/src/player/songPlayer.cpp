@@ -164,6 +164,8 @@ static uint8_t IntDisable(void);
 static void IntEnable(uint8_t intStatus);
 static void TEMPO_startWithInt(void);
 static void ResetSongPosition(void);
+static void ResetBeatCounter(void);
+
 
 /*****************************************************************************
  **                         INTERNAL GLOBAL VARIABLES
@@ -561,6 +563,11 @@ static void ResetSongPosition(void) {
     IntEnable(status);
 }
 
+static void ResetBeatCounter(void) {
+    unsigned char status = IntDisable();
+    BeatCounter = 0;
+    IntEnable(status);
+}
 
 void SongPlayer_getPlayerStatus(SongPlayer_PlayerStatus *playerStatus,
         unsigned int *partIndex, unsigned int *drumfillIndex) {
@@ -647,8 +654,9 @@ int SongPlayer_loadSong(char* file, uint32_t length)
 
         /* Drumfills */
         for (j = 0; j < SongPtr->part[i].nDrumFill; j++) {
-            if (SongPtr->part[i].drumFillIndex[j] < 0)
+            if (SongPtr->part[i].drumFillIndex[j] < 0) {
                 return 0;
+            }
             adjust_trig_length(SongPtr->part[i].drumFillIndex[j]);
         }
         /* Transition Fill */
@@ -938,7 +946,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         case DRUMFILL_REQUEST:
             // If there is drum fills in the current part
             if (CurrPartPtr->nDrumFill > 0) {
-
                 DrumFillStartSyncTick = CalculateStartBarSyncTick(MasterTick,
                         MAIN_LOOP_PTR(CurrPartPtr)->barLength,
                         AutopilotCueFill ? MAIN_LOOP_PTR(CurrPartPtr)->barLength : MAIN_LOOP_PTR(CurrPartPtr)->trigPos);
@@ -963,6 +970,14 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 DrumFillStartSyncTick -= DrumFillPickUpSyncTickLength;
 
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
+            }
+            else {
+                // If there is no drum fill in the current part
+                ResetBeatCounter();
+            }
+            //Extends the section on autopilot
+            if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
+                MAIN_LOOP_PTR(CurrPartPtr)->index = 0;
             }
             break;
 
