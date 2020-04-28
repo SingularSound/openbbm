@@ -1,14 +1,14 @@
 /*
-  	This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound 
- 	BeatBuddy Manager is free software: you can redistribute it and/or modify
+    This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound
+    BeatBuddy Manager is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2 as published by
     the Free Software Foundation.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
@@ -42,7 +42,7 @@ QVariant TrackPtrItem::data(int column)
     switch (column) {
     case NAME:
         return mp_SongTrack ? mp_SongTrack->name() : tr("Undefined File");
-    case ABSOLUTE_PATH:     
+    case ABSOLUTE_PATH:
         return mp_SongTrack ? mp_SongTrack->fullFilePath() : QString::null;
     case MAX_CHILD_CNT:
         return 0; // Cannot have child
@@ -252,54 +252,11 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
             partModel->getDrumFill(drumFillIndex)->setPlayAt(value.at(0).toInt());
             partModel->getDrumFill(drumFillIndex)->setPlayFor(value.at(1).toInt());
-           // AutoPilotSequence();
         }
     }
     auto ppp = parent()->parent()->parent();
     ppp->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
     model()->itemDataChanged(ppp, SAVE);
-}
-
-void TrackPtrItem::CheckAutoPilotSequence()
-{
-    bool nonsequential = false;
-    QMap<uint32_t,int> idxsequence;
-    TrackArrayItem  * tai = static_cast<TrackArrayItem *>(parent());
-    SongPartItem    * spi = static_cast<SongPartItem*>(tai->parent());
-    SongPartModel   * spm = static_cast<SongPartModel*>(spi->filePart());
-    SongFileItem    * sfi = static_cast<SongFileItem*>(spi->parent());
-    SongFileModel   * sfm  = static_cast<SongFileModel*>(sfi->filePart());
-    QList<int> idxs;
-
-    AutoPilotDataModel *apdm = static_cast<AutoPilotDataModel*>(sfm->getAutoPilotDataModel());
-    int partRow = tai->parent()->row();
-    AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
-    int nbFill =spm->nbDrumFills();
-
-    for(int j = 0; j < nbFill; j++){
-            //use the playAt value as key so the order goes accordingly to the AP configured
-            idxsequence[partModel->getDrumFill(j)->getPlayAt()] = spm->drumFillList()[j]->index();
-            if(partModel->getDrumFill(j)->getPlayAt() > partModel->getDrumFill(j+1)->getPlayAt()){
-                nonsequential = true;
-            }
-    }
-    if(nonsequential){
-        for(int i = 0; i < nbFill; i++){
-            //fills index order before changing the list
-            foreach(SongTrack * o, spm->drumFillList())
-            {
-                if(o->index() ==idxsequence.first())
-                {
-                    idxs.append(spm->drumFillList().indexOf(o));
-                    break;
-                }
-            }
-            partModel->getDrumFill(i)->setPlayAt(idxsequence.keys()[i]);
-            spm->drumFillList()[i]->setIndex(idxsequence.values()[i]);
-        }
-       auto ppp = parent();
-       model()->MoveModelChildren(ppp, idxs);
-    }
 }
 
 QList<QVariant> TrackPtrItem::autoPilotValues()
@@ -320,7 +277,7 @@ QList<QVariant> TrackPtrItem::autoPilotValues()
                                  << static_cast<AutoPilotDataPartModel*>(apdm->getOutroModel())->getMainLoop()->getPlayFor();
     } else {
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)parent()->data(TRACK_TYPE).toInt();
-        int partRow = tai->parent()->row(); 
+        int partRow = tai->parent()->row();
 
         if(trackType == MAIN_DRUM_LOOP ){
 
@@ -335,7 +292,7 @@ QList<QVariant> TrackPtrItem::autoPilotValues()
                                     << partModel->getTransitionFill()->getPlayFor();
 
         }else if( trackType == DRUM_FILL ){
-            int drumFillIndex = row();   
+            int drumFillIndex = row();
 
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
             return QList<QVariant>() << partModel->getDrumFill(drumFillIndex)->getPlayAt()

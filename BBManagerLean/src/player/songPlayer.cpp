@@ -128,6 +128,8 @@ static int CalculateStartBarSyncTick(unsigned int tickPos,
 
 static unsigned int CalculateTranFillQuitSyncTick(unsigned int tickPos,
         unsigned int tickPerBar);
+static unsigned int getNextAPIndex();
+static void fillAPIndex();
 
 
 static void ExternalNoteOnHandler(uint8_t note, uint8_t velocity);
@@ -182,6 +184,7 @@ int32_t BeatCounter = 0;
 int32_t AutopilotAction = FALSE;
 int32_t AutopilotCueFill = FALSE;
 int32_t AutopilotTransitionCount;
+QMap<int, int> idxs;//key playAt value real index
 
 static int PartStopSyncTick;
 static int PartStopPickUpSyncTickLength;
@@ -545,7 +548,8 @@ void SongPlayer_externalTransition(uint32_t part_number) {
 
 static void ResetSongPosition(void) {
     unsigned char status = IntDisable();
-    DrumFillIndex = 0;
+    fillAPIndex();
+    DrumFillIndex = (APPtr)?getNextAPIndex():0;
     PartIndex = 0;
     MasterTick = 0;
     CurrPartPtr = nullptr;
@@ -660,12 +664,9 @@ int SongPlayer_loadSong(char* file, uint32_t length)
         APPtr = (AUTOPILOT_AutoPilotDataStruct *)(file + CurrSongFilePtr->offsets.autoPilotDataOffset);
 
         /* Validate Autopilot Flags */
-        if (!APPtr->internalData.autoPilotFlags & AUTOPILOT_ON_FLAG ||
-                !APPtr->internalData.autoPilotFlags & AUTOPILOT_VALID_FLAG) {
+        if (APPtr->internalData.autoPilotFlags == 2) {
             APPtr = nullptr;
         }
-        //AP sequence code here
-        //fill indexes here to pass on later
     }
 
     CurrSongPtr = SongPtr;
@@ -759,7 +760,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 				AutopilotAction = FALSE;
 		}
 
-    }//end if AP
+    }
 
 
     if (PlayerStatus == PAUSED) {
@@ -1175,7 +1176,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     nTick, INTR_FILL_ID);
 
             TmpMasterPartTick = 0u;
-            DrumFillIndex = 0;
+            fillAPIndex();
+            DrumFillIndex = (APPtr)?getNextAPIndex():0;
 
             if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {
                 PartIndex = NextPartNumber - 1;
@@ -1448,7 +1450,8 @@ static void NextPart(void) {
             DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
         }
     } else {
-        DrumFillIndex = 0;
+        fillAPIndex();
+        DrumFillIndex = (APPtr)?getNextAPIndex():0;
     }
 
     // Send next part message on Uart Port
@@ -1522,7 +1525,7 @@ static void FirstPart(void) {
             if (CurrPartPtr->shuffleFlag) {
                 DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
             } else {
-                DrumFillIndex = 0; // First Drumfil always
+                DrumFillIndex = (APPtr)?getNextAPIndex():0; // First Drumfill always
             }
         }
     }
@@ -1574,7 +1577,7 @@ static void IntroPart(void) {
                 DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
             }
         } else {
-            DrumFillIndex = 0;
+            DrumFillIndex = (APPtr)?getNextAPIndex():0;
         }
         SpecialEffectManager();
 
@@ -1598,7 +1601,7 @@ static void SamePart(unsigned int nextDrumfill) {
                 if (CurrPartPtr->shuffleFlag) {
                     DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
                 } else {
-                    DrumFillIndex = (DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
+                    DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
                 }
             }
         }
@@ -1607,6 +1610,34 @@ static void SamePart(unsigned int nextDrumfill) {
     CurrPartPtr = &CurrSongPtr->part[PartIndex];
 
     PlayerStatus = PLAYING_MAIN_TRACK;
+}
+
+static unsigned int getNextAPIndex()
+{
+    unsigned int index;
+    if(idxs.size() <= 0)
+    {
+      return 0; //if that was the last drumfill
+    }else{
+        index = idxs.first();
+        idxs.remove(idxs.firstKey());
+       return index;
+    }
+}
+
+static void fillAPIndex()
+{
+    if(APPtr)
+    {
+        if(CurrPartPtr){
+            idxs.clear();//avoid pedal press in the middle of sequence
+            int counter = CurrSongPtr->part[PartIndex].nDrumFill;
+            for(int i = 0;i < counter; i++)
+            {
+                idxs.insert(APPtr->part[PartIndex].drumFill[i].playAt,i);
+            }
+        }
+    }
 }
 
 static bool isEndOfTrack(int pos, SONG_SongPartStruct *CurrPartPtr/*, int loop, int loopCount*/) {

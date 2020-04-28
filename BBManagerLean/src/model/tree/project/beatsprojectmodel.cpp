@@ -2686,8 +2686,4 @@ QFileInfo BeatsProjectModel::createProjectFolderForProjectFile(const QFileInfo &
    // return the new absolute path
    return projectFolderDir.absoluteFilePath(projectFileName);
 }
-void BeatsProjectModel::MoveModelChildren(AbstractTreeItem * item, QList<int> idxs)
-{
-    item->changeChildrenOrder(idxs);
-}
 

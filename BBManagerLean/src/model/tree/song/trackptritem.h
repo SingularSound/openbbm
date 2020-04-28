@@ -25,8 +25,6 @@ public:
    QByteArray getTrackData();
    bool setTrackData(const QByteArray&);
 
-   void CheckAutoPilotSequence();
-   int GetChildIndex(QList<SongTrack> drfillist, int nbFill, int value);
 signals:
    void sigFileSet(SongTrack *p_Track, int row);
 

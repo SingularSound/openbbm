@@ -163,15 +163,3 @@ Qt::ItemFlags AbstractTreeItem::flags(int /*column*/)
    }
    return tempFlags;
 }
-void AbstractTreeItem::changeChildrenOrder(QList<int> idxs)
-{
-    int counter = childCount();
-
-     for(int i = 0;i<counter;i++){
-       if(i != idxs[i]){
-           m_childItems.move(i,idxs[i]);
-           i++;//never swap children next to each other as they will end in their original position
-       }
-     }
-
-}

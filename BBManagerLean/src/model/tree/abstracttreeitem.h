@@ -103,7 +103,6 @@ public:
    AbstractTreeItem *parent() const;
    BeatsProjectModel *model() const;
 
-   void changeChildrenOrder(QList<int> idxs);
 protected:
    inline QList<AbstractTreeItem*> *childItems(){return &m_childItems;}
    void removeChildInternal(int row);
