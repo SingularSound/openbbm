@@ -664,7 +664,8 @@ int SongPlayer_loadSong(char* file, uint32_t length)
                 !APPtr->internalData.autoPilotFlags & AUTOPILOT_VALID_FLAG) {
             APPtr = nullptr;
         }
-        //julis code here
+        //AP sequence code here
+        //fill indexes here to pass on later
     }
 
     CurrSongPtr = SongPtr;

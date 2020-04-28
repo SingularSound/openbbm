@@ -260,7 +260,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
     model()->itemDataChanged(ppp, SAVE);
 }
 
-void TrackPtrItem::AutoPilotSequence()
+void TrackPtrItem::CheckAutoPilotSequence()
 {
     bool nonsequential = false;
     QMap<uint32_t,int> idxsequence;
