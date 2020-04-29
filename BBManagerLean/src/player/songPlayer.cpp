@@ -1316,7 +1316,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     SamePart(2); // do a drumfill, if it exists, and loop again
             SpecialEffectManager();
         }
-
+        if(idxs.size() == 0 && APPtr)
+        {
+            fillAPIndex();
+        }
         break;
 
     case NO_FILL_TRAN_CANCEL:
@@ -1592,6 +1595,7 @@ static void IntroPart(void) {
                 DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
             }
         } else {
+            fillAPIndex();
             DrumFillIndex = (APPtr)?getNextAPIndex():0;
         }
         SpecialEffectManager();
