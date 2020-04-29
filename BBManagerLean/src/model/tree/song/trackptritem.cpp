@@ -1,14 +1,14 @@
 /*
-  	This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound 
- 	BeatBuddy Manager is free software: you can redistribute it and/or modify
+    This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound
+    BeatBuddy Manager is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2 as published by
     the Free Software Foundation.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
@@ -42,7 +42,7 @@ QVariant TrackPtrItem::data(int column)
     switch (column) {
     case NAME:
         return mp_SongTrack ? mp_SongTrack->name() : tr("Undefined File");
-    case ABSOLUTE_PATH:     
+    case ABSOLUTE_PATH:
         return mp_SongTrack ? mp_SongTrack->fullFilePath() : QString::null;
     case MAX_CHILD_CNT:
         return 0; // Cannot have child
@@ -259,8 +259,6 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
     model()->itemDataChanged(ppp, SAVE);
 }
 
-
-
 QList<QVariant> TrackPtrItem::autoPilotValues()
 {
     TrackArrayItem      * tai = static_cast<TrackArrayItem *>(parent());
@@ -279,7 +277,7 @@ QList<QVariant> TrackPtrItem::autoPilotValues()
                                  << static_cast<AutoPilotDataPartModel*>(apdm->getOutroModel())->getMainLoop()->getPlayFor();
     } else {
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)parent()->data(TRACK_TYPE).toInt();
-        int partRow = tai->parent()->row(); 
+        int partRow = tai->parent()->row();
 
         if(trackType == MAIN_DRUM_LOOP ){
 
@@ -294,7 +292,7 @@ QList<QVariant> TrackPtrItem::autoPilotValues()
                                     << partModel->getTransitionFill()->getPlayFor();
 
         }else if( trackType == DRUM_FILL ){
-            int drumFillIndex = row();   
+            int drumFillIndex = row();
 
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
             return QList<QVariant>() << partModel->getDrumFill(drumFillIndex)->getPlayAt()

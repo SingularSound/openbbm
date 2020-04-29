@@ -2687,4 +2687,3 @@ QFileInfo BeatsProjectModel::createProjectFolderForProjectFile(const QFileInfo &
    return projectFolderDir.absoluteFilePath(projectFileName);
 }
 
-

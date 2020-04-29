@@ -18,39 +18,21 @@
  *  \brief  Song Player of the beat buddy. This code get a file from the soung manager and ticks from tempo.c
  *          and play note.
  */
-#ifndef am335x
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <QDebug>
+#include <algorithm>
 
 
 #include "../model/filegraph/songfile.h"
+#include "../model/tree/abstracttreeitem.h"
 #include "button.h"
 #include "songPlayer.h"
 #include "soundManager.h"
 #include "settings.h"
-#else
 
-#include "songPlayer.h"
-#include "button.h"
-#include "soundManager.h"
-#include "stdio.h"
-#include "string.h"
-#include "stdlib.h"
-#include "tempo.h"
-#include "uartStdio.h"
-#include "button.h"
-#include "soc_AM335x.h"
-#include "gpio_v2.h"
-#include "interrupt.h"
-#include "hw_types.h"
-#include "song.h"
-#include "gui.h"
-#include "uartMidi.h"
-#include "settings.h"
-
-#endif
 
 /*****************************************************************************
  **                      	INTERNAL TYPEDEF
@@ -98,32 +80,16 @@ typedef enum {
 
 }MidiTriggerPosition;
 
-#ifndef am335x
+
 typedef SONG_SongStruct     Song_t;
 typedef SONG_SongPartStruct SongPart_t;
-#endif
+
 
 /*****************************************************************************
  **                      	INTERNAL MACROS
  *****************************************************************************/
 #define POST_EVENT_MAX_TICK         (200)
 
-
-#ifdef am335x
-
-#define COUNT_IN_PART_ID        NO_PART_ID
-#define COUNT_IN_VELOCITY       (100)
-#define NUM_COUNT_IN_NOTE       (4)
-
-#define bool uint32_t
-
-#define MAIN_LOOP_PTR(partPtr)         (partPtr->trackPtr)
-#define TRANS_FILL_PTR(partPtr)		   (partPtr->tranFillPtr)
-#define DRUM_FILL_PTR(partPtr, index)  (partPtr->drumFillPtr[index])
-#define INTRO_TRACK_PTR(songPtr)       (songPtr->intro.trackPtr)
-#define OUTRO_TRACK_PTR(songPtr)       (songPtr->outro.trackPtr)
-
-#else 
 #define MAIN_LOOP_PTR(partPtr)         (partPtr->mainLoopIndex+1        ? &Tracks[partPtr->mainLoopIndex] : 0)
 #define TRANS_FILL_PTR(partPtr)        (partPtr->transFillIndex+1       ? &Tracks[partPtr->transFillIndex] : 0)
 #define DRUM_FILL_PTR(partPtr, index)  (partPtr->drumFillIndex[index]+1 ? &Tracks[partPtr->drumFillIndex[index]] : 0)
@@ -144,12 +110,6 @@ typedef SONG_SongPartStruct SongPart_t;
 #define GUI_SONG_SEL    123456789
 
 
-
-
-
-#endif
-
-
 #define NO_DELAY                (0)
 
 
@@ -168,6 +128,8 @@ static int CalculateStartBarSyncTick(unsigned int tickPos,
 
 static unsigned int CalculateTranFillQuitSyncTick(unsigned int tickPos,
         unsigned int tickPerBar);
+static unsigned int getNextAPIndex();
+static void fillAPIndex();
 
 
 static void ExternalNoteOnHandler(uint8_t note, uint8_t velocity);
@@ -190,12 +152,6 @@ static void IntroPart(void);
 static void PauseUnpauseHandler(void);
 static void SpecialEffectManager(void);
 
-#ifdef am335x
-static void CountIn(void);
-static void settingsCallback(SETTINGS_main_key_enum key, void * value);
-static getNotesTrack(MIDIPARSER_MidiTrack *track, uint8_t *present_note, uint8_t *note_list, int32_t *count);
-#else
-
 static uint32_t GUI_GetCurrentWindows(void);
 static void UartMidi_SendStop(void);
 static void UartMidi_sendContinue(void);
@@ -209,7 +165,7 @@ static void IntEnable(uint8_t intStatus);
 static void TEMPO_startWithInt(void);
 static void ResetSongPosition(void);
 static void ResetBeatCounter(void);
-#endif
+
 
 /*****************************************************************************
  **                         INTERNAL GLOBAL VARIABLES
@@ -230,6 +186,7 @@ int32_t BeatCounter = 0;
 int32_t AutopilotAction = FALSE;
 int32_t AutopilotCueFill = FALSE;
 int32_t AutopilotTransitionCount;
+QMap<int, int> idxs;//key playAt value real index
 
 static int PartStopSyncTick;
 static int PartStopPickUpSyncTickLength;
@@ -272,32 +229,12 @@ static int8_t SendStopOnPause = 0;
 static int8_t SendStopOnEnd = 0;
 
 
-#ifdef am335x
-static SETTINGS_intro_fill IntroFillParam;
-static SETTINGS_midi_out_start_message MidiOutStartMsg = DEFAULT_MIDI_OUT_START_MSG;
-static SETTINGS_midi_out_sync_message MidiOutSyncSettings;
-static SETTINGS_sobriety SobrietyFeature;
-
-/*
- * List of drumset note for the count-in
- * Cross stick
- * Closed Hi-Hat
- * Open Hi-Hat
- * Snare
- */
-static const uint8_t CountInNoteList[NUM_COUNT_IN_NOTE] = {37, 42, 46, 38};
-static SETTINGS_autopilot_feature AutopilotFeature = DEFAULT_AUTOPILOT_FEATURE;
-#else
-
 // In VM, player is started like with an external midi message
 // Need to start with Intro
 static char MidiMessageStart = MIDI_POS_INTRO;
 static SONGFILE_FileStruct *CurrSongFilePtr = nullptr;
 static std::vector<MIDIPARSER_MidiTrack> Tracks;
 static MIDIPARSER_MidiTrack *SingleMidiTrackPtr = nullptr;
-
-
-#endif
 
 
 static uint32_t SobrietyDrumTranFill;
@@ -341,156 +278,8 @@ void SongPlayer_init(void) {
     APPtr = nullptr;
 
     NextPartNumber = 0;
-
-#ifdef am335x    // Register a callback from the butten class
-    MidiOutSyncSettings = DEFAULT_MIDI_OUT_SYNC_MSG;
-    SobrietyFeature = DEFAULT_SOBRIETY;
-    SETTINGS_registerCallback(settingsCallback);
-    UartMidi_setNoteOnListener(ExternalNoteOnHandler);
-    UartMidi_setNoteOffListener(ExternalNoteOffHandler);
-#endif
 }
 
-#ifdef am335x
-
-void SongPlayer_setActivePauseEnable(int32_t enable){
-    if (enable){
-        ActivePauseEnable = 1;
-    } else {
-        ActivePauseEnable = 0;
-    }
-}
-
-static void settingsCallback(SETTINGS_main_key_enum key, void* value) {
-
-    switch (key) {
-    case MAIN_UNPAUSE_MODE_TAP:
-
-        if (MAIN_UNPAUSE_TAP_TO_FILL == (MAIN_UNPAUSE_TAP_params) (*(int32_t*)value)) {
-            MainUnpauseModeTapToFill = START_FILL;
-        } else {
-            MainUnpauseModeTapToFill = START_INTRO;
-        }
-        break;
-
-    case MAIN_UNPAUSE_MODE_HOLD:
-        if (MAIN_UNPAUSE_HOLD_TO_START_TRAN == (MAIN_UNPAUSE_HOLD_params) (*(int32_t*)value)) {
-            MainUnpauseModeHoldToTransition = START_TRANSITION;
-        } else {
-            MainUnpauseModeHoldToTransition = STOP_SONG;
-        }
-        break;
-
-    case PRIMARY_FOOTSWITCH_ACTION_PLAYING:
-        if ((*(int32_t*)value) == PLAYING_ACCENT_HIT) {
-            PrimaryFootSwitchPlayingAction = ACTION_SPECIAL_EFFECT;
-        } else if ((*(int32_t*)value) == PLAYING_PAUSE_UNPAUSE) {
-            PrimaryFootSwitchPlayingAction = ACTION_PAUSE_UNPAUSE;
-        } else if ((*(int32_t*)value) == PLAYING_OUTRO_FILL) {
-            PrimaryFootSwitchPlayingAction = ACTION_OUTRO;
-        } else {
-            PrimaryFootSwitchPlayingAction = ACTION_NONE;
-        }
-        break;
-
-    case SECONDARY_FOOTWTWICH_ACTION_PLAYING:
-        if ((*(int32_t*)value) == PLAYING_ACCENT_HIT) {
-            SecondaryFootSwitchPlayingAction = ACTION_SPECIAL_EFFECT;
-        } else if ((*(int32_t*)value) == PLAYING_PAUSE_UNPAUSE) {
-            SecondaryFootSwitchPlayingAction = ACTION_PAUSE_UNPAUSE;
-        } else if ((*(int32_t*)value) == PLAYING_OUTRO_FILL) {
-            SecondaryFootSwitchPlayingAction = ACTION_OUTRO;
-        } else {
-            SecondaryFootSwitchPlayingAction = ACTION_NONE;
-        }
-        break;
-
-    case PRIMARY_FOOTSWITCH_ACTION_STOPPED:
-        if ((*(int32_t*)value) == PLAYING_ACCENT_HIT) {
-            PrimaryFootSwitchStoppedAction = ACTION_SPECIAL_EFFECT;
-        } else {
-            PrimaryFootSwitchStoppedAction = ACTION_NONE;
-        }
-        break;
-
-    case SECONDARY_FOOTSWITCH_ACTION_STOPPED:
-        if ((*(int32_t*)value) == PLAYING_ACCENT_HIT) {
-            SecondaryFootSwitchStoppedAction = ACTION_SPECIAL_EFFECT;
-        } else {
-            SecondaryFootSwitchStoppedAction = ACTION_NONE;
-        }
-        break;
-
-    case TRIPLE_TAP_STOP:
-        if ((*(int32_t*)value) == TRIPLE_TAP_STOP_ENABLE) {
-            TrippleTapEnable = 1;
-        } else {
-            TrippleTapEnable = 0;
-        }
-        break;
-    case MIDI_OUT_START_MESSAGE:
-        MidiOutStartMsg = (SETTINGS_midi_out_start_message) (*(int32_t*)value);
-        break;
-
-    case INTRO_FILL_CONTROL:
-        IntroFillParam = (SETTINGS_intro_fill) (*(int32_t*)value);
-        break;
-
-    case START_BEAT:
-        if ((*(int32_t*)value) == START_BEAT_ON_PRESS) {
-            StartBeatOnPress = 1;
-        } else {
-            StartBeatOnPress = 0;
-        }
-        break;
-
-    case MIDI_OUT_STOP_MESSAGE:
-        if ((*(int32_t*)value) == MIDI_OUT_STOP_MESSAGE_PAUSE_ONLY) {
-            SendStopOnPause = TRUE;
-            SendStopOnEnd = FALSE;
-        } else if ((*(int32_t*)value) == MIDI_OUT_STOP_MESSAGE_PAUSE_AND_END) {
-            SendStopOnPause = TRUE;
-            SendStopOnEnd = TRUE;
-        } else if ((*(int32_t*)value) == MIDI_OUT_STOP_MESSAGE_END_ONLY) {
-            SendStopOnPause = FALSE;
-            SendStopOnEnd = TRUE;
-        } else { // If disabled
-            SendStopOnPause = FALSE;
-            SendStopOnEnd = FALSE;
-        }
-        break;
-
-    case MIDI_IN_NOTES_ON_MESSAGE:
-        if (MIDI_IN_NOTES_ON_MESSAGE_ENABLE == (SETTINGS_midi_in_notes_on_message) (*(int32_t*)value)){
-            MidiInNoteOnEnable = TRUE;
-        } else {
-            MidiInNoteOnEnable = FALSE;
-        }
-        break;
-
-    case MIDI_IN_NOTES_OFF_MESSAGE:
-        if (MIDI_IN_NOTES_OFF_MESSAGE_ENABLE == (SETTINGS_midi_in_notes_off_message) (*(int32_t*)value)){
-            MidiInNoteOffEnable = TRUE;
-        } else {
-            MidiInNoteOffEnable = FALSE;
-        }
-        break;
-
-    case MIDI_OUT_SYNC_MESSAGE:
-        MidiOutSyncSettings = (SETTINGS_midi_out_sync_message) (*(int32_t*)value);
-        break;
-
-    case SOBRIETY_FEATURE:
-        SobrietyFeature = (SETTINGS_sobriety) (*(int32_t*)value);
-        SobrietyDrumTranFill = 0;
-        Test = 0;
-        break;
-    case AUTO_PILOT_FEATURE:
-        AutopilotFeature = (SETTINGS_autopilot_feature) (*(int32_t*)value);
-        break;
-    }
-}
-#endif
 
 int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
     int32_t return_value = 0;
@@ -498,33 +287,7 @@ int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
     uint8_t status = IntDisable();
     *startBeat = 0;
 
-#ifdef am335x
-    if (CurrSongPtr != NULL ) {
 
-        switch (PlayerStatus) {
-
-        case NO_SONG_LOADED:
-            break;
-        case STOPPED:
-            if ((IntroFillParam == INTRO_FILL_ENABLE) && INTRO_TRACK_PTR(CurrSongPtr)){
-                return_value = ((MasterTick
-                        / (INTRO_TRACK_PTR(CurrSongPtr)->barLength
-                                / INTRO_TRACK_PTR(CurrSongPtr)->timeSigNum))
-                        % INTRO_TRACK_PTR(CurrSongPtr)->timeSigNum);
-                // Calculate the offset for not complete intro ( 2 beat in 4/4) ( 6 beat in 4/4)
-                offset = INTRO_TRACK_PTR(CurrSongPtr)->barLength -
-                        (INTRO_TRACK_PTR(CurrSongPtr)->nTick % INTRO_TRACK_PTR(CurrSongPtr)->barLength);
-                *startBeat = (offset /
-                        (INTRO_TRACK_PTR(CurrSongPtr)->barLength / INTRO_TRACK_PTR(CurrSongPtr)->timeSigNum)) %
-                                INTRO_TRACK_PTR(CurrSongPtr)->timeSigNum;
-            } else {
-                return_value = ((MasterTick
-                        / (CurrSongPtr->part[0].trackPtr->barLength
-                                / CurrSongPtr->part[0].trackPtr->timeSigNum))
-                        % CurrSongPtr->part[0].trackPtr->timeSigNum);
-            }
-            break;
-#else
         if (CurrPartPtr != nullptr ) {
             switch (PlayerStatus) {
 
@@ -532,10 +295,7 @@ int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
             case STOPPED:
                 return_value = -2;
                 break;
-#endif
-
-
-            case INTRO:
+          case INTRO:
                 if (CurrPartPtr != nullptr ) {
                     // Calculate the offset for not complete intro ( 2 beat in 4/4) ( 6 beat in 4/4)
                     offset = MAIN_LOOP_PTR(CurrPartPtr)->barLength
@@ -565,9 +325,6 @@ int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
 
             case PLAYING_MAIN_TRACK_TO_END:
             case PLAYING_MAIN_TRACK:
-#ifdef am335x
-            case COUNT_IN_TO_MAIN:
-#endif
             case DRUMFILL_WAITING_TRIG:
             case TRANFILL_WAITING_TRIG:
             case NO_FILL_TRAN:
@@ -606,14 +363,14 @@ int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
                 return_value = -2;
             break;
         }
-#ifndef am335x
+
     } else if (PlayerStatus == SINGLE_TRACK_PLAYER && SingleMidiTrackPtr != nullptr ){
         return_value =
                 (MasterTick
                         / (SingleMidiTrackPtr->barLength
                                 / SingleMidiTrackPtr->timeSigNum)
                                 % SingleMidiTrackPtr->timeSigNum);
-#endif
+
     } else {
         return_value = -2;
     }
@@ -631,16 +388,7 @@ int SongPlayer_getMasterTick(void) {
     }
     return MasterTick;
 }
-#ifdef am335x
-void SongPlayer_deInit(void) {
-    // Stop the player par placing an empty song in it
-    SongPlayer_setSong(NULL, NULL);
-}
 
-void SongPlayer_reInit(void) {
-    // No action to reinit. ( need to load a new song from the gui
-}
-#endif
 
 /**
  *
@@ -668,14 +416,14 @@ int SongPlayer_getTimeSignature(TimeSignature * timeSig) {
             return 1;
         }
     }
-#ifndef am335x
+
     else if (PlayerStatus == SINGLE_TRACK_PLAYER && SingleMidiTrackPtr != NULL ){
         timeSig->num = SingleMidiTrackPtr->timeSigNum;
         timeSig->den = SingleMidiTrackPtr->timeSigDen;
         IntEnable(status);
         return 1;
     }
-#endif
+
     IntEnable(status);
     return 0;
 }
@@ -702,7 +450,7 @@ void SongPlayer_forceStop(void) {
 
 }
 
-#ifndef am335x
+
 char* SongPlayer_getSoundEffectName(uint32_t part) {
 
     if (CurrSongPtr == nullptr) return nullptr;
@@ -710,7 +458,7 @@ char* SongPlayer_getSoundEffectName(uint32_t part) {
 
     return (char*)CurrSongPtr->part[part].effectName;
 }
-#endif
+
 
 void SongPlayer_externalPause(void) {
     PauseUnpauseHandler();
@@ -799,10 +547,11 @@ void SongPlayer_externalTransition(uint32_t part_number) {
     IntEnable(status);
 }
 
-#ifndef am335x
+
 static void ResetSongPosition(void) {
     unsigned char status = IntDisable();
-    DrumFillIndex = 0;
+    fillAPIndex();
+    DrumFillIndex = (APPtr)?getNextAPIndex():0;
     PartIndex = 0;
     MasterTick = 0;
     CurrPartPtr = nullptr;
@@ -819,7 +568,6 @@ static void ResetBeatCounter(void) {
     BeatCounter = 0;
     IntEnable(status);
 }
-#endif
 
 void SongPlayer_getPlayerStatus(SongPlayer_PlayerStatus *playerStatus,
         unsigned int *partIndex, unsigned int *drumfillIndex) {
@@ -827,68 +575,6 @@ void SongPlayer_getPlayerStatus(SongPlayer_PlayerStatus *playerStatus,
     *partIndex = PartIndex;
     *drumfillIndex = DrumFillIndex;
 }
-#ifdef am335x
-int32_t SongPlayer_getNextNoteValue(uint8_t * nextNote, uint8_t *presentNotes) {
-    uint8_t note;
-    int32_t count = 0;
-    int32_t idx;
-
-    uint8_t status = IntDisable();
-
-
-    // If no song is loaded
-    if (PlayerStatus == NO_SONG_LOADED || CurrSongPtr == (void*)0) {
-        IntEnable(status);
-        return 0;
-    }
-
-    // Copy all the note from the Count-In buffer
-    for(idx = 0; idx < NUM_COUNT_IN_NOTE; idx++){
-        note = CountInNoteList[idx];
-        presentNotes[note] = 1;
-        nextNote[idx] = note;
-    }
-    count = NUM_COUNT_IN_NOTE;
-
-
-    if (INTRO_TRACK_PTR(CurrSongPtr)){
-        getNotesTrack(INTRO_TRACK_PTR(CurrSongPtr),presentNotes,nextNote,&count);
-    }
-    getNotesTrack(CurrSongPtr->part[PartIndex].trackPtr,presentNotes,nextNote,&count);
-    IntEnable(status);
-    return count;
-}
-
-int32_t SongPlayer_isCurrentPartAutoPilot(void) {
-    uint8_t status = IntDisable();
-    int32_t retValue;
-
-    retValue = AutopilotFeature != AUTOPILOT_FEATURE_DISABLE &&
-            CurrSongPtr != NULL && APPtr != NULL;
-
-
-    IntEnable(status);
-
-    return retValue;
-}
-
-static getNotesTrack(MIDIPARSER_MidiTrack *track, uint8_t *present_note, uint8_t *note_list, int32_t *count) {
-    uint8_t tmpVal;
-    int32_t i;
-
-    for (i = 0; i < track->nEvent; i++){
-        tmpVal = track->event[i].note;
-        if (!(present_note[tmpVal]))
-        {
-            present_note[tmpVal] = 1;
-            note_list[*count] = tmpVal;
-            (*count) += 1;
-        }
-    }
-}
-
-#else
-
 
 static void adjust_length(int ix){
     if (ix == -1) return;
@@ -986,8 +672,7 @@ int SongPlayer_loadSong(char* file, uint32_t length)
         APPtr = (AUTOPILOT_AutoPilotDataStruct *)(file + CurrSongFilePtr->offsets.autoPilotDataOffset);
 
         /* Validate Autopilot Flags */
-        if (!APPtr->internalData.autoPilotFlags & AUTOPILOT_ON_FLAG ||
-                !APPtr->internalData.autoPilotFlags & AUTOPILOT_VALID_FLAG) {
+        if (APPtr->internalData.autoPilotFlags == 2) {
             APPtr = nullptr;
         }
     }
@@ -997,47 +682,6 @@ int SongPlayer_loadSong(char* file, uint32_t length)
     ResetSongPosition();
     return 1;
 }
-
-#endif
-
-#ifdef am335x
-
-void SongPlayer_setSong(SONG_SongStruct *songPtr, AUTOPILOT_AutoPilotDataStruct *autoPilotPtr) {
-    uint8_t status;
-    status = IntDisable();
-
-    StopSong();
-
-    CurrSongPtr = songPtr;
-
-
-    // AUTOPILOT VALIDATION
-    if (autoPilotPtr != NULL &&
-            autoPilotPtr->internalData.autoPilotFlags & AUTOPILOT_ON_FLAG &&
-            autoPilotPtr->internalData.autoPilotFlags & AUTOPILOT_VALID_FLAG) {
-    	APPtr = autoPilotPtr;
-    } else {
-        APPtr = NULL;
-    }
-
-    if (CurrSongPtr == NULL ) {
-
-        PlayerStatus = NO_SONG_LOADED;
-        IntEnable(status);
-        return;
-    } else {
-        PlayerStatus = STOPPED;
-    }
-    IntEnable(status);
-
-    SpecialEffectManager();
-    GUI_ForceRefresh();
-}
-
-#endif
-
-
-#ifndef am335x
 
 void SongPlayer_SetSingleTrack(MIDIPARSER_MidiTrack *track) {
 
@@ -1078,7 +722,6 @@ int32_t SongPlayer_calculateSingleTrackOffset(uint32_t nTicks, uint32_t tickPerB
         return tickPerBar - (nTicks % tickPerBar);
     }
 }
-#endif
 
 /**
  * @brief SongPlayer_processSong
@@ -1086,11 +729,6 @@ int32_t SongPlayer_calculateSingleTrackOffset(uint32_t nTicks, uint32_t tickPerB
  * @param nTick
  */
 void SongPlayer_processSong(float ratio, int32_t nTick) {
-
-#ifdef am335x
-    if (0 == (MasterTick % 480))
-        GUI_SetTempoBeat();
-#endif
 
     // When no songs are loaded, no need to go through the song processing
     if (PlayerStatus == NO_SONG_LOADED) {
@@ -1101,11 +739,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
     // Clear previous flag
     AutopilotCueFill = FALSE;
 
-#ifdef am335x
-    if (AutopilotFeature != AUTOPILOT_FEATURE_DISABLE && APPtr != NULL && CurrPartPtr != NULL) {
-#else
     if (APPtr != nullptr && CurrPartPtr != nullptr) {
-#endif
     	// BEAT COUNTER
 		if ((MasterTick % (CurrPartPtr->tickPerBar / CurrPartPtr->timeSigNum)) == 0) {
 			BeatCounter++;
@@ -1133,6 +767,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 				AutopilotCueFill = TRUE;
 				AutopilotAction = FALSE;
 		}
+
     }
 
 
@@ -1169,28 +804,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 } else {
                     SamePart(FALSE);
                 }
-#ifdef am335x
-                // Start command should also be sent when unpaused, if Stop command was sent when paused.
-                if (SendStopOnPause && (MidiOutStartMsg != MIDI_OUT_START_MESSAGE_DISABLED)) {
-                    UartMidi_SendStart();
-                }
-#endif
+
             } else {
                 IntroPart();
-#ifdef am335x
-                if (MidiOutStartMsg != MIDI_OUT_START_MESSAGE_DISABLED) {
-                    // Always resend start on intro
-                    if (PlayerStatus == INTRO &&  MidiOutStartMsg == MIDI_OUT_START_MESSAGE_INTRO){
-                        UartMidi_SendStart();
-                        DelayStartCmd = 0;
-                    } else if (PlayerStatus == PLAYING_MAIN_TRACK && MidiOutStartMsg != MIDI_OUT_START_MESSAGE_DISABLED){
-                        UartMidi_SendStart();
-                        DelayStartCmd = 0;
-                    } else {
-                        DelayStartCmd = 1;
-                    }
-                }
-#endif
+
             }
             break;
 
@@ -1209,11 +826,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             SpecialEffectManager(); // Change the special effect on UNPAUSED
             // Send continue message when UNPAUSED
             WasPausedFlag = 1;
-#ifdef am335x
-            if (!ActivePauseEnable && MidiOutStartMsg != MIDI_OUT_START_MESSAGE_DISABLED){
-                UartMidi_SendStart();
-            }
-#endif
 
             RequestFlag = REQUEST_DONE;
             break;
@@ -1223,77 +835,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         }
     }
 
-#ifdef am335x
-    // Sobriery Special Handler
-    if (SobrietyFeature != SOBRIETY_SOBER && RequestFlag == REQUEST_DONE) {
-        if (PlayerStatus == PLAYING_MAIN_TRACK) {
 
-            int barNumber = 0;
-            if (CurrPartPtr->trackPtr->nTick != CurrPartPtr->trackPtr->barLength) {
-                barNumber = MasterTick / CurrPartPtr->tickPerBar;
-            } else if (MasterTick == 0) {
-                if (Test == 1) {
-                    barNumber = 1;
-                    Test = 0;
-                } else {
-                    Test = 1;
-                }
-            }
-
-
-            if (barNumber == 1) {
-                if (SobrietyFeature == SOBRIETY_DRUNK || (SobrietyFeature == SOBRIETY_WASTED && (SobrietyDrumTranFill == 0 && CurrPartPtr->nDrumFill > 0))) {
-                    RequestFlag = DRUMFILL_REQUEST;
-                    SobrietyDrumTranFill = 1;
-                } else if (SobrietyFeature == SOBRIETY_WASTED && (SobrietyDrumTranFill == 1 || CurrPartPtr->nDrumFill == 0)) {
-                    SobrietyDrumTranFill = 2;
-                    RequestFlag = TRANFILL_REQUEST;
-                    NextPartNumber = 0; // Means no specefic next part
-                }
-            }
-        } else if ((PlayerStatus == TRANFILL_ACTIVE || PlayerStatus == NO_FILL_TRAN) && SobrietyDrumTranFill == 2) {
-            RequestFlag = TRANFILL_QUIT_REQUEST;
-            SobrietyDrumTranFill = 0;
-        }
-    }
-
-    // Generate a random special effect in wasted mode when playing
-    if (SobrietyFeature == SOBRIETY_WASTED) {
-        if (SobriertySpecialEffectTickDelay >= nTick) {
-            SobriertySpecialEffectTickDelay -= nTick;
-        } else if ((PlayerStatus != PAUSED) && (PlayerStatus != STOPPED)) {
-            SoundManager_playSpecialEffect(100, FALSE);
-            SobriertySpecialEffectTickDelay = nTick * (48 + rand() % 96);
-        }
-    }
-
-
-    // Start request handler
-    if (((RequestFlag == START_REQUEST || RequestFlag == EXTERNAL_START_REQUEST)) &&
-            PlayerStatus == STOPPED) {
-        if (IntroFillParam == INTRO_COUNT_IN) {
-            CountIn();
-        } else {
-            IntroPart();
-            if (MidiOutStartMsg == MIDI_OUT_START_MESSAGE_INTRO){
-                UartMidi_SendStart();
-                DelayStartCmd = 0;
-            } else if (MidiOutStartMsg == MIDI_OUT_START_MESSAGE_FIRST_PART){
-                if (PlayerStatus == PLAYING_MAIN_TRACK){
-                    UartMidi_SendStart();
-                    DelayStartCmd = 0;
-                } else {
-                    DelayStartCmd = 1;
-                }
-            }
-        }
-    }
-
-#else
     if ((RequestFlag == START_REQUEST) && PlayerStatus == STOPPED) {
             IntroPart();
     }
-#endif
+
 
 
     if (RequestFlag == PAUSE_REQUEST) {
@@ -1454,11 +1000,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                         // Use nTick instead of 0 to avoid negative number for master ticks
                         MasterTick = TRANS_FILL_PTR(CurrPartPtr)->nTick - TranFillPickUpSyncTickLength;
                         TranFillStartSyncTick = MasterTick;
-#ifdef am335x
-                        if (MidiOutStartMsg != MIDI_OUT_START_MESSAGE_DISABLED) {
-                            UartMidi_SendStart();
-                        }
-#endif
+
                     } else {
                         TranFillStartSyncTick = CalculateStartBarSyncTick(MasterTick,
                                 MAIN_LOOP_PTR(CurrPartPtr)->barLength,
@@ -1638,25 +1180,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
     }
 
     switch (PlayerStatus) {
-#ifdef am335x
-    case COUNT_IN_TO_MAIN:
-
-        /* Switch fo main track after one bar */
-        if (TmpMasterPartTick >= CurrPartPtr->trackPtr->barLength) {
-            PlayerStatus = PLAYING_MAIN_TRACK;
-            MasterTick = 0;
-        } else {
-
-            /* Play the count in sound at each time in the bar */
-            if (0 ==
-                    (MasterTick % (CurrPartPtr->trackPtr->barLength / CurrPartPtr->trackPtr->timeSigNum)))
-            {
-                SoundManager_playAvailableNote(CountInNoteList, NUM_COUNT_IN_NOTE,
-                        COUNT_IN_VELOCITY, NO_DELAY, ratio, COUNT_IN_PART_ID);
-            }
-        }
-        break;
-#endif
     case INTRO:
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio, 0, INTR_FILL_ID);
 
@@ -1668,7 +1191,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     nTick, INTR_FILL_ID);
 
             TmpMasterPartTick = 0u;
-            DrumFillIndex = 0;
+            fillAPIndex();
+            DrumFillIndex = (APPtr)?getNextAPIndex():0;
 
             if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {
                 PartIndex = NextPartNumber - 1;
@@ -1792,7 +1316,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     SamePart(2); // do a drumfill, if it exists, and loop again
             SpecialEffectManager();
         }
-
+        if(idxs.size() == 0 && APPtr)
+        {
+            fillAPIndex();
+        }
         break;
 
     case NO_FILL_TRAN_CANCEL:
@@ -1884,13 +1411,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         break;
     }
 
-#ifdef am335x
-    if (MidiOutSyncSettings == MIDI_OUT_SYNC_MESSAGE_ALWAYS_ENABLE ||
-            (MidiOutSyncSettings == MIDI_OUT_SYNC_MESSAGE_PLAYING_ONLY &&
-                    (PlayerStatus != STOPPED && PlayerStatus != NO_SONG_LOADED))) {
-        UartMidi_sendTick();
-    }
-#endif
 
     // Advance the master tick counter
     MasterTick = TmpMasterPartTick;
@@ -1943,16 +1463,13 @@ static void NextPart(void) {
     }
 
     // Suffle drumsets if enabled in song
-#ifdef am335x
-    if (CurrPartPtr->shuffleFlag || SobrietyFeature == SOBRIETY_WASTED) {
-#else
     if (CurrPartPtr->shuffleFlag) {
-#endif
         if (CurrPartPtr->nDrumFill != 0) {
             DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
         }
     } else {
-        DrumFillIndex = 0;
+        fillAPIndex();
+        DrumFillIndex = (APPtr)?getNextAPIndex():0;
     }
 
     // Send next part message on Uart Port
@@ -2026,7 +1543,7 @@ static void FirstPart(void) {
             if (CurrPartPtr->shuffleFlag) {
                 DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
             } else {
-                DrumFillIndex = 0; // First Drumfil always
+                DrumFillIndex = (APPtr)?getNextAPIndex():0; // First Drumfill always
             }
         }
     }
@@ -2035,37 +1552,6 @@ static void FirstPart(void) {
     BeatCounter = 0;
 
 }
-#ifdef am335x
-static void CountIn(void){
-
-    PlayerStatus = COUNT_IN_TO_MAIN;
-
-    if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {
-        PartIndex = NextPartNumber - 1;
-    } else {
-        PartIndex = 0;
-    }
-
-    NextPartNumber = 0;
-    CurrPartPtr = &CurrSongPtr->part[PartIndex];
-
-    MasterTick = 0;
-
-    /// Calculate the Drumfill Index
-    if (CurrPartPtr->shuffleFlag) {
-        if (CurrPartPtr->nDrumFill != 0) {
-            DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
-        }
-    } else {
-        DrumFillIndex = 0;
-    }
-    SpecialEffectManager();
-
-    // A start command will be triggered when the MAIN_PART starts
-    DelayStartCmd = true;
-}
-
-#endif
 
 /**
  * @brief IntroPart
@@ -2075,11 +1561,8 @@ static void IntroPart(void) {
     MasterTick = 0;
     WasPausedFlag = 0;
     PartIndex = 0;
-#ifdef am335x
-    if ((INTRO_TRACK_PTR(CurrSongPtr) != NULL) && (IntroFillParam == INTRO_FILL_ENABLE)) {
-#else
+
     if (INTRO_TRACK_PTR(CurrSongPtr) != NULL) {
-#endif
         PlayerStatus = INTRO;
         CurrPartPtr = &CurrSongPtr->intro;
 
@@ -2112,7 +1595,8 @@ static void IntroPart(void) {
                 DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
             }
         } else {
-            DrumFillIndex = 0;
+            fillAPIndex();
+            DrumFillIndex = (APPtr)?getNextAPIndex():0;
         }
         SpecialEffectManager();
 
@@ -2136,7 +1620,7 @@ static void SamePart(unsigned int nextDrumfill) {
                 if (CurrPartPtr->shuffleFlag) {
                     DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
                 } else {
-                    DrumFillIndex = (DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
+                    DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
                 }
             }
         }
@@ -2145,6 +1629,34 @@ static void SamePart(unsigned int nextDrumfill) {
     CurrPartPtr = &CurrSongPtr->part[PartIndex];
 
     PlayerStatus = PLAYING_MAIN_TRACK;
+}
+
+static unsigned int getNextAPIndex()
+{
+    unsigned int index;
+    if(idxs.size() <= 0)
+    {
+      return 0; //if that was the last drumfill
+    }else{
+        index = idxs.first();
+        idxs.remove(idxs.firstKey());
+       return index;
+    }
+}
+
+static void fillAPIndex()
+{
+    if(APPtr)
+    {
+        if(CurrPartPtr){
+            idxs.clear();//avoid pedal press in the middle of sequence
+            int counter = CurrSongPtr->part[PartIndex].nDrumFill;
+            for(int i = 0;i < counter; i++)
+            {
+                idxs.insert(APPtr->part[PartIndex].drumFill[i].playAt,i);
+            }
+        }
+    }
 }
 
 static bool isEndOfTrack(int pos, SONG_SongPartStruct *CurrPartPtr/*, int loop, int loopCount*/) {
@@ -2205,12 +1717,6 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
                 delay,
                 ratio,
                 partID);
-#ifdef am335x
-        MIDINOTES_playNotes(
-                track->event[track->index].note,
-                track->event[track->index].vel,
-                delay * 1000);
-#endif
 
         track->index++;
 
@@ -2278,57 +1784,7 @@ static void ExternalNoteOffHandler(uint8_t note, uint8_t velocity) {
     }
 }
 
-#ifdef am335x
-uint32_t SongPlayer_getCurrentPartIndex(uint32_t *num_part) {
-    uint32_t n_part;
-    uint32_t index;
 
-    uint8_t status = IntDisable();
-    if (CurrSongPtr == NULL ) {
-        n_part = 0;
-        index = 0;
-    } else {
-        n_part = CurrSongPtr->nPart;
-        index = PartIndex;
-    }
-
-    IntEnable(status);
-
-    *num_part = n_part;
-    return index;
-}
-
-uint32_t SongPlayer_getDrumFillIndex(uint32_t *num_fills) {
-    uint32_t n_fill;
-    uint32_t index;
-
-    uint8_t status = IntDisable();
-    if (CurrPartPtr == NULL ) {
-        n_fill = 0;
-        index = 0;
-    } else {
-        n_fill = CurrSongPtr->part[PartIndex].nDrumFill;
-        index = DrumFillIndex;
-    }
-
-    IntEnable(status);
-
-    *num_fills = n_fill;
-    return index;
-}
-
-static void SpecialEffectManager(void) {
-
-    if (CurrSongPtr != NULL ) {
-        if (PartIndex < CurrSongPtr->nPart) {
-            SoundManager_RequestSpecialEffectLoading(
-                    (char*) CurrSongPtr->part[PartIndex].effectName,
-                    (char*) CurrSongPtr->part[(PartIndex + 1)% CurrSongPtr->nPart].effectName,
-                    FALSE);
-        }
-    }
-}
-#else
 
 static uint32_t GUI_GetCurrentWindows(void) {return 0;}
 static uint8_t IntDisable(void) {return 0;}
@@ -2340,7 +1796,6 @@ static void UartMidi_SendStart(void) {}
 static void UartMidi_sendNextPartMessage(int32_t) {}
 static void SpecialEffectManager(void) {}
 static void GUI_ForceRefresh(void) {}
-#endif
 
 
 static void  NO_SONG_LOADED_ButtonHandler(BUTTON_EVENT event){
@@ -2621,11 +2076,7 @@ static void  OUTRO_CANCELED_ButtonHandler(BUTTON_EVENT event){
 
 static unsigned long long LastMultiTapTime = 0;
 
-#ifdef am335x
-void SONGPLAYER_ButtonCallback(BUTTON_EVENT event, unsigned long long time)
-#else
 void SongPlayer_ButtonCallback(BUTTON_EVENT event, unsigned long long time)
-#endif
 {
     uint8_t status = IntDisable();
 
@@ -2736,13 +2187,9 @@ void SongPlayer_ButtonCallback(BUTTON_EVENT event, unsigned long long time)
     case OUTRO:                     { OUTRO_ButtonHandler(event);                       break;}
     case OUTRO_WAITING_TRIG:        { OUTRO_WAITING_TRIG_ButtonHandler(event);          break;}
     case OUTRO_CANCELED:            { OUTRO_CANCELED_ButtonHandler(event);              break;}
-#ifdef am335x
-    case COUNT_IN_TO_MAIN:          { /* No action for now */                           break;}
-#endif
     }
 
     end_handler:
     IntEnable(status);
 
 }
-

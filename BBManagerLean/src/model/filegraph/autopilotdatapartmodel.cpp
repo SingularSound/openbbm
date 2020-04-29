@@ -109,12 +109,6 @@ QString AutoPilotDataPartModel::verifyPartValid(int nbFill)
         {
             returnString += QString(tr("Drum Fill #%1 Trigger at value > Main Drum Trigger at value.\n")).arg(i+1) ;
         }
-        if(getDrumFill(i)->getPlayAt() >= getDrumFill(i+1)->getPlayAt())
-        {
-            returnString += QString(tr("Drum Fill #%1 Trigger at value > Drum Fill #%2 Trigger at value.\n"))
-                    .arg(i+1)
-                    .arg(i+2);
-        }
     }
 
     if(getDrumFill(nbFill-1)->getPlayAt() >= getMainLoop()->getPlayAt()

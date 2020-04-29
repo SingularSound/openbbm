@@ -15,26 +15,13 @@
 #include "mixer.h"
 #include "settings.h"
 #include "pragmapack.h"
-#ifdef am335x
-#include "license.h"
-#include "codec.h"
-#include "string.h"
-#include "cache.h"
-#include "soc_AM335x.h"
-#include "gpio_v2.h"
-#include "hw_types.h"
-#include "math.h"
-#include "uartStdio.h"
-#include "songPlayer.h"
-#include "interrupt.h"
-#else
 #include <string.h>
 #include <math.h>
 #include <time.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#endif
+
 
 
 #ifdef __cplusplus
@@ -58,13 +45,11 @@ extern "C" {
 
 
 #define MIXER_MAX_CHANNEL_ARRAY      (64u) // Number max of stereo channel
-#ifdef am335x
-#    define MIXER_BUFFER_LENGTH          (90u) // Left righht Buffer so half
-#else
+
 // MIXER_BUFFER_LENGTH_SAMPLES DEFINED in .h so that it can be accessed by player.cpp
 #    define MIXER_BUFFER_LENGTH          (70560u)//(MIXER_BUFFER_LENGTH_SAMPLES)
 #define BUFFER_LENGTH               (MIXER_BUFFER_LENGTH)
-#endif
+
 
 #define MIXER_TIME_SAMPLE_US_RATIO  (1.0f/(1000000.0f/44100.0f))
 
@@ -145,16 +130,9 @@ extern LICENSE_Status_enum gLicenseStatus;
 /******************************************************************************
  **                     INTERNAL FUNCTION PROTOTYPE
  ******************************************************************************/
-#ifdef am335x
-static void mixer_ReadOutputStream(signed int * ptr, unsigned int length);
-#else
-
 
 char IntDisable(void){ return 0; }
 void IntEnable(char status){(void) status;}
-
-
-#endif
 
 static void calculateReleaseTimeCoeff(int *array, int length);
 static void settingsCallback(SETTINGS_main_key_enum key, int value);
@@ -194,10 +172,6 @@ void mixer_init(void)
     // Initialise the mixer circular buffer
     numEmptyValues = MIXER_BUFFER_LENGTH;
 
-#ifdef am335x
-    CODEC_registerListener(mixer_ReadOutputStream);
-    SETTINGS_registerCallback(settingsCallback);
-#endif
     calculateReleaseTimeCoeff(ReleaseCoeff,100);
 }
 
@@ -208,58 +182,6 @@ static void calculateReleaseTimeCoeff(int *array, int length){
         array[i] = (1000.0f  * (length - i)) / length;
     }
 }
-#ifdef am335x
-static void settingsCallback(SETTINGS_main_key_enum key, int value){
-
-
-    if (key == RELEASE_TIME) {
-
-        switch (value) {
-        case RELEASE_TIME_0MS:
-            ReleaseLength = 2;
-            break;
-        case RELEASE_TIME_10MS:
-            ReleaseLength = ((10 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_20MS:
-            ReleaseLength = ((20 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_30MS:
-            ReleaseLength = ((30 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_40MS:
-            ReleaseLength = ((40 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_50MS:
-            ReleaseLength = ((50 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_60MS:
-            ReleaseLength = ((60 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_70MS:
-            ReleaseLength = ((70 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_80MS:
-            ReleaseLength = ((80 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_90MS:
-            ReleaseLength = ((90 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_100MS:
-            ReleaseLength = ((100 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_250MS:
-            ReleaseLength = ((250 * 44100) / 1000);
-            break;
-        case RELEASE_TIME_500MS:
-            ReleaseLength = ((500 * 44100) / 1000);
-            break;
-        }
-        calculateReleaseTimeCoeff(ReleaseCoeff,ReleaseLength);
-    }
-}
-
-#endif
 
 /**
  * \brief  This function tries to add activate a ADD/Activate a channel in the mixer,
@@ -871,11 +793,7 @@ float mixer_getOutputLevel(void){
 static unsigned int tt = 0;
 /* Function handler of the EMPTY DMA
  */
-#ifdef am335x
-void mixer_ReadOutputStream(signed int * ptr, unsigned int length)
-#else
 void mixer_ReadOutputStream(signed short * buff, unsigned int length)
-#endif
 {
 
     // NOTE: length is in absolute sample count (regardless of stereo/mono)
@@ -953,52 +871,6 @@ void mixer_ReadOutputStream(signed short * buff, unsigned int length)
         }
     }
 
-#ifdef am335x
-
-
-
-    if (gLicenseStatus == LICENSE_UNREGISTERED){
-        counter += 180;
-
-        if (counter >88200){
-            counter = 0;
-        } else if (counter > 44100){
-            memset(ptr,0,length * 4);
-            CacheDataCleanBuff((unsigned int)ptr,length * 4);
-            return;
-        }
-    }
-
-
-    k = 0;
-    i = 0;
-    while(k < length){
-
-        tmp = (signed long)(L_Buffer[i]/MASTER_DIVIDER);
-        // HARD CLIP
-        if(tmp > MAX_VALUE){
-            tmp = MAX_VALUE;
-        }else if (tmp < MIN_VALUE){
-            tmp = MIN_VALUE;
-        }
-        ptr[k++] = tmp;
-
-        // HARD CLIP // lowered by 3db ( 50 % apprx)
-        tmp = (signed long)(R_Buffer[i++]/MASTER_DIVIDER);
-        tmp = tmp > MAX_VALUE ? MAX_VALUE : tmp;
-        tmp = tmp < MIN_VALUE ? MIN_VALUE : tmp;
-        ptr[k++] = tmp;
-    }
-
-    memset(R_Buffer,0,sizeof(R_Buffer));
-    memset(L_Buffer,0,sizeof(L_Buffer));
-
-    IntEnable(status);
-
-    /* Clear cache for valid value for DMA */
-    CacheDataCleanBuff((unsigned int)ptr,length * 4);
-
-#else 
     k = 0;
     i = 0;
 
@@ -1018,8 +890,6 @@ void mixer_ReadOutputStream(signed short * buff, unsigned int length)
         buff[k++] = ((int)(g_level * (float)tmp)) >> 8;
     }
     IntEnable(status);
-
-#endif
 
 }
 

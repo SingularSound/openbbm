@@ -358,10 +358,11 @@ void SongFileItem::verifyAutoPilot()
         QString answer = apdm->getPartModel(i)->verifyPartValid(nbFill);
         if(!answer.isEmpty())
         {
-            //Not Valid.
-            answer = QString("\n\nIn Part #%1:\n").arg(i+1) + answer;
+          //Not Valid.
+          answer = QString("\n\nIn Part #%1:\n").arg(i+1) + answer;
+          warningMsg += answer;
+
         }
-        warningMsg += answer;
     }
 
     if(warningMsg.isEmpty()) {

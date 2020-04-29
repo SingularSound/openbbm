@@ -45,6 +45,7 @@ public:
 
     bool& hasUnsavedChanges() { return m_UnsavedChanges; }
     inline QString fileName() { return m_FileName; }
+
 private:
    void saveFile();
    void verifyFile();
