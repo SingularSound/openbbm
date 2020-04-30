@@ -1032,8 +1032,8 @@ void SongFileItem::manageParsingErrors(QWidget *p_parent)
          // Save the modified song
          setData(SAVE, QVariant(true));
          setData(SAVE, QVariant(false));
-
-        QMessageBox::warning(p_parent, tr("Processing errors"), tr("Error while parsing song %1 in folder %2\nThe song was recovered and a copy of the faulty song was created at:\n%3\n\nThe error log is:\n%4").arg(data(NAME).toString()).arg(parent()->data(NAME).toString()).arg(tempDir.absoluteFilePath(fi.fileName())).arg(errorLog));
+        QString dtlerrlog = (errorLog.contains("A part of the file was not used by parser"))?"Please make sure every songpart has a Main Drum loop":errorLog;
+        QMessageBox::warning(p_parent, tr("Processing errors"), tr("Error while parsing song %1 in folder %2\nThe song was recovered and a copy of the faulty song was created at:\n%3\n\nThe error log is:\n%4").arg(data(NAME).toString()).arg(parent()->data(NAME).toString()).arg(tempDir.absoluteFilePath(fi.fileName())).arg(dtlerrlog));
       }
 
       computeHash(false);
