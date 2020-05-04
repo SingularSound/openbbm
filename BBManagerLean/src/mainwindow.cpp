@@ -2999,16 +2999,10 @@ void MainWindow::slotOnDrmClosed()
 void MainWindow::slotActivePlayer(bool status)
 {
    m_playing = status;
-   // If the player is active
-    if (status){
-        mp_BeatsPanel->setSongsEnabled(false);
-        mp_beatsModel->setEditingDisabled(true);
-        mp_beatsModel->setSelectionDisabled(true);
-    } else {
-       mp_BeatsPanel->setSongsEnabled(true);
-       mp_beatsModel->setEditingDisabled(false);
-       mp_beatsModel->setSelectionDisabled(false);
-    }
+
+   mp_BeatsPanel->setSongsEnabled(true);
+   mp_beatsModel->setEditingDisabled(false);
+   mp_beatsModel->setSelectionDisabled(false);
 
     refreshMenus();
 }

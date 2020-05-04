@@ -836,10 +836,9 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
     }
 
 
-    if ((RequestFlag == START_REQUEST) && PlayerStatus == STOPPED) {
+    if ((RequestFlag == START_REQUEST ||RequestFlag == EXTERNAL_START_REQUEST) && PlayerStatus == STOPPED) {
             IntroPart();
     }
-
 
 
     if (RequestFlag == PAUSE_REQUEST) {

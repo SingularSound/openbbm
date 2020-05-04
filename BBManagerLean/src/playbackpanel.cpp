@@ -703,10 +703,10 @@ void PlaybackPanel::slotPedalPress(void)
 
 void PlaybackPanel::slotPedalRelease(void)
 {
-   if (mp_Player->isRunning()) {
-      mp_Player->pedalRelease();
-   } else  if (mp_ButtonPlay->isEnabled()){
+   if (mp_ButtonPlay->isEnabled()){
       play();
+   }else{
+      mp_Player->pedalRelease();
    }
 }
 
