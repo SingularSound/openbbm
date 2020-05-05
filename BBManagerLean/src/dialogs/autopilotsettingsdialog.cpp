@@ -75,11 +75,14 @@ AutoPilotSettingsDialog::~AutoPilotSettingsDialog()
 
 int AutoPilotSettingsDialog::playAt()
 {
-    if(ui->playAtCheckBox->isChecked() || !m_playAtEnabled ){
-        return 0;
+    try {
+        if(ui->playAtCheckBox->isChecked() || !m_playAtEnabled ){
+            return 0;
+        }
+        return (ui->playAtMeasureSpinBox->value()-1)*m_sigNum+ui->playAtBeatSpinBox->value();
+    } catch (...) {
+        return (ui->playAtMeasureSpinBox->value()-1)*m_sigNum+ui->playAtBeatSpinBox->value();
     }
-    return (ui->playAtMeasureSpinBox->value()-1)*m_sigNum+ui->playAtBeatSpinBox->value();
-
 }
 
 int AutoPilotSettingsDialog::playFor()

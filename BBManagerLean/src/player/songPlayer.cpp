@@ -1210,8 +1210,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
     case DRUMFILL_ACTIVE:
         TrackPlay(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex),
-                MasterTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength,
-                TmpMasterPartTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength, ratio, 0,
+                MasterTick - DrumFillStartSyncTick,
+                TmpMasterPartTick - DrumFillStartSyncTick, ratio, 0,
                 DRUM_FILL_ID);
 
         // Drumfill end detector

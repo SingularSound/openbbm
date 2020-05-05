@@ -315,10 +315,13 @@ bool SongsFolderTreeItem::importFoldersModal(QWidget *p_parentWidget, const QStr
          QDataStream fin(&zipFile);
          fin >> versionFileContent;
          zipFile.close();
+         try {
+             fileVersion = versionFileContent.value("version", -1);
+             fileRevision = versionFileContent.value("revision", -1);
+             fileBuild = versionFileContent.value("build", -1);
+         } catch (...) {
 
-         fileVersion = versionFileContent.value("version", -1);
-         fileRevision = versionFileContent.value("revision", -1);
-         fileBuild = versionFileContent.value("build", -1);
+         }
 
          if(fileVersion < 0 || fileRevision < 0 || fileBuild < 0){
             QMessageBox::warning(p_parentWidget, tr("Import Folder"), tr("Unable to determine file version of Portable Folder %1\nInvalid version file content\n\nSkipping file...").arg(QFileInfo(srcFileName).absoluteFilePath()));

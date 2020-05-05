@@ -405,30 +405,13 @@ void SoundManager_playDrumsetNote(unsigned char note, unsigned char velocity,
     unsigned int nDelay = ((unsigned int) (delay_seconde * SAMPLING_RATE));
 
     // If there is no sound for the note
-#ifndef am335x
+
 #if (defined(__x86_64__) || defined(_M_X64))
     DrumsetStruct64_t *drum64 = &Drumset64;
 #endif
     if (Drumset.status[note] == FREE) return;
     drum = &Drumset;
-#else
-    if (!SoundManagerInitFlag)
-        return;
-    // Check for the most recent drumset and the oldest drum set for a valid sound for the note
-    if (CurDrumset->status[note] != FREE) {
 
-        drum = CurDrumset;
-
-    } else if (OldDrumset->status[note] != FREE) {
-        drum = OldDrumset;
-    } else {
-        // No sound to play
-        return;
-    }
-
-
-
-#endif
 
     if (velocity < 1 && drum->inst[note].nonPercussion>0) {
         // Choke note when velocity is zero, and non percussion
