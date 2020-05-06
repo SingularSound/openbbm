@@ -72,12 +72,10 @@ void SongPlayer_externalStop(void);
 int SongPlayer_getBeatInbar(int32_t *startBeat);
 int SongPlayer_getMasterTick(void);
 
-
 int SongPlayer_getTimeSignature(TimeSignature * timeSignature);
 int SongPlayer_getTempo();
 
 unsigned int SongPlayer_getNextNoteValue(unsigned char * nextNote, unsigned int length);
-
 
 void SongPlayer_getPlayerStatus (
     SongPlayer_PlayerStatus *playerStatus,

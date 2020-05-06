@@ -148,6 +148,7 @@ static void SwapToOutro(void);
 static void StopSong(void);
 static void FirstPart(void);
 static void IntroPart(void);
+static void CheckAndCountBeat(void);
 
 static void PauseUnpauseHandler(void);
 static void SpecialEffectManager(void);
@@ -186,6 +187,8 @@ int32_t BeatCounter = 0;
 int32_t AutopilotAction = FALSE;
 int32_t AutopilotCueFill = FALSE;
 int32_t AutopilotTransitionCount;
+unsigned int currentLoopTick = -1; // Stores the current tick of the loop, start at infinity.
+
 QMap<int, int> idxs;//key playAt value real index
 
 static int PartStopSyncTick;
@@ -228,7 +231,6 @@ static uint32_t NextPartNumber;
 static int8_t SendStopOnPause = 0;
 static int8_t SendStopOnEnd = 0;
 
-
 // In VM, player is started like with an external midi message
 // Need to start with Intro
 static char MidiMessageStart = MIDI_POS_INTRO;
@@ -241,8 +243,6 @@ static uint32_t SobrietyDrumTranFill;
 static uint32_t SobriertySpecialEffectTickDelay;
 
 static uint32_t Test;
-
-
 
 
 /*****************************************************************************
@@ -691,7 +691,6 @@ void SongPlayer_SetSingleTrack(MIDIPARSER_MidiTrack *track) {
 }
 
 void SongPlayer_ProcessSingleTrack(float ratio, int32_t nTick, int32_t offset) {
-
     TmpMasterPartTick = MasterTick + nTick;
     if (PlayerStatus == NO_SONG_LOADED) {
         return;
@@ -708,7 +707,6 @@ void SongPlayer_ProcessSingleTrack(float ratio, int32_t nTick, int32_t offset) {
         }
 
     }
-
     MasterTick = TmpMasterPartTick;
 }
 
@@ -740,10 +738,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
     AutopilotCueFill = FALSE;
 
     if (APPtr != nullptr && CurrPartPtr != nullptr) {
-    	// BEAT COUNTER
-		if ((MasterTick % (CurrPartPtr->tickPerBar / CurrPartPtr->timeSigNum)) == 0) {
-			BeatCounter++;
-		}
+        CheckAndCountBeat();
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
 			int32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
@@ -1112,7 +1107,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         }
     }
     RequestFlag = REQUEST_DONE;
-
     TmpMasterPartTick = MasterTick + nTick;
 
     // Trigger Manager
@@ -1603,6 +1597,22 @@ static void IntroPart(void) {
     }
     MAIN_LOOP_PTR(CurrPartPtr)->index = 0;
 }
+
+/**
+ * @brief CheckAndCountBeat
+ * Check the current state of the loop and adds a beat to the beat counter if needed
+ */
+static void CheckAndCountBeat(void) {
+    unsigned int ticksPerCount = (CurrPartPtr->tickPerBar / CurrPartPtr->timeSigNum);
+    unsigned int newTickPosition = (MasterTick % ticksPerCount);
+    bool shouldcount =  newTickPosition <= currentLoopTick;
+    qDebug() << MasterTick << "CBeat" << BeatCounter << CurrPartPtr->timeSigNum;
+    if (shouldcount) {
+        BeatCounter++;
+    }
+    currentLoopTick = newTickPosition;
+};
+
 
 /**
  * @brief SamePart

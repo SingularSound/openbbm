@@ -210,11 +210,7 @@ int Player::processTime(int samplesToProcess)
     unsigned int DrumfillIndex;
 
     // Process as many samples as possible, but always by multiples of TICKS_PER_REFRESH
-    int updateCount = 1;
-    while (samplesToProcess >= (SAMPLES_PER_REFRESH(m_tempo) * updateCount) ){
-       updateCount++;
-    }
-    updateCount--;
+    int updateCount = (int)(samplesToProcess / SAMPLES_PER_REFRESH(m_tempo));
 
     // Keep track of the actual amount of samples being processed (with fraction being summed until entire value reached)
     m_processedSamples_real += SAMPLES_PER_REFRESH(m_tempo) * updateCount;
@@ -241,7 +237,6 @@ int Player::processTime(int samplesToProcess)
             }
 
         } else {
-
             SongPlayer_processSong(TICK_TO_TIME_RATIO(m_tempo), updateCount * TICKS_PER_REFRESH);
 
             SongPlayer_getPlayerStatus( &currentPlayerStatus,
