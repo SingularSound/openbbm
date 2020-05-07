@@ -746,7 +746,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 			if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
-			} else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
+            } else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt >= BeatCounter) {
 				if (PartIndex < CurrSongPtr->nPart - 1) {
 					RequestFlag = TRANFILL_REQUEST;
 					AutopilotCueFill = TRUE;
