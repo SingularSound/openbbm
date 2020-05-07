@@ -125,6 +125,7 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int startTick, int endTick, f
 
 static int CalculateStartBarSyncTick(unsigned int tickPos,
         unsigned int tickPerBar, unsigned int barTriggerLimit);
+static int CalculatePickUpNotesLength(MIDIPARSER_MidiTrack *track);
 
 static unsigned int CalculateTranFillQuitSyncTick(unsigned int tickPos,
         unsigned int tickPerBar);
@@ -697,8 +698,8 @@ void SongPlayer_ProcessSingleTrack(float ratio, int32_t nTick, int32_t offset) {
     }
 
     if (PlayerStatus == SINGLE_TRACK_PLAYER) {
-
-        TrackPlay(SingleMidiTrackPtr,MasterTick - offset ,TmpMasterPartTick - offset ,ratio,0,MAIN_PART_ID);
+        int pickuplenght = (MasterTick == 0)?CalculatePickUpNotesLength(SingleMidiTrackPtr):0;
+        TrackPlay(SingleMidiTrackPtr,MasterTick - pickuplenght ,TmpMasterPartTick,ratio,0,MAIN_PART_ID);
 
         // If its the end of the track
         if (TmpMasterPartTick >= SingleMidiTrackPtr->nTick + offset) {
@@ -951,17 +952,18 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DrumFillStartSyncTick += MAIN_LOOP_PTR(CurrPartPtr)->barLength -
                             (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick % MAIN_LOOP_PTR(CurrPartPtr)->barLength);
                 }
+                //pick up notes detection
+                DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength = CalculatePickUpNotesLength(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex));
 
                 if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength){
                     if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength % nTick){
-                        DrumFillPickUpSyncTickLength = (( 1 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick);
+                        DrumFillPickUpSyncTickLength = (( 1 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick) - DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;
                     } else {
                         DrumFillPickUpSyncTickLength = (( 0 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick);
                     }
                 } else {
                     DrumFillPickUpSyncTickLength = 0;
                 }
-                DrumFillStartSyncTick -= DrumFillPickUpSyncTickLength;
 
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
@@ -1204,12 +1206,12 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
     case DRUMFILL_ACTIVE:
         TrackPlay(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex),
-                MasterTick - DrumFillStartSyncTick,
-                TmpMasterPartTick - DrumFillStartSyncTick, ratio, 0,
+                  MasterTick - (DrumFillStartSyncTick + DrumFillPickUpSyncTickLength),
+                  TmpMasterPartTick - (DrumFillStartSyncTick + DrumFillPickUpSyncTickLength), ratio, 0,
                 DRUM_FILL_ID);
 
         // Drumfill end detector
-        if (TmpMasterPartTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength
+        if (TmpMasterPartTick - (DrumFillStartSyncTick + DrumFillPickUpSyncTickLength)
                 >= (int)(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick)) {
 
             // Play the extra notes at the end
@@ -1301,10 +1303,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 0, MAIN_PART_ID);
 
         // If its the end of the track
-        if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick /*&& (loopCount == 0 || AutopilotFeature == AUTOPILOT_FEATURE_DISABLE)*/) {
+        if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick) {
             SamePart(0);
             SpecialEffectManager();
-        } else if (isEndOfTrack(TmpMasterPartTick, CurrPartPtr/*, loop, loopCount)*/)) {
+        } else if (isEndOfTrack(TmpMasterPartTick, CurrPartPtr)) {
 
                     SamePart(2); // do a drumfill, if it exists, and loop again
             SpecialEffectManager();
@@ -1702,7 +1704,7 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
         return;
 
     // if the play position is before the current track position
-    if (startTick < track->event[track->index].tick)
+    if (startTick < track->event[track->index].tick && track->index>0)
         track->index = 0u;
 
     // Advance the track to the right position
@@ -1738,6 +1740,15 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
 static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
         uint32_t tickPerBar) {
     return ((1 + ((uint32_t) (tickPos / tickPerBar))) * tickPerBar);
+}
+
+static int CalculatePickUpNotesLength(MIDIPARSER_MidiTrack *track)
+{
+    int result = 0;
+    while(track->event[result].tick < 0){
+        result++;
+    }
+    return result;
 }
 
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
