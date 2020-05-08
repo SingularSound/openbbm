@@ -280,7 +280,10 @@ void SongPlayer_init(void) {
 
     NextPartNumber = 0;
 }
-
+int GetPartOffset(MIDIPARSER_MidiTrack *track)
+{
+    return track->barLength - (track->nTick % track->barLength);
+}
 
 int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
     int32_t return_value = 0;
@@ -299,9 +302,7 @@ int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
           case INTRO:
                 if (CurrPartPtr != nullptr ) {
                     // Calculate the offset for not complete intro ( 2 beat in 4/4) ( 6 beat in 4/4)
-                    offset = MAIN_LOOP_PTR(CurrPartPtr)->barLength
-                            - (MAIN_LOOP_PTR(CurrPartPtr)->nTick
-                                    % MAIN_LOOP_PTR(CurrPartPtr)->barLength);
+                    offset = GetPartOffset(MAIN_LOOP_PTR(CurrPartPtr));
                     return_value = (((MasterTick + offset)
                             / (MAIN_LOOP_PTR(CurrPartPtr)->barLength
                                     / MAIN_LOOP_PTR(CurrPartPtr)->timeSigNum))
@@ -383,9 +384,7 @@ int32_t SongPlayer_getBeatInbar(int32_t *startBeat) {
 int SongPlayer_getMasterTick(void) {
     if (CurrSongPtr && CurrPartPtr && PlayerStatus == INTRO) {
         // Calculate the offset for not complete intro ( 2 beat in 4/4) ( 6 beat in 4/4)
-        return MasterTick + MAIN_LOOP_PTR(CurrPartPtr)->barLength
-                            - (MAIN_LOOP_PTR(CurrPartPtr)->nTick
-                                    % MAIN_LOOP_PTR(CurrPartPtr)->barLength);
+        return MasterTick + GetPartOffset(MAIN_LOOP_PTR(CurrPartPtr));
     }
     return MasterTick;
 }
@@ -744,7 +743,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
 			int32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
-			if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
+            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
             } else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
@@ -948,6 +947,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 
                 // Adjust offset if drumfill is smaller than one bar
+                qDebug() << "Drum offset"<<GetPartOffset(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex));
+                qDebug() <<DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick << " y el otro "<< MAIN_LOOP_PTR(CurrPartPtr)->barLength;
                 if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick < MAIN_LOOP_PTR(CurrPartPtr)->barLength) {
 
                     DrumFillStartSyncTick += MAIN_LOOP_PTR(CurrPartPtr)->barLength -
@@ -958,7 +959,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
                 if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength){
                     if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength % nTick){
-                        DrumFillPickUpSyncTickLength = (( 1 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick) - DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;
+                        DrumFillPickUpSyncTickLength = (( 1 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick) - DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick+GetPartOffset(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex));
                     } else {
                         DrumFillPickUpSyncTickLength = (( 0 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick);
                     }
@@ -1119,7 +1120,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 
         // If still waiting for trigger
-        if (TmpMasterPartTick <= (DrumFillStartSyncTick +DrumFillPickUpSyncTickLength)) {
+        if (TmpMasterPartTick <= (DrumFillStartSyncTick + DrumFillPickUpSyncTickLength)) {
             TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio, 0, MAIN_PART_ID);
 
             // If its the end of the track
