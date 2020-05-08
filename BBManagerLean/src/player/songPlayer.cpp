@@ -959,7 +959,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
                 if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength){
                     if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength % nTick){
-                        DrumFillPickUpSyncTickLength = (( 1 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick) - DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick+GetPartOffset(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex));
+                        DrumFillPickUpSyncTickLength = (( 1 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick) + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;
                     } else {
                         DrumFillPickUpSyncTickLength = (( 0 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick);
                     }
