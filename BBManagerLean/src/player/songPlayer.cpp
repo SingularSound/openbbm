@@ -567,6 +567,7 @@ static void ResetSongPosition(void) {
 static void ResetBeatCounter(void) {
     unsigned char status = IntDisable();
     BeatCounter = 0;
+    currentLoopTick = -1;
     IntEnable(status);
 }
 
@@ -1198,7 +1199,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             CurrPartPtr = &CurrSongPtr->part[PartIndex];
 
             PlayerStatus = PLAYING_MAIN_TRACK;
-            BeatCounter = 0;
+            ResetBeatCounter();
             SpecialEffectManager();
         }
 
@@ -1436,7 +1437,7 @@ static void PauseUnpauseHandler(void) {
 static void NextPart(void) {
     TmpMasterPartTick = 0;
     MasterTick = 0;
-    BeatCounter = 0;
+    ResetBeatCounter();
     WasPausedFlag = 0;
     SobrietyDrumTranFill = 0;
     Test = 0;
@@ -1451,8 +1452,6 @@ static void NextPart(void) {
         NextPartNumber = 0;
         CurrPartPtr = &CurrSongPtr->part[PartIndex];
         PlayerStatus = PLAYING_MAIN_TRACK;
-        BeatCounter = 0;
-
     } else {
         StopSong();
     }
@@ -1492,7 +1491,7 @@ static void EndPart(void) {
 static void OutroPart(void) {
     TmpMasterPartTick = 0;
     MasterTick = 0;
-    BeatCounter = 0;
+    ResetBeatCounter();
 }
 
 static void SwapToOutro(void){
@@ -1516,7 +1515,7 @@ static void FirstPart(void) {
     TmpMasterPartTick = 0;
     MasterTick = 0;
     WasPausedFlag = 0;
-    BeatCounter = 0;
+    ResetBeatCounter();
 
     if (CurrSongPtr->nPart > 0) {
 
@@ -1544,8 +1543,6 @@ static void FirstPart(void) {
     }
 
     PlayerStatus = PLAYING_MAIN_TRACK;
-    BeatCounter = 0;
-
 }
 
 /**
@@ -1768,7 +1765,7 @@ static void StopSong(void) {
     DrumFillIndex = 0;
     PartIndex = 0;
     MasterTick = 0;
-    BeatCounter = 0;
+    ResetBeatCounter();
     NextPartNumber = 0;
     SobrietyDrumTranFill = 0;
     Test = 0;
