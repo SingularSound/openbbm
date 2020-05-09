@@ -27,6 +27,8 @@ macx {
 
    OBJECTIVE_SOURCES += ./src/platform/macosx/macosxplatform.mm
 
+} else:linux {
+    LIBS       += -lquazip -lminIni
 } else:win32{
    LIBS       += -L$$PWD/./libs/quazip/msvc_64/release/ -lquazip
    LIBS       += -L$$PWD/./libs/minIni/msvc_64/release/ -lminIni
