@@ -39,6 +39,42 @@ Finally make sure your `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\b
 ### Building and Deploying
 The project file is `BBManagerLean/BBManagerLean.pro`. When opening the project select the corresponding kit, Clean, Build, and Run.
 
+
+## Building for Ubuntu
+
+Build currently only performed on Ubuntu 18.04.
+
+### Install the dependencies
+
+Basically dependencies remain the same as for other systems. For Qt, you can use the default Qt distributed with the distro, i.e. `5.9.5`.
+
+You can install `libquazip` directly from Ubuntu official repo:
+
+    $ sudo apt install libquazip-dev
+
+Unfortunately Ubuntu 18.04 doesn't provide libMinini, but apparently Ubuntu 20.04 does, so you can download the deb files for Ubuntu 20.04:
+
+```shell
+# Get & install the library
+$ wget http://archive.ubuntu.com/ubuntu/pool/universe/libm/libminini/libminini1_1.2.a+ds-4build1_amd64.deb
+$ sudo dpkg -i ./libminini1_1.2.a+ds-4build1_amd64.deb
+# Get and install the development files
+$ wget http://archive.ubuntu.com/ubuntu/pool/universe/libm/libminini/libminini-dev_1.2.a+ds-4build1_amd64.deb
+$ sudo dpkg -i ./libminini-dev_1.2.a+ds-4build1_amd64.deb
+```
+
+If you already migrated to the 20.04, you obviously just have to do:
+
+    $ sudo apt install libminini-dev
+
+### Building
+
+Ensure in QtCreator, that you are using the `clang` compiler for C++ for your Qt5 Kit.
+
+    $ qmake ; make clean ; make all
+
+It will produce the `BBManagerLean/BBManagerLean`.
+
 ## Contributing
 
 Please read the [contribution guidelines for this project](CONTRIBUTING.md), for details on contributions and the process of submitting pull requests.
