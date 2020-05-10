@@ -40,11 +40,11 @@ Finally make sure your `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\b
 The project file is `BBManagerLean/BBManagerLean.pro`. When opening the project select the corresponding kit, Clean, Build, and Run.
 
 
-## Building for Ubuntu
+## Building for Ubuntu
 
 Build currently only performed on Ubuntu 18.04.
 
-### Pre-requisites
+### Pre-requisites
 
 All build toolchain installed:
 * Compiler (`clang++`)
