@@ -74,9 +74,13 @@ If you already migrated to the Ubuntu 20.04, you obviously just have to do:
 
 ### Building
 
-Ensure in QtCreator, that you are using the `clang` compiler for C++ for your Qt5 Kit.
+Specify that you are using the `clang` compiler for C++:
 
-    $ qmake bbmanager.pro && make clean && make all
+    $ qmake bbmanager.pro -spec linux-clang && make qmake_all
+
+And then build:
+
+    make clean && make all
 
 It will produce the `BBManagerLean/BBManagerLean`.
 
