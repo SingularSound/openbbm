@@ -1294,7 +1294,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             DelayStartCmd = 0;
         }
 
-        TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick + newEnd, ratio,
+        TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
         newEnd = 0;
         // If its the end of the track
@@ -1602,12 +1602,12 @@ static void IntroPart(void) {
 static void CheckAndCountBeat(void) {
     unsigned int ticksPerCount = (CurrPartPtr->tickPerBar / CurrPartPtr->timeSigNum);
     unsigned int newTickPosition = (MasterTick % ticksPerCount);
-    bool shouldcount =  newTickPosition <= currentLoopTick;
+    CalculateMainTrim(ticksPerCount, newTickPosition);
+    bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
     qDebug() << MasterTick << "CBeat" << BeatCounter << CurrPartPtr->timeSigNum;
     if (shouldcount) {
         BeatCounter++;
     }
-    CalculateMainTrim(ticksPerCount, newTickPosition);
     currentLoopTick = newTickPosition;
 };
 /**
@@ -1620,7 +1620,8 @@ static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPo
     int remaininTick = ticksPerCount-newTickPosition;
     if(remaininTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes)
     {
-        newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;
+        newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
+        MasterTick += remaininTick;
     }
 }
 
