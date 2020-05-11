@@ -149,6 +149,7 @@ static void StopSong(void);
 static void FirstPart(void);
 static void IntroPart(void);
 static void CheckAndCountBeat(void);
+static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPosition);
 
 static void PauseUnpauseHandler(void);
 static void SpecialEffectManager(void);
@@ -188,6 +189,7 @@ int32_t AutopilotAction = FALSE;
 int32_t AutopilotCueFill = FALSE;
 int32_t AutopilotTransitionCount;
 unsigned int currentLoopTick = -1; // Stores the current tick of the loop, start at infinity.
+int32_t newEnd = 0;
 
 QMap<int, int> idxs;//key playAt value real index
 
@@ -742,7 +744,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
 			int32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
-            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
+            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) /*|| (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1 == tmpBeatCounter))*/ {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
 			} else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
@@ -1292,11 +1294,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             DelayStartCmd = 0;
         }
 
-        TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
+        TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick + newEnd, ratio,
                 0, MAIN_PART_ID);
-
+        newEnd = 0;
         // If its the end of the track
-        if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick /*&& (loopCount == 0 || AutopilotFeature == AUTOPILOT_FEATURE_DISABLE)*/) {
+        if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick /*|| TmpMasterPartTick > DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick*-1*/) {
             SamePart(0);
             SpecialEffectManager();
         } else if (isEndOfTrack(TmpMasterPartTick, CurrPartPtr/*, loop, loopCount)*/)) {
@@ -1605,9 +1607,22 @@ static void CheckAndCountBeat(void) {
     if (shouldcount) {
         BeatCounter++;
     }
+    CalculateMainTrim(ticksPerCount, newTickPosition);
     currentLoopTick = newTickPosition;
 };
-
+/**
+ * @brief CalculateMainTrim
+ * Check the current state of the beat to see if is bigger than next drum fill have pick up notes
+ */
+static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPosition){
+    bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
+    bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
+    int remaininTick = ticksPerCount-newTickPosition;
+    if(remaininTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes)
+    {
+        newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;
+    }
+}
 
 /**
  * @brief SamePart
