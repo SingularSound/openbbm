@@ -17,7 +17,7 @@
 VersionInfo::VersionInfo(){}
 
 VersionInfo::VersionInfo(unsigned int major, unsigned int minor, unsigned  int patch, unsigned int build):
-    major(major),minor(minor),patch(patch),build(build){};
+    major{major},minor{minor},patch{patch},build{build}{};
 
 bool VersionInfo::operator>(const VersionInfo& other){
     bool greaterThan = false;

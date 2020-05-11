@@ -9,6 +9,8 @@
 #define DEFAULT_UPDATE_URL "https://www.singularsound.com/downloadable/latest-macx.xml"
 #elif defined(Q_OS_WIN)
 #define DEFAULT_UPDATE_URL "https://www.singularsound.com/downloadable/latest-win.xml"
+#elif defined(Q_OS_LINUX)
+#define DEFAULT_UPDATE_URL "https://www.singularsound.com/downloadable/latest-linux.xml"
 #else
 #error "Compiling for unsupported OS"
 #endif

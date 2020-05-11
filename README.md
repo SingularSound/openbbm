@@ -39,6 +39,51 @@ Finally make sure your `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\b
 ### Building and Deploying
 The project file is `BBManagerLean/BBManagerLean.pro`. When opening the project select the corresponding kit, Clean, Build, and Run.
 
+
+## Building for Ubuntu
+
+Build currently only performed on Ubuntu 18.04.
+
+### Pre-requisites
+
+All build toolchain installed:
+* Compiler (`clang++`)
+* Qt libraries and development tools  For Qt, you can use the default Qt provided by the distro, i.e. `5.9.5`. (Probably a newer version with Ubuntu 20.04).
+
+### Install the dependencies
+
+Basically dependencies remain the same as for other systems.
+You can install `libquazip` directly from Ubuntu official repo:
+
+    $ sudo apt install libquazip-dev
+
+Unfortunately Ubuntu 18.04 doesn't provide libMinini, but apparently Ubuntu 20.04 does, so you can download the deb files for Ubuntu 20.04. Here is an example, as version may evolve (this is exactly why you should prefer apt...). If it does'nt work, check packages versions.
+
+```shell
+# Get & install the library
+$ wget http://archive.ubuntu.com/ubuntu/pool/universe/libm/libminini/libminini1_1.2.a+ds-4build1_amd64.deb
+$ sudo dpkg -i ./libminini1_1.2.a+ds-4build1_amd64.deb
+# Get and install the development files
+$ wget http://archive.ubuntu.com/ubuntu/pool/universe/libm/libminini/libminini-dev_1.2.a+ds-4build1_amd64.deb
+$ sudo dpkg -i ./libminini-dev_1.2.a+ds-4build1_amd64.deb
+```
+
+If you already migrated to the Ubuntu 20.04, you obviously just have to do:
+
+    $ sudo apt install libminini-dev
+
+### Building
+
+Specify that you are using the `clang` compiler for C++:
+
+    $ qmake bbmanager.pro -spec linux-clang && make qmake_all
+
+And then build:
+
+    make clean && make all
+
+It will produce the `BBManagerLean/BBManagerLean`.
+
 ## Contributing
 
 Please read the [contribution guidelines for this project](CONTRIBUTING.md), for details on contributions and the process of submitting pull requests.

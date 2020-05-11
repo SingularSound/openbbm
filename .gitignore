@@ -1,2 +1,12 @@
 *.pro.user*
 bbmanager.pro.user
+*.o
+.qmake.stash
+Makefile
+BBManagerLean/BBManagerLean
+BBManagerLean/moc_*.cpp
+moc_predefs.h
+bbmtest/target_wrapper.sh
+bbmtest/bbmtest
+BBManagerLean/qrc_resources.cpp
+BBManagerLean/ui_*.h
