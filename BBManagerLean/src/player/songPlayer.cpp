@@ -190,6 +190,7 @@ int32_t AutopilotCueFill = FALSE;
 int32_t AutopilotTransitionCount;
 unsigned int currentLoopTick = -1; // Stores the current tick of the loop, start at infinity.
 int32_t newEnd = 0;
+int32_t addedTick = 0;//to fill the currentLoopon Pick up note cases
 
 QMap<int, int> idxs;//key playAt value real index
 
@@ -1296,7 +1297,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
-        newEnd = 0;
+
         // If its the end of the track
         if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick /*|| TmpMasterPartTick > DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick*-1*/) {
             SamePart(0);
@@ -1608,7 +1609,8 @@ static void CheckAndCountBeat(void) {
     if (shouldcount) {
         BeatCounter++;
     }
-    currentLoopTick = newTickPosition;
+    currentLoopTick = (newEnd != 0)? newTickPosition + addedTick: newTickPosition;
+    addedTick = 0;
 };
 /**
  * @brief CalculateMainTrim
@@ -1617,11 +1619,12 @@ static void CheckAndCountBeat(void) {
 static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPosition){
     bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
     bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
-    int remaininTick = ticksPerCount-newTickPosition;
-    if(remaininTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes)
-    {
+    addedTick = ticksPerCount-newTickPosition;
+    if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
         newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
-        MasterTick += remaininTick;
+        MasterTick += addedTick;//TODO ERASE
+    }else {
+        newEnd = 0;
     }
 }
 
