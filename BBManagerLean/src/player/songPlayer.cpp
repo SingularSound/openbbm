@@ -747,7 +747,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
 			int32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
-			if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
+            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
 			} else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
@@ -760,7 +760,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 					RequestFlag = STOP_REQUEST;
 					AutopilotCueFill = TRUE;
 				}
-			}
+            }
 		} else if ((AutopilotAction == TRUE) &&
 				(PlayerStatus == NO_FILL_TRAN || PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + APPtr->part[PartIndex].transitionFill.playFor))) {
 				RequestFlag = TRANFILL_QUIT_REQUEST;
@@ -957,16 +957,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                             (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick % MAIN_LOOP_PTR(CurrPartPtr)->barLength);
                 }
 
-                if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength){
-                    if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength % nTick){
-                        DrumFillPickUpSyncTickLength = (( 1 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick);
-                    } else {
-                        DrumFillPickUpSyncTickLength = (( 0 + DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->pickupNotesLength/ nTick) * nTick);
-                    }
+                if (DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick <0){//pick up notes
+                    DrumFillPickUpSyncTickLength = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick * -1;
                 } else {
                     DrumFillPickUpSyncTickLength = 0;
                 }
-                DrumFillStartSyncTick -= DrumFillPickUpSyncTickLength;
 
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
@@ -1211,7 +1206,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
     case DRUMFILL_ACTIVE:
         TrackPlay(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex),
                 MasterTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength,
-                TmpMasterPartTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength, ratio, 0,
+                TmpMasterPartTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength , ratio, 0,
                 DRUM_FILL_ID);
 
         // Drumfill end detector
