@@ -132,9 +132,6 @@ static unsigned int getNextAPIndex();
 static void fillAPIndex();
 
 
-static void ExternalNoteOnHandler(uint8_t note, uint8_t velocity);
-static void ExternalNoteOffHandler(uint8_t note, uint8_t velocity);
-
 /*****************************************************************************
  **                        STATIC FUNCTION PROTOTYPE
  *****************************************************************************/
@@ -142,7 +139,6 @@ static void ExternalNoteOffHandler(uint8_t note, uint8_t velocity);
 // Simple Function to move in the song
 static void NextPart(void);
 static void SamePart(unsigned int nextDrumfill);
-static void EndPart(void);
 static void OutroPart(void);
 static void SwapToOutro(void);
 static void StopSong(void);
@@ -154,9 +150,7 @@ static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPo
 static void PauseUnpauseHandler(void);
 static void SpecialEffectManager(void);
 
-static uint32_t GUI_GetCurrentWindows(void);
 static void UartMidi_SendStop(void);
-static void UartMidi_sendContinue(void);
 static void UartMidi_sendNextPartMessage(int32_t);
 static void SpecialEffectManager(void);
 static void GUI_ForceRefresh(void);
@@ -184,7 +178,7 @@ static volatile unsigned int PartIndex; // Current part index of the song
 static unsigned int DrumFillIndex;      // Current drumfill index of the current part
 
 AUTOPILOT_AutoPilotDataStruct * APPtr;
-int32_t BeatCounter = 0;
+uint32_t BeatCounter = 0;
 int32_t AutopilotAction = FALSE;
 int32_t AutopilotCueFill = FALSE;
 int32_t AutopilotTransitionCount;
@@ -226,17 +220,10 @@ static int8_t ActivePauseEnable = DEFAULT_ACTIVE_PAUSE;
 static int8_t TrippleTapEnable  = DEFAULT_TRIPLE_TAP_STOP;
 static int8_t StartBeatOnPress;
 
-
-static uint8_t MidiInNoteOnEnable;
-static uint8_t MidiInNoteOffEnable;
-
 static uint32_t NextPartNumber;
 static int8_t SendStopOnPause = 0;
 static int8_t SendStopOnEnd = 0;
 
-// In VM, player is started like with an external midi message
-// Need to start with Intro
-static char MidiMessageStart = MIDI_POS_INTRO;
 static SONGFILE_FileStruct *CurrSongFilePtr = nullptr;
 static std::vector<MIDIPARSER_MidiTrack> Tracks;
 static MIDIPARSER_MidiTrack *SingleMidiTrackPtr = nullptr;
@@ -746,7 +733,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         CheckAndCountBeat();
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
-			int32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
+            uint32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
             if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
@@ -762,7 +749,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 				}
             }
 		} else if ((AutopilotAction == TRUE) &&
-				(PlayerStatus == NO_FILL_TRAN || PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + APPtr->part[PartIndex].transitionFill.playFor))) {
+                (PlayerStatus == NO_FILL_TRAN || (PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + APPtr->part[PartIndex].transitionFill.playFor)))) {
 				RequestFlag = TRANFILL_QUIT_REQUEST;
 				AutopilotCueFill = TRUE;
 				AutopilotAction = FALSE;
@@ -1469,24 +1456,6 @@ static void NextPart(void) {
     UartMidi_sendNextPartMessage(PartIndex + 1);
 }
 
-static void EndPart(void) {
-    TmpMasterPartTick = 0;
-    MasterTick = 0;
-    WasPausedFlag = 0;
-
-    uint8_t status = IntDisable();
-
-    if (OUTRO_TRACK_PTR(CurrSongPtr)) {
-        CurrPartPtr = &CurrSongPtr->outro;
-        MasterTick = 0;
-        PlayerStatus = OUTRO;
-    } else {
-        StopSong();
-    }
-
-    IntEnable(status);
-}
-
 static void OutroPart(void) {
     TmpMasterPartTick = 0;
     MasterTick = 0;
@@ -1797,29 +1766,10 @@ static void StopSong(void) {
 
 }
 
-
-static void ExternalNoteOnHandler(uint8_t note, uint8_t velocity) {
-    if (MidiInNoteOnEnable && (velocity > 0 || MidiInNoteOffEnable)) {
-        SoundManager_playDrumsetNote(note,velocity,0,0,NO_PART_ID);
-    }
-}
-
-static void ExternalNoteOffHandler(uint8_t note, uint8_t velocity) {
-
-    // Play note off (remove sound) only if note on AND note off is enabled is enabled
-    if (MidiInNoteOnEnable && MidiInNoteOffEnable) {
-        SoundManager_playDrumsetNote(note, 0, 0, 0, NO_PART_ID);
-    }
-}
-
-
-
-static uint32_t GUI_GetCurrentWindows(void) {return 0;}
 static uint8_t IntDisable(void) {return 0;}
 static void IntEnable(uint8_t intStatus) {(void)intStatus;}
 static void TEMPO_startWithInt(void) {}
 static void UartMidi_SendStop(void) {}
-static void UartMidi_sendContinue(void) {}
 static void UartMidi_SendStart(void) {}
 static void UartMidi_sendNextPartMessage(int32_t) {}
 static void SpecialEffectManager(void) {}
@@ -1942,7 +1892,10 @@ static void  PLAYING_MAIN_TRACK_TO_END_ButtonHandler(BUTTON_EVENT event){
     case BUTTON_EVENT_PEDAL_RELEASE:
         RequestFlag = OUTRO_CANCEL_REQUEST;
         break;
+    default:
+        break;
     }
+
 }
 
 static void  NO_FILL_TRAN_ButtonHandler(BUTTON_EVENT event){
@@ -1976,6 +1929,8 @@ static void  NO_FILL_TRAN_QUITTING_ButtonHandler(BUTTON_EVENT event){
         if (!TrippleTapEnable) {
             MultiTapCounter = 0;
         }
+        break;
+    default:
         break;
     }
 
@@ -2029,6 +1984,8 @@ static void  TRANFILL_QUITING_ButtonHandler(BUTTON_EVENT event){
         RequestFlag = TRANFILL_CANCEL_REQUEST;
         WasLongPressed = true;
         break;
+    default:
+        break;
     }
 }
 
@@ -2048,6 +2005,8 @@ static void  DRUMFILL_WAITING_TRIG_ButtonHandler(BUTTON_EVENT event){
         if (!TrippleTapEnable) {
             MultiTapCounter = 0;
         }
+        break;
+    default:
         break;
     }
 }
@@ -2215,6 +2174,8 @@ void SongPlayer_ButtonCallback(BUTTON_EVENT event, unsigned long long time)
     case OUTRO:                     { OUTRO_ButtonHandler(event);                       break;}
     case OUTRO_WAITING_TRIG:        { OUTRO_WAITING_TRIG_ButtonHandler(event);          break;}
     case OUTRO_CANCELED:            { OUTRO_CANCELED_ButtonHandler(event);              break;}
+    default:
+        break;
     }
 
     end_handler:
