@@ -1619,14 +1619,17 @@ static void CheckAndCountBeat(void) {
  * Check the current state of the beat to see if is bigger than next drum fill have pick up notes
  */
 static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPosition){
-    bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
-    bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
-    addedTick = ticksPerCount-newTickPosition;
-    if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
-        newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
-        MasterTick += addedTick;
-    }else {
-        newEnd = 0;
+    auto Drumpart = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex);//if there is a drumfill
+    if(Drumpart){
+        bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
+        bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
+        addedTick = ticksPerCount-newTickPosition;
+        if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
+            newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
+            MasterTick += addedTick;
+        }else {
+            newEnd = 0;
+        }
     }
 }
 
