@@ -73,6 +73,7 @@ int SongPlayer_getBeatInbar(int32_t *startBeat);
 int SongPlayer_getMasterTick(void);
 
 int SongPlayer_getTimeSignature(TimeSignature * timeSignature);
+int SongPlayer_getbarLength();
 int SongPlayer_getTempo();
 
 unsigned int SongPlayer_getNextNoteValue(unsigned char * nextNote, unsigned int length);
