@@ -747,7 +747,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
 			int32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
-            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) /*|| (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1 == tmpBeatCounter))*/ {
+            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
 			} else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
@@ -1624,7 +1624,7 @@ static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPo
     addedTick = ticksPerCount-newTickPosition;
     if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
         newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
-        MasterTick += addedTick;//TODO ERASE
+        MasterTick += addedTick;
     }else {
         newEnd = 0;
     }
