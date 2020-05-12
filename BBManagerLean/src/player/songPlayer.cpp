@@ -695,13 +695,15 @@ void SongPlayer_SetSingleTrack(MIDIPARSER_MidiTrack *track) {
 
 void SongPlayer_ProcessSingleTrack(float ratio, int32_t nTick, int32_t offset) {
     TmpMasterPartTick = MasterTick + nTick;
+    int pickuplength = 0;//pick up notes
     if (PlayerStatus == NO_SONG_LOADED) {
         return;
     }
 
     if (PlayerStatus == SINGLE_TRACK_PLAYER) {
+        pickuplength = (SingleMidiTrackPtr->event[0].tick < 0 && MasterTick == 0)? SingleMidiTrackPtr->event[0].tick: pickuplength;
 
-        TrackPlay(SingleMidiTrackPtr,MasterTick - offset ,TmpMasterPartTick - offset ,ratio,0,MAIN_PART_ID);
+        TrackPlay(SingleMidiTrackPtr,MasterTick - offset + pickuplength ,TmpMasterPartTick - offset + pickuplength,ratio,0,MAIN_PART_ID);
 
         // If its the end of the track
         if (TmpMasterPartTick >= SingleMidiTrackPtr->nTick + offset) {
@@ -710,7 +712,7 @@ void SongPlayer_ProcessSingleTrack(float ratio, int32_t nTick, int32_t offset) {
         }
 
     }
-    MasterTick = TmpMasterPartTick;
+    MasterTick = TmpMasterPartTick + pickuplength;
 }
 
 int32_t SongPlayer_calculateSingleTrackOffset(uint32_t nTicks, uint32_t tickPerBar) {
