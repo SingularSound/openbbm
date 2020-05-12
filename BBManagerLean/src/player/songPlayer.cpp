@@ -379,7 +379,32 @@ int SongPlayer_getMasterTick(void) {
     return MasterTick;
 }
 
+int SongPlayer_getbarLength(){
+    unsigned char status = IntDisable();
+    int result;
+    if (CurrSongPtr != nullptr) {
+        if (CurrPartPtr != nullptr) {
+            if (MAIN_LOOP_PTR(CurrPartPtr)) {
+                result = MAIN_LOOP_PTR(CurrPartPtr)->barLength;
+                IntEnable(status);
+            }
+        } else if (INTRO_TRACK_PTR(CurrSongPtr)) {
+            result = INTRO_TRACK_PTR(CurrSongPtr)->barLength;
+            IntEnable(status);
+        } else {
+            result = MAIN_LOOP_PTR( ((SONG_SongPartStruct *)&(CurrSongPtr->part[0])) )->barLength;
+            IntEnable(status);
+        }
+    }
 
+    else if (PlayerStatus == SINGLE_TRACK_PLAYER && SingleMidiTrackPtr != NULL ){
+        result = SingleMidiTrackPtr->barLength;
+        IntEnable(status);
+    }
+
+    IntEnable(status);
+    return result;
+}
 /**
  *
  */
@@ -1574,13 +1599,14 @@ static void IntroPart(void) {
 static void CheckAndCountBeat(void) {
     TimeSignature timeSignature;
     SongPlayer_getTimeSignature(&timeSignature);
-    unsigned int ticksPerCount = (CurrPartPtr->tickPerBar / timeSignature.num);
+    unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
     unsigned int newTickPosition = (MasterTick % ticksPerCount);
     CalculateMainTrim(ticksPerCount, newTickPosition);
     bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
-    qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
+
     if (shouldcount) {
         BeatCounter++;
+          qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
     }
     currentLoopTick = (newEnd != 0)? newTickPosition + addedTick: newTickPosition;
     addedTick = 0;
