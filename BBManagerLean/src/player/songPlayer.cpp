@@ -1572,11 +1572,13 @@ static void IntroPart(void) {
  * Check the current state of the loop and adds a beat to the beat counter if needed
  */
 static void CheckAndCountBeat(void) {
-    unsigned int ticksPerCount = (CurrPartPtr->tickPerBar / CurrPartPtr->timeSigNum);
+    TimeSignature timeSignature;
+    SongPlayer_getTimeSignature(&timeSignature);
+    unsigned int ticksPerCount = (CurrPartPtr->tickPerBar / timeSignature.num);
     unsigned int newTickPosition = (MasterTick % ticksPerCount);
     CalculateMainTrim(ticksPerCount, newTickPosition);
     bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
-    qDebug() << MasterTick << "CBeat" << BeatCounter << CurrPartPtr->timeSigNum;
+    qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
     if (shouldcount) {
         BeatCounter++;
     }
