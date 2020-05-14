@@ -984,6 +984,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             //Extends the section on autopilot
             if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
                 MAIN_LOOP_PTR(CurrPartPtr)->index = 0;
+                ResetBeatCounter();
             }
             break;
 
