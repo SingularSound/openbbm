@@ -9,7 +9,7 @@
 ## Building in MacOS X
 
 ### Initial Setup
-To build BBManager you'll need qt5.5; you can get it through brew (if you don't have brew, you can get it at brew.sh), by invoking the command `brew install qt@5.5` in the command line.
+To build BBManager you'll need to the [current suported version of qt](https://doc.qt.io/qt-5/macos.html) installed.
 
 To successfully run BBManager, you need a local installation of libquazip and libMinini.
 
