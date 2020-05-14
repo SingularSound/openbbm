@@ -14,6 +14,7 @@
 - Make sure to use a clear and descriptive title to identify the problem.
 - Describe the steps to recreate the bug, the behavior you observed after following the steps pointing out what exactly is the problem with that behavior. And explain which behavior you expected to see instead, and why.
 - Include details of your current configuration, and running platform.
+- If you just notice something weird but are not sure is a bug, you can always contact the developers to check.
 
 ## Suggesting Enhancements
 
@@ -27,10 +28,12 @@ If you want to add new features, make sure to:
 
 Please follow these steps to have your contribution considered by the maintainers:
    - Use a clear and descriptive title and description for the PR.
-   - Include the relevant issue number if applicable.
+   - Include the relevant issue number, if there is no issue created you must create one following the [Reporting bugs](#reporting-bugs) section.
    - You can drag and drop screenshots to showcase what your work implements.
 
-While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional information before your pull request can be accepted.
+While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional information before your pull request can be accepted. 
+
+Comments and answers to these questions inside the Pull Request should always show respect to all parties.
 
 ## Contact with Developers
 

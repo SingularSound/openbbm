@@ -9,20 +9,19 @@
 ## Building in MacOS X
 
 ### Initial Setup
-To build BBManager you'll need qt5.5; you can get it through brew (if you don't have brew, you can get it at brew.sh), by invoking the command `brew install qt@5.5` in the command line.
+To build BBManager you'll need the [current suported version of qt](https://doc.qt.io/qt-5/macos.html) installed.
 
 To successfully run BBManager, you need a local installation of libquazip and libMinini.
 
-Those should be installed at the ~/lib directory, because the OS looks for shared libraries there without any configuration; the files to be moved into that directory can be found in BBManager/libs/quazip/macx/release and BBManager/libs/minIni/macx/release respectively.
+Those should be installed at the ~/lib directory after running the `make install` command, because the OS looks for shared libraries there without any configuration; the files to be moved into that directory can be found in BBManager/libs/quazip/macx/release and BBManager/libs/minIni/macx/release respectively.
 
 ### Building and Deploying
-The project file is BBManager/project/ProjectEditor.pro. In BBManager/project you can build by running `qmake && make clean && make all`. The BBManager.app will be in the same directory, and you can run this to test the app.
+The project beatbuddy-manager-lite.pro will hold all project of the BeatBuddy Manager, so in order to run the application the project file is **BBManagerLean/BBManagerLean.pro** as this will run the BeatBuddy Manager. In BBManager/project you can build by running `qmake && make clean && make all`. The BBManager.app will be in the same directory, and you can run this to test the app.
 
 While dependencies don't change, future builds can be done with just `make`.
 
 To pack for deployment - ie: to share with other people - you need to run `BBManager/mac_deployment/deploy.sh` with `BBManager/project/BBManager.app` as an argument; this will make the dynamic libraries be loaded from the BBManager.app bundle, instead of them being sought elsewhere in the system.
 
-I haven't yet figured out how to sign it, and that needs to be figured out before we can start shipping it as a final version.
 
 ## Building in Windows
 
@@ -38,6 +37,8 @@ Finally make sure your `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\b
 
 ### Building and Deploying
 The project file is `BBManagerLean/BBManagerLean.pro`. When opening the project select the corresponding kit, Clean, Build, and Run.
+
+To pack for deployment - ie: to share with other people make the .pro file is set for release, and set the Build(The computer above the Run button on the Qt Creator) to 'Release' and build the application. Go to the folder containing the .exe and delete all but the .exe file, open the command prompt and run `windeployqt.exe --quick .` this will generate all the necessary .dll, and it is ready.
 
 
 ## Building for Ubuntu
