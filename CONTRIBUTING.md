@@ -31,7 +31,9 @@ Please follow these steps to have your contribution considered by the maintainer
    - Include the relevant issue number, if there is no issue created you must create one following the [Reporting bugs](#reporting-bugs) section.
    - You can drag and drop screenshots to showcase what your work implements.
 
-While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional information before your pull request can be accepted. And answers to these questions inside the Pull Request should always show respect to all parties.
+While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional information before your pull request can be accepted. 
+
+Comments and answers to these questions inside the Pull Request should always show respect to all parties.
 
 ## Contact with Developers
 
