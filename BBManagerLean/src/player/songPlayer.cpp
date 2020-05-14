@@ -762,23 +762,21 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
-			} else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
-				if (PartIndex < CurrSongPtr->nPart - 1) {
-					RequestFlag = TRANFILL_REQUEST;
-					AutopilotCueFill = TRUE;
-					AutopilotAction = TRUE;
-					AutopilotTransitionCount = BeatCounter;
-				} else {
-					RequestFlag = STOP_REQUEST;
-					AutopilotCueFill = TRUE;
-				}
+            } else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
+               RequestFlag = TRANFILL_REQUEST;
+               AutopilotCueFill = TRUE;
+               AutopilotAction = TRUE;
             }
 		} else if ((AutopilotAction == TRUE) &&
                 (PlayerStatus == NO_FILL_TRAN || (PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + APPtr->part[PartIndex].transitionFill.playFor)))) {
 				RequestFlag = TRANFILL_QUIT_REQUEST;
 				AutopilotCueFill = TRUE;
 				AutopilotAction = FALSE;
-		}
+        }else if(PlayerStatus == NO_FILL_TRAN_QUITTING && PartIndex == CurrSongPtr->nPart - 1)//if there is no trans fill and is the last song part must go to outro
+        {
+            RequestFlag = STOP_REQUEST;
+            AutopilotCueFill = TRUE;
+        }
 
     }
 
@@ -1341,12 +1339,12 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
-
-        if (TmpMasterPartTick >= PartStopSyncTick) {
-            NextPart();
-            SpecialEffectManager();
+        if (PartIndex < CurrSongPtr->nPart - 1) {
+            if (TmpMasterPartTick >= PartStopSyncTick) {
+                NextPart();
+                SpecialEffectManager();
+            }
         }
-
         break;
 
     case PLAYING_MAIN_TRACK_TO_END:
