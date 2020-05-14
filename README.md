@@ -16,7 +16,7 @@ To successfully run BBManager, you need a local installation of libquazip and li
 Those should be installed at the ~/lib directory, because the OS looks for shared libraries there without any configuration; the files to be moved into that directory can be found in BBManager/libs/quazip/macx/release and BBManager/libs/minIni/macx/release respectively.
 
 ### Building and Deploying
-The project beatbuddy-manager-lite.pro will hold all project of the BeatBuddy Manager, so in order to run the application the project file is **BBManager/project/ProjectEditor.pro** as this will run the BeatBuddy Manager. In BBManager/project you can build by running `qmake && make clean && make all`. The BBManager.app will be in the same directory, and you can run this to test the app.
+The project beatbuddy-manager-lite.pro will hold all project of the BeatBuddy Manager, so in order to run the application the project file is **BBManagerLean/BBManagerLean.pro** as this will run the BeatBuddy Manager. In BBManager/project you can build by running `qmake && make clean && make all`. The BBManager.app will be in the same directory, and you can run this to test the app.
 
 While dependencies don't change, future builds can be done with just `make`.
 
