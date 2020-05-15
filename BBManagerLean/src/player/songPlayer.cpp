@@ -445,16 +445,8 @@ int SongPlayer_getTimeSignature(TimeSignature * timeSig) {
 
 int SongPlayer_getTempo() {
     unsigned char status = IntDisable();
-    if (CurrSongPtr != nullptr) {
-        if (CurrPartPtr != nullptr) {
-            if (MAIN_LOOP_PTR(CurrPartPtr)) {
-                IntEnable(status);
-                if (MAIN_LOOP_PTR(CurrPartPtr)->bpm>0) {
-                    return MAIN_LOOP_PTR(CurrPartPtr)->bpm;
-                }
-                return CurrSongPtr->bpm;
-            }
-        }
+    if (CurrSongPtr != nullptr && CurrPartPtr != nullptr) {
+       return CurrSongPtr->bpm;
     }
     IntEnable(status);
     return 0;
