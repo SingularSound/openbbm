@@ -445,16 +445,8 @@ int SongPlayer_getTimeSignature(TimeSignature * timeSig) {
 
 int SongPlayer_getTempo() {
     unsigned char status = IntDisable();
-    if (CurrSongPtr != nullptr) {
-        if (CurrPartPtr != nullptr) {
-            if (MAIN_LOOP_PTR(CurrPartPtr)) {
-                IntEnable(status);
-                if (MAIN_LOOP_PTR(CurrPartPtr)->bpm>0) {
-                    return MAIN_LOOP_PTR(CurrPartPtr)->bpm;
-                }
-                return CurrSongPtr->bpm;
-            }
-        }
+    if (CurrSongPtr != nullptr && CurrPartPtr != nullptr) {
+       return CurrSongPtr->bpm;
     }
     IntEnable(status);
     return 0;
@@ -755,30 +747,33 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
     AutopilotCueFill = FALSE;
 
     if (APPtr != nullptr && CurrPartPtr != nullptr) {
+        int extra = 0;
         CheckAndCountBeat();
+        //for tran fills longer than 1 bar
+        if(PlayerStatus == TRANFILL_ACTIVE && TRANS_FILL_PTR(CurrPartPtr)){
+            extra = (TRANS_FILL_PTR(CurrPartPtr)->nTick /TRANS_FILL_PTR(CurrPartPtr)->barLength > 1)?APPtr->part[PartIndex].transitionFill.playFor: extra;
+        }
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
             uint32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
             if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
-			} else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
-				if (PartIndex < CurrSongPtr->nPart - 1) {
-					RequestFlag = TRANFILL_REQUEST;
-					AutopilotCueFill = TRUE;
-					AutopilotAction = TRUE;
-					AutopilotTransitionCount = BeatCounter;
-				} else {
-					RequestFlag = STOP_REQUEST;
-					AutopilotCueFill = TRUE;
-				}
+            } else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt == BeatCounter) {
+               RequestFlag = TRANFILL_REQUEST;
+               AutopilotCueFill = TRUE;
+               AutopilotAction = TRUE;
             }
-		} else if ((AutopilotAction == TRUE) &&
-                (PlayerStatus == NO_FILL_TRAN || (PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + APPtr->part[PartIndex].transitionFill.playFor)))) {
+        } else if ((AutopilotAction == TRUE) &&
+                (PlayerStatus == NO_FILL_TRAN || (PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + extra)))) {
 				RequestFlag = TRANFILL_QUIT_REQUEST;
 				AutopilotCueFill = TRUE;
 				AutopilotAction = FALSE;
-		}
+        }else if(PlayerStatus == NO_FILL_TRAN_QUITTING && PartIndex == CurrSongPtr->nPart - 1)//if there is no trans fill and is the last song part must go to outro
+        {
+            RequestFlag = STOP_REQUEST;
+            AutopilotCueFill = TRUE;
+        }
 
     }
 
@@ -984,6 +979,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             //Extends the section on autopilot
             if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
                 MAIN_LOOP_PTR(CurrPartPtr)->index = 0;
+                ResetBeatCounter();
             }
             break;
 
@@ -1341,12 +1337,12 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
-
-        if (TmpMasterPartTick >= PartStopSyncTick) {
-            NextPart();
-            SpecialEffectManager();
+        if (PartIndex < CurrSongPtr->nPart - 1) {
+            if (TmpMasterPartTick >= PartStopSyncTick) {
+                NextPart();
+                SpecialEffectManager();
+            }
         }
-
         break;
 
     case PLAYING_MAIN_TRACK_TO_END:
