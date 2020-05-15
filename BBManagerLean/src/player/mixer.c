@@ -121,11 +121,8 @@ static unsigned long counter = 180;
 
 static int ReleaseCoeff[RELEASE_GAIN_LENGTH];
 static int ReleaseLength = RELEASE_GAIN_LENGTH;
-#ifndef am335x
+
 static float g_level;
-#else
-extern LICENSE_Status_enum gLicenseStatus;
-#endif
 
 /******************************************************************************
  **                     INTERNAL FUNCTION PROTOTYPE
@@ -764,8 +761,6 @@ void mixer_removeSoundWithAddress(uint64_t addr, unsigned int range){
 }
 #endif
 
-
-#ifndef am335x
 /**
  * @brief mixer_setOutputLevel
  *       Set the output level of the data stream. The multiplication is made at the end of the audio processing
@@ -784,7 +779,6 @@ float mixer_getOutputLevel(void){
     return g_level;
 }
 
-#endif
 
 
 #define PI  (3.1415926535897932384626433832795)

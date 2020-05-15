@@ -10,7 +10,6 @@ extern "C" {
 /*****************************************************************************
  **                     DEFINES
  *****************************************************************************/
-#ifndef am335x
 // minimum 11.6ms in order for sound card to work properly on mac mini
 // buffer needs to be filled by at least 2048 bytes
 // 100 was defined arbitrarily to sound good and not to lag too much
@@ -26,7 +25,7 @@ extern "C" {
 #    define MIXER_BUFFERRING_TIME_MS_TO_BYTES_STEREO(time)  (MIXER_BUFFERRING_TIME_MS_TO_SMAPLES(time) * MIXER_BYTES_PER_SAMPLE_STEREO)
 #    define MIXER_BUFFER_LENGTH_BYTES_MONO                  (MIXER_BUFFER_LENGTH_SAMPLES * MIXER_BYTES_PER_SAMPLE_MONO)
 #    define MIXER_BUFFER_LENGTH_BYTES_STEREO                (MIXER_BUFFER_LENGTH_SAMPLES * MIXER_BYTES_PER_SAMPLE_STEREO)
-#endif
+
 
 /*****************************************************************************
  **                     FUNCTION PROTOTYPES
@@ -110,13 +109,11 @@ void mixer_removeAll(void);
 void mixer_chokeChannel(unsigned int groupId,unsigned int array_offset);
 void mixer_chokeNote(unsigned int note);
 
-
-#ifndef am335x
 float mixer_getOutputLevel(void);
 void mixer_setOutputLevel(float level);
 void mixer_ReadOutputStream(signed short * buff, unsigned int length);
 void mixer_setDitheringBits(int ditheringBits);
-#endif
+
 void mixer_setLeftFreq(unsigned int freq);
 void mixer_setRightFreq(unsigned int freq);
 #ifdef __cplusplus
