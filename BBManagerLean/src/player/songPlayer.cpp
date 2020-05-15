@@ -747,7 +747,12 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
     AutopilotCueFill = FALSE;
 
     if (APPtr != nullptr && CurrPartPtr != nullptr) {
+        int extra = 0;
         CheckAndCountBeat();
+        //for tran fills longer than 1 bar
+        if(PlayerStatus == TRANFILL_ACTIVE && TRANS_FILL_PTR(CurrPartPtr)){
+            extra = (TRANS_FILL_PTR(CurrPartPtr)->nTick /TRANS_FILL_PTR(CurrPartPtr)->barLength > 1)?APPtr->part[PartIndex].transitionFill.playFor: extra;
+        }
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
             uint32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
@@ -765,8 +770,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 					AutopilotCueFill = TRUE;
 				}
             }
-		} else if ((AutopilotAction == TRUE) &&
-                (PlayerStatus == NO_FILL_TRAN || (PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + APPtr->part[PartIndex].transitionFill.playFor)))) {
+        } else if ((AutopilotAction == TRUE) &&
+                (PlayerStatus == NO_FILL_TRAN || (PlayerStatus == TRANFILL_ACTIVE && BeatCounter >= (AutopilotTransitionCount + extra)))) {
 				RequestFlag = TRANFILL_QUIT_REQUEST;
 				AutopilotCueFill = TRUE;
 				AutopilotAction = FALSE;
