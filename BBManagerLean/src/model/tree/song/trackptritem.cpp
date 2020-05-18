@@ -253,8 +253,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             int drumFillIndex = row();   //thats the stuff for 0-7
             //Which of the 32?
             //Which of the 8?
-                            AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
-            qDebug() <<"Isvalid" <<lastCall.isValid() <<" time elapsed"<< lastCall.elapsed();
+            AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
             if(!lastCall.isValid() || lastCall.elapsed() > 5000)
             {
                 droppedDrumFill = QPoint(drumFillIndex,partModel->getDrumFill(drumFillIndex)->getPlayAt());
