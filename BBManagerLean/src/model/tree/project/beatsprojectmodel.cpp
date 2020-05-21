@@ -705,7 +705,12 @@ void BeatsProjectModel::addAPSettingInQueue(QList<int> settings)
 {
     m_APSettings.push_back(settings);
 }
-
+QList<int> BeatsProjectModel::getAPSettings(QModelIndex index)
+{
+    auto item = (AbstractTreeItem*) index.internalPointer();
+    QVariant settings = item->data(17);
+    return QList<int>() << settings.toStringList()[0].toInt() << settings.toStringList()[1].toInt();
+}
 void BeatsProjectModel::clearAPSettingQueue()
 {
     m_APSettings.clear();
@@ -760,6 +765,7 @@ public:
         QFile(data).copy(backup = bkp.absoluteFilePath(QFileInfo(data).fileName()));
         auto ret = new CmdCreateSongFile(model, parent, row, backup, data);
         model->undoStack()->push(ret);
+
         return *ret;
     }
 
@@ -2562,7 +2568,6 @@ void BeatsProjectModel::manageParsingErrors(QWidget *p_parent)
 {
    songsFolder()->manageParsingErrors(p_parent);
 }
-
 
 void BeatsProjectModel::saveModal()
 {

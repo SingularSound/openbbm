@@ -254,7 +254,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             //Which of the 32?
             //Which of the 8?
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
-            if(!lastCall.isValid() || lastCall.elapsed() > 5000)
+            if((!lastCall.isValid() || lastCall.elapsed() > 6000))
             {
                 droppedDrumFill.push_back(drumFillIndex);
                 droppedDrumFill.push_back(partModel->getDrumFill(drumFillIndex)->getPlayAt());

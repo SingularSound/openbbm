@@ -83,10 +83,10 @@ void BeatFileWidget::drag()
         qWarning() << "BeatFileWidget::drag - ERROR 1 - unable to export file.";
         return;
     }
-
-    QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
-                                                   ,modelIndex().parent())).value<QList<int>>();
+    QList<int> lastsettings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR,modelIndex().parent())).value<QList<int>>();
+    QList<int> settings = model()->getAPSettings(modelIndex());
     model()->addAPSettingInQueue(settings);
+    model()->addAPSettingInQueue(lastsettings);
 
     QDrag* drag = new QDrag(this);
     connect(drag, SIGNAL(actionChanged(Qt::DropAction)), this, SLOT(dragActionChanged(Qt::DropAction)));
