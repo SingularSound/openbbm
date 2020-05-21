@@ -185,6 +185,7 @@ int32_t AutopilotTransitionCount;
 unsigned int currentLoopTick = -1; // Stores the current tick of the loop, start at infinity.
 int32_t newEnd = 0;
 int32_t addedTick = 0;//to fill the currentLoopon Pick up note cases
+bool playingPickUp = false;//to avoid counting a beat when is a pick up note
 
 QMap<int, int> idxs;//key playAt value real index
 
@@ -1593,19 +1594,22 @@ static void IntroPart(void) {
  * Check the current state of the loop and adds a beat to the beat counter if needed
  */
 static void CheckAndCountBeat(void) {
-    TimeSignature timeSignature;
-    SongPlayer_getTimeSignature(&timeSignature);
-    unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
-    unsigned int newTickPosition = (MasterTick % ticksPerCount);
-    CalculateMainTrim(ticksPerCount, newTickPosition);
-    bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
+    if(!playingPickUp)
+    {
+        TimeSignature timeSignature;
+        SongPlayer_getTimeSignature(&timeSignature);
+        unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
+        unsigned int newTickPosition = (MasterTick % ticksPerCount);
+        CalculateMainTrim(ticksPerCount, newTickPosition);
+        bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
 
-    if (shouldcount) {
-        BeatCounter++;
-          qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
+        if (shouldcount) {
+            BeatCounter++;
+              qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
+        }
+        currentLoopTick = (newEnd != 0)? newTickPosition + addedTick: newTickPosition;
+        addedTick = 0;
     }
-    currentLoopTick = (newEnd != 0)? newTickPosition + addedTick: newTickPosition;
-    addedTick = 0;
 };
 /**
  * @brief CalculateMainTrim
@@ -1704,6 +1708,7 @@ static bool isEndOfTrack(int pos, SONG_SongPartStruct *CurrPartPtr/*, int loop, 
 static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t endTick, float ratio,
         int32_t manualOffset, uint32_t partID) {
     float delay;
+     playingPickUp = (startTick < 0)? true : false;
 
     // if the index of the song is outside the array of event, put it to the last value
     if (track->index >= track->event.size())
@@ -1744,6 +1749,12 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
         // if the index is outside the array of event exit
         if (track->index >= track->event.size())
             return;
+    }
+    //check if done playing pick up notes to adjust beat counter
+    if(playingPickUp && track->event[track->index].tick >= 0){
+        qDebug() <<"The pick up notes were played";
+        DrumFillPickUpSyncTickLength = 0;
+        currentLoopTick= 0;
     }
 }
 
