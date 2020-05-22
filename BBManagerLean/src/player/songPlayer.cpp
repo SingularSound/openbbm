@@ -953,7 +953,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         case DRUMFILL_REQUEST:
             // If there is drum fills in the current part
             if (CurrPartPtr->nDrumFill > 0) {
-                DrumFillStartSyncTick = (PedalPressFlag > 0)? MasterTick: CalculateStartBarSyncTick(MasterTick,
+                DrumFillStartSyncTick = CalculateStartBarSyncTick(MasterTick,
                         MAIN_LOOP_PTR(CurrPartPtr)->barLength,
                         AutopilotCueFill ? MAIN_LOOP_PTR(CurrPartPtr)->barLength : MAIN_LOOP_PTR(CurrPartPtr)->trigPos);
 
@@ -1773,7 +1773,9 @@ static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
         uint32_t tickPerBar, uint32_t barTriggerLimit) {
 
-    if ((tickPos % tickPerBar) <= barTriggerLimit) {
+    if(PedalPressFlag > 0){
+        return tickPos;
+    }else if ((tickPos % tickPerBar) <= barTriggerLimit) {
 
         return ((0 + ((int32_t) (tickPos / tickPerBar))) * tickPerBar);
     } else {
@@ -1870,10 +1872,10 @@ static void  PAUSED_ButtonHandler(BUTTON_EVENT event){
     case BUTTON_EVENT_PEDAL_LONG_PRESS:
 
         if (MainUnpauseModeHoldToTransition == START_TRANSITION) {
-            NextPartNumber = 0; // Means no specefic next part
+            NextPartNumber = 0; // Means no specific next part
             RequestFlag = TRANFILL_REQUEST;
         } else {
-            PedalPressFlag = 0; // FOrce a 0 to make sur the next release doesn't start the song again
+            PedalPressFlag = 0; // Force a 0 to make sure the next release doesn't start the song again
             StopSong();
         }
         break;
