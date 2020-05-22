@@ -13,6 +13,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QVariant>
 
 #include "trackptritem.h"
@@ -28,6 +29,9 @@
 #include "../../beatsmodelfiles.h"
 #include "../project/beatsprojectmodel.h"
 #include "trackarrayitem.h"
+
+QElapsedTimer lastCall;
+QList<int> droppedDrumFill;//drumfillindex,lastplayat, drumfillsongpart
 
 TrackPtrItem::TrackPtrItem(AbstractTreeItem *parent, SongTracksModel * p_TracksModel, SongTrack * p_SongTrack):
    AbstractTreeItem(parent->model(), parent),
@@ -245,18 +249,32 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             partModel->getTransitionFill()->setPlayAt(value.at(0).toInt());
             partModel->getTransitionFill()->setPlayFor(value.at(1).toInt());
 
-        }else if( trackType == DRUM_FILL ){
+        }else if( trackType == DRUM_FILL){
             int drumFillIndex = row();   //thats the stuff for 0-7
             //Which of the 32?
             //Which of the 8?
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
-            partModel->getDrumFill(drumFillIndex)->setPlayAt(value.at(0).toInt());
-            partModel->getDrumFill(drumFillIndex)->setPlayFor(value.at(1).toInt());
+            if((!lastCall.isValid() || lastCall.elapsed() > 6000))
+            {
+                droppedDrumFill.clear();
+                droppedDrumFill.push_back(drumFillIndex);
+                droppedDrumFill.push_back(partModel->getDrumFill(drumFillIndex)->getPlayAt());
+                droppedDrumFill.push_back(partRow-1);
+
+                partModel->getDrumFill(drumFillIndex)->setPlayAt(value.at(0).toInt());
+                partModel->getDrumFill(drumFillIndex)->setPlayFor(value.at(1).toInt());
+            }else{//if drag and drop swaps playAts
+                AutoPilotDataPartModel * lastpartModel =  apdm->getPartModel(droppedDrumFill[2]);
+                int crrntPlayAt = partModel->getDrumFill(drumFillIndex)->getPlayAt();
+                partModel->getDrumFill(drumFillIndex)->setPlayAt(droppedDrumFill[1]);//Change the playAt to previous drumfill playat value
+                lastpartModel->getDrumFill(droppedDrumFill[0])->setPlayAt(crrntPlayAt);//change previous playAt to currentplayAt
+            }
         }
     }
     auto ppp = parent()->parent()->parent();
     ppp->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
     model()->itemDataChanged(ppp, SAVE);
+    lastCall.start();
 }
 
 QList<QVariant> TrackPtrItem::autoPilotValues()

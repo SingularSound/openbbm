@@ -185,6 +185,7 @@ int32_t AutopilotTransitionCount;
 unsigned int currentLoopTick = -1; // Stores the current tick of the loop, start at infinity.
 int32_t newEnd = 0;
 int32_t addedTick = 0;//to fill the currentLoopon Pick up note cases
+bool playingPickUp = false;//to avoid counting a beat when is a pick up note
 
 QMap<int, int> idxs;//key playAt value real index
 
@@ -969,18 +970,25 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 } else {
                     DrumFillPickUpSyncTickLength = 0;
                 }
+                //Extends the section on autopilot if pedal pressed
+                if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
+                    ResetBeatCounter();
+                    if (CurrPartPtr->shuffleFlag) {
+                        if (CurrPartPtr->nDrumFill != 0) {
+                            DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
+                        }
+                    } else {
+                        fillAPIndex();
+                    }
 
+                }
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
             else {
                 // If there is no drum fill in the current part
                 ResetBeatCounter();
             }
-            //Extends the section on autopilot
-            if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
-                MAIN_LOOP_PTR(CurrPartPtr)->index = 0;
-                ResetBeatCounter();
-            }
+
             break;
 
         case TRANFILL_REQUEST:
@@ -1225,7 +1233,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick,
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
-
+            PedalPressFlag = 0;
             SamePart(TRUE);
             SpecialEffectManager();
         }
@@ -1593,19 +1601,22 @@ static void IntroPart(void) {
  * Check the current state of the loop and adds a beat to the beat counter if needed
  */
 static void CheckAndCountBeat(void) {
-    TimeSignature timeSignature;
-    SongPlayer_getTimeSignature(&timeSignature);
-    unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
-    unsigned int newTickPosition = (MasterTick % ticksPerCount);
-    CalculateMainTrim(ticksPerCount, newTickPosition);
-    bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
+    if(!playingPickUp)
+    {
+        TimeSignature timeSignature;
+        SongPlayer_getTimeSignature(&timeSignature);
+        unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
+        unsigned int newTickPosition = (MasterTick % ticksPerCount);
+        CalculateMainTrim(ticksPerCount, newTickPosition);
+        bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
 
-    if (shouldcount) {
-        BeatCounter++;
-          qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
+        if (shouldcount) {
+            BeatCounter++;
+              qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
+        }
+        currentLoopTick = (newEnd != 0)? newTickPosition + addedTick: newTickPosition;
+        addedTick = 0;
     }
-    currentLoopTick = (newEnd != 0)? newTickPosition + addedTick: newTickPosition;
-    addedTick = 0;
 };
 /**
  * @brief CalculateMainTrim
@@ -1704,6 +1715,7 @@ static bool isEndOfTrack(int pos, SONG_SongPartStruct *CurrPartPtr/*, int loop, 
 static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t endTick, float ratio,
         int32_t manualOffset, uint32_t partID) {
     float delay;
+     playingPickUp = (startTick < 0)? true : false;
 
     // if the index of the song is outside the array of event, put it to the last value
     if (track->index >= track->event.size())
@@ -1745,6 +1757,12 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
         if (track->index >= track->event.size())
             return;
     }
+    //check if done playing pick up notes to adjust beat counter
+    if(playingPickUp && track->event[track->index].tick >= 0){
+        qDebug() <<"The pick up notes were played";
+        DrumFillPickUpSyncTickLength = 0;
+        currentLoopTick= 0;
+    }
 }
 
 static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
@@ -1755,7 +1773,9 @@ static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
         uint32_t tickPerBar, uint32_t barTriggerLimit) {
 
-    if ((tickPos % tickPerBar) <= barTriggerLimit) {
+    if(PedalPressFlag > 0){
+        return tickPos;
+    }else if ((tickPos % tickPerBar) <= barTriggerLimit) {
 
         return ((0 + ((int32_t) (tickPos / tickPerBar))) * tickPerBar);
     } else {
@@ -1852,10 +1872,10 @@ static void  PAUSED_ButtonHandler(BUTTON_EVENT event){
     case BUTTON_EVENT_PEDAL_LONG_PRESS:
 
         if (MainUnpauseModeHoldToTransition == START_TRANSITION) {
-            NextPartNumber = 0; // Means no specefic next part
+            NextPartNumber = 0; // Means no specific next part
             RequestFlag = TRANFILL_REQUEST;
         } else {
-            PedalPressFlag = 0; // FOrce a 0 to make sur the next release doesn't start the song again
+            PedalPressFlag = 0; // Force a 0 to make sure the next release doesn't start the song again
             StopSong();
         }
         break;
@@ -1888,6 +1908,7 @@ static void  PLAYING_MAIN_TRACK_ButtonHandler(BUTTON_EVENT event){
     switch(event){
     case BUTTON_EVENT_PEDAL_RELEASE:
         RequestFlag = DRUMFILL_REQUEST;
+        PedalPressFlag = 1;
         break;
     case BUTTON_EVENT_PEDAL_LONG_PRESS:
         NextPartNumber = 0; // Means no specefic next part
