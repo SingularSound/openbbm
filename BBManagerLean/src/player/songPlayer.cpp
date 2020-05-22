@@ -953,7 +953,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         case DRUMFILL_REQUEST:
             // If there is drum fills in the current part
             if (CurrPartPtr->nDrumFill > 0) {
-                DrumFillStartSyncTick = CalculateStartBarSyncTick(MasterTick,
+                DrumFillStartSyncTick = (PedalPressFlag > 0)? MasterTick: CalculateStartBarSyncTick(MasterTick,
                         MAIN_LOOP_PTR(CurrPartPtr)->barLength,
                         AutopilotCueFill ? MAIN_LOOP_PTR(CurrPartPtr)->barLength : MAIN_LOOP_PTR(CurrPartPtr)->trigPos);
 
@@ -970,18 +970,25 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 } else {
                     DrumFillPickUpSyncTickLength = 0;
                 }
+                //Extends the section on autopilot if pedal pressed
+                if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
+                    ResetBeatCounter();
+                    if (CurrPartPtr->shuffleFlag) {
+                        if (CurrPartPtr->nDrumFill != 0) {
+                            DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
+                        }
+                    } else {
+                        fillAPIndex();
+                    }
 
+                }
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
             else {
                 // If there is no drum fill in the current part
                 ResetBeatCounter();
             }
-            //Extends the section on autopilot
-            if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
-                MAIN_LOOP_PTR(CurrPartPtr)->index = 0;
-                ResetBeatCounter();
-            }
+
             break;
 
         case TRANFILL_REQUEST:
@@ -1226,7 +1233,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick,
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
-
+            PedalPressFlag = 0;
             SamePart(TRUE);
             SpecialEffectManager();
         }
@@ -1899,6 +1906,7 @@ static void  PLAYING_MAIN_TRACK_ButtonHandler(BUTTON_EVENT event){
     switch(event){
     case BUTTON_EVENT_PEDAL_RELEASE:
         RequestFlag = DRUMFILL_REQUEST;
+        PedalPressFlag = 1;
         break;
     case BUTTON_EVENT_PEDAL_LONG_PRESS:
         NextPartNumber = 0; // Means no specefic next part
