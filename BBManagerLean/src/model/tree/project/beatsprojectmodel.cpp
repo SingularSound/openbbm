@@ -145,7 +145,7 @@ public:
     {
         auto item = (AbstractTreeItem*)index.internalPointer();
         if (!item) {
-            qFatal("[Undo/Redo] CmdSetData : Model Index died :(");
+            qDebug("[Undo/Redo] CmdSetData : Model Index died :(");
             return false;
         }
         if (AbstractTreeItem::NAME == index.column() || AbstractTreeItem::FILE_NAME == index.column()) {
@@ -764,7 +764,11 @@ public:
         model->dirUndoRedo().mkdir(bkp.dirName());
         QFile(data).copy(backup = bkp.absoluteFilePath(QFileInfo(data).fileName()));
         auto ret = new CmdCreateSongFile(model, parent, row, backup, data);
-        model->undoStack()->push(ret);
+        try {
+          model->undoStack()->push(ret);
+        } catch (...) {
+            qDebug() << "There was a problem with the undo stack";
+        }
 
         return *ret;
     }

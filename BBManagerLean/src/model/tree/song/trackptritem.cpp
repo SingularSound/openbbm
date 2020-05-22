@@ -256,6 +256,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
             if((!lastCall.isValid() || lastCall.elapsed() > 6000))
             {
+                droppedDrumFill.clear();
                 droppedDrumFill.push_back(drumFillIndex);
                 droppedDrumFill.push_back(partModel->getDrumFill(drumFillIndex)->getPlayAt());
                 droppedDrumFill.push_back(partRow-1);
@@ -267,7 +268,6 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
                 int crrntPlayAt = partModel->getDrumFill(drumFillIndex)->getPlayAt();
                 partModel->getDrumFill(drumFillIndex)->setPlayAt(droppedDrumFill[1]);//Change the playAt to previous drumfill playat value
                 lastpartModel->getDrumFill(droppedDrumFill[0])->setPlayAt(crrntPlayAt);//change previous playAt to currentplayAt
-                droppedDrumFill.clear();
             }
         }
     }
