@@ -254,7 +254,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
             //Which of the 32?
             //Which of the 8?
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
-            if((!lastCall.isValid() || lastCall.elapsed() > 6000))
+            if((!lastCall.isValid() || lastCall.elapsed() > 50))
             {
                 droppedDrumFill.clear();
                 droppedDrumFill.push_back(drumFillIndex);
@@ -264,6 +264,7 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
                 partModel->getDrumFill(drumFillIndex)->setPlayAt(value.at(0).toInt());
                 partModel->getDrumFill(drumFillIndex)->setPlayFor(value.at(1).toInt());
             }else{//if drag and drop swaps playAts
+                qDebug() << "The elapsed time was" <<lastCall.elapsed();
                 AutoPilotDataPartModel * lastpartModel =  apdm->getPartModel(droppedDrumFill[2]);
                 int crrntPlayAt = partModel->getDrumFill(drumFillIndex)->getPlayAt();
                 partModel->getDrumFill(drumFillIndex)->setPlayAt(droppedDrumFill[1]);//Change the playAt to previous drumfill playat value
