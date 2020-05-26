@@ -980,6 +980,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     } else {
                         fillAPIndex();
                     }
+                    //Check if previous drum fill was off the AP but should play manually
+                    if(APPtr->part[PartIndex].drumFill[DrumFillIndex-1].playAt == 0)
+                    {
+                        DrumFillIndex --;
+                    }
 
                 }
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
@@ -1685,7 +1690,9 @@ static void fillAPIndex()
             int counter = CurrSongPtr->part[PartIndex].nDrumFill;
             for(int i = 0;i < counter; i++)
             {
-                idxs.insert(APPtr->part[PartIndex].drumFill[i].playAt,i);
+                if(APPtr->part[PartIndex].drumFill[i].playAt > 0){
+                  idxs.insert(APPtr->part[PartIndex].drumFill[i].playAt,i);
+                }
             }
         }
     }
