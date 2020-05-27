@@ -200,6 +200,7 @@ static int TranFillStopSyncTick;
 static int TranFillPickUpSyncTickLength;
 
 static uint8_t PedalPressFlag; // Important to eliminate drumfill when quitting tap windows by the long pedal press
+static uint8_t PedalPresswDrumFillFlag = 0;
 static uint8_t WasPausedFlag;
 static uint8_t MultiTapCounter;
 static uint8_t WasLongPressed;
@@ -1233,7 +1234,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick,
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
-            PedalPressFlag = 0;
+            PedalPresswDrumFillFlag = 0;
             SamePart(TRUE);
             SpecialEffectManager();
         }
@@ -1773,7 +1774,7 @@ static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
         uint32_t tickPerBar, uint32_t barTriggerLimit) {
 
-    if(PedalPressFlag > 0){
+    if(PedalPresswDrumFillFlag > 0 && APPtr && CurrPartPtr){
         return tickPos;
     }else if ((tickPos % tickPerBar) <= barTriggerLimit) {
 
@@ -1908,7 +1909,7 @@ static void  PLAYING_MAIN_TRACK_ButtonHandler(BUTTON_EVENT event){
     switch(event){
     case BUTTON_EVENT_PEDAL_RELEASE:
         RequestFlag = DRUMFILL_REQUEST;
-        PedalPressFlag = 1;
+        PedalPresswDrumFillFlag = 1;
         break;
     case BUTTON_EVENT_PEDAL_LONG_PRESS:
         NextPartNumber = 0; // Means no specefic next part
