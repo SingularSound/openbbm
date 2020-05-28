@@ -33,7 +33,7 @@ AutoPilotSettingsDialog::AutoPilotSettingsDialog(MIDIPARSER_TrackType type, int 
     setWindowTitle("AutoPilot Settings");
     ui->playAtBeatSpinBox->setMaximum(m_sigNum);
     ui->playAtBeatSpinBox->setMinimum(1);
-    ui->playAtMeasureSpinBox->setMinimum(1);
+    ui->playAtMeasureSpinBox->setMinimum(0);
 
 
     //Dialog Setup
@@ -75,7 +75,7 @@ AutoPilotSettingsDialog::~AutoPilotSettingsDialog()
 
 int AutoPilotSettingsDialog::playAt()
 {
-    if(ui->playAtCheckBox->isChecked() || !m_playAtEnabled ){
+    if(ui->playAtCheckBox->isChecked() || !m_playAtEnabled || ui->playAtMeasureSpinBox->value() < 1){
         return 0;
     }
     return (ui->playAtMeasureSpinBox->value()-1)*m_sigNum+ui->playAtBeatSpinBox->value();

@@ -200,6 +200,7 @@ static int TranFillStopSyncTick;
 static int TranFillPickUpSyncTickLength;
 
 static uint8_t PedalPressFlag; // Important to eliminate drumfill when quitting tap windows by the long pedal press
+static uint8_t PedalPresswDrumFillFlag = 0;
 static uint8_t WasPausedFlag;
 static uint8_t MultiTapCounter;
 static uint8_t WasLongPressed;
@@ -980,13 +981,21 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     } else {
                         fillAPIndex();
                     }
+                    //Check if previous drum fill was off the AP but should play manually
+                    if(APPtr->part[PartIndex].drumFill[DrumFillIndex-1].playAt == 0)
+                    {
+                        DrumFillIndex --;
+                    }
 
                 }
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
             else {
                 // If there is no drum fill in the current part
-                ResetBeatCounter();
+                if(APPtr->part[PartIndex].mainLoop.playAt > 0)
+                {
+                   ResetBeatCounter();
+                }
             }
 
             break;
@@ -1233,7 +1242,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick,
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
-            PedalPressFlag = 0;
+            PedalPresswDrumFillFlag = 0;
             SamePart(TRUE);
             SpecialEffectManager();
         }
@@ -1628,6 +1637,7 @@ static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPo
         bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
         bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
         addedTick = ticksPerCount-newTickPosition;
+
         if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
             newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
             MasterTick += addedTick;
@@ -1685,7 +1695,9 @@ static void fillAPIndex()
             int counter = CurrSongPtr->part[PartIndex].nDrumFill;
             for(int i = 0;i < counter; i++)
             {
-                idxs.insert(APPtr->part[PartIndex].drumFill[i].playAt,i);
+                if(APPtr->part[PartIndex].drumFill[i].playAt > 0){
+                  idxs.insert(APPtr->part[PartIndex].drumFill[i].playAt,i);
+                }
             }
         }
     }
@@ -1749,7 +1761,8 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
                 track->event[track->index].vel,
                 delay,
                 ratio,
-                partID);
+                partID,
+                playingPickUp);
 
         track->index++;
 
@@ -1758,8 +1771,8 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
             return;
     }
     //check if done playing pick up notes to adjust beat counter
-    if(playingPickUp && track->event[track->index].tick >= 0){
-        qDebug() <<"The pick up notes were played";
+    if(playingPickUp && track->event[track->index].tick >= 0 && APPtr){
+        qDebug() <<"The pick up notes were played and next tick is " << track->event[track->index].tick ;
         DrumFillPickUpSyncTickLength = 0;
         currentLoopTick= 0;
     }
@@ -1773,7 +1786,7 @@ static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
         uint32_t tickPerBar, uint32_t barTriggerLimit) {
 
-    if(PedalPressFlag > 0){
+    if(PedalPresswDrumFillFlag > 0 && ((APPtr && CurrPartPtr)||(RequestFlag==DRUMFILL_REQUEST))){
         return tickPos;
     }else if ((tickPos % tickPerBar) <= barTriggerLimit) {
 
@@ -1908,7 +1921,7 @@ static void  PLAYING_MAIN_TRACK_ButtonHandler(BUTTON_EVENT event){
     switch(event){
     case BUTTON_EVENT_PEDAL_RELEASE:
         RequestFlag = DRUMFILL_REQUEST;
-        PedalPressFlag = 1;
+        PedalPresswDrumFillFlag = 1;
         break;
     case BUTTON_EVENT_PEDAL_LONG_PRESS:
         NextPartNumber = 0; // Means no specefic next part
