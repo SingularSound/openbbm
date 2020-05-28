@@ -1629,6 +1629,7 @@ static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPo
         bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
         bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
         addedTick = ticksPerCount-newTickPosition;
+
         if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
             newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
             MasterTick += addedTick;
@@ -1760,7 +1761,7 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
             return;
     }
     //check if done playing pick up notes to adjust beat counter
-    if(playingPickUp && track->event[track->index].tick >= 0){
+    if(playingPickUp && track->event[track->index].tick >= 0 && APPtr){
         qDebug() <<"The pick up notes were played and next tick is " << track->event[track->index].tick ;
         DrumFillPickUpSyncTickLength = 0;
         currentLoopTick= 0;
@@ -1775,7 +1776,7 @@ static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
         uint32_t tickPerBar, uint32_t barTriggerLimit) {
 
-    if(PedalPresswDrumFillFlag > 0 && APPtr && CurrPartPtr){
+    if(PedalPresswDrumFillFlag > 0 && ((APPtr && CurrPartPtr)||(RequestFlag==DRUMFILL_REQUEST))){
         return tickPos;
     }else if ((tickPos % tickPerBar) <= barTriggerLimit) {
 
