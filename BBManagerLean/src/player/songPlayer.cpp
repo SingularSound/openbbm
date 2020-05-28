@@ -992,7 +992,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             }
             else {
                 // If there is no drum fill in the current part
-                if(APPtr->part[PartIndex].mainLoop.playAt > 0)
+                if(APPtr && APPtr->part[PartIndex].mainLoop.playAt > 0)
                 {
                    ResetBeatCounter();
                 }
