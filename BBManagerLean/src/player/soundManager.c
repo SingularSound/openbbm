@@ -392,7 +392,7 @@ void SoundManager_playSpecialEffect(unsigned char vel, uint32_t part){
  *
  */
 void SoundManager_playDrumsetNote(unsigned char note, unsigned char velocity,
-        float delay_seconde, float ratio, unsigned int partID) {
+        float delay_seconde, float ratio, unsigned int partID, int pickUp) {
 
     unsigned int fillChokeGroup;
     unsigned int fillChokeDelay_nsample;
@@ -402,7 +402,7 @@ void SoundManager_playDrumsetNote(unsigned char note, unsigned char velocity,
     int low_index = 0;
     int delta;
     DrumsetStruct_t *drum = NULL;
-    unsigned int nDelay = ((unsigned int) (delay_seconde * SAMPLING_RATE));
+    unsigned int nDelay = (pickUp == 0)?((unsigned int) (delay_seconde * SAMPLING_RATE)):0;
 
     // If there is no sound for the note
 

@@ -1750,7 +1750,8 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
                 track->event[track->index].vel,
                 delay,
                 ratio,
-                partID);
+                partID,
+                playingPickUp);
 
         track->index++;
 
@@ -1760,7 +1761,7 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
     }
     //check if done playing pick up notes to adjust beat counter
     if(playingPickUp && track->event[track->index].tick >= 0){
-        qDebug() <<"The pick up notes were played";
+        qDebug() <<"The pick up notes were played and next tick is " << track->event[track->index].tick ;
         DrumFillPickUpSyncTickLength = 0;
         currentLoopTick= 0;
     }

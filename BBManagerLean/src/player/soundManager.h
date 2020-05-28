@@ -65,7 +65,7 @@ typedef struct {
 
 extern void SoundManager_init(void);
 extern void SoundManager_LoadDrumset(char* file, uint32_t size);
-extern void SoundManager_playDrumsetNote(unsigned char note, unsigned char velocity, float delay_seconde,float ratio, unsigned int isExclusive);
+extern void SoundManager_playDrumsetNote(unsigned char note, unsigned char velocity, float delay_seconde,float ratio, unsigned int isExclusive, int pickUp);
 extern void SoundManager_playSpecialEffect(unsigned char vel, uint32_t part);
 extern void SoundManager_LoadEffect(char* file, uint32_t part);
 extern char* SongPlayer_getSoundEffectName(uint32_t part);
