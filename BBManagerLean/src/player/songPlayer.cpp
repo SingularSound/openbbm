@@ -981,8 +981,9 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     } else {
                         fillAPIndex();
                     }
+
                     //Check if previous drum fill was off the AP but should play manually
-                    if(APPtr->part[PartIndex].drumFill[DrumFillIndex-1].playAt == 0)
+                    if(DrumFillIndex != 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex-1].playAt == 0)
                     {
                         DrumFillIndex --;
                     }
