@@ -758,7 +758,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
             uint32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
-            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter) {
+            if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter && CurrPartPtr->nDrumFill > 0) {
 				RequestFlag = DRUMFILL_REQUEST;
 				AutopilotCueFill = TRUE;
             } else if (APPtr->part[PartIndex].mainLoop.playAt > 0 && APPtr->part[PartIndex].mainLoop.playAt <= BeatCounter) {
@@ -1058,6 +1058,9 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             if ((PlayerStatus == TRANFILL_WAITING_TRIG) || (PlayerStatus == TRANFILL_ACTIVE)) {
                 TranFillStopSyncTick = CalculateTranFillQuitSyncTick(MasterTick,
                         MAIN_LOOP_PTR(CurrPartPtr)->barLength);
+                if(TRANS_FILL_PTR(CurrPartPtr)->nTick > TRANS_FILL_PTR(CurrPartPtr)->barLength){//longer bars
+                    TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
+                }
                 PlayerStatus = TRANFILL_QUITING;
             } else {
                 PartStopSyncTick = CalculateTranFillQuitSyncTick(MasterTick,
