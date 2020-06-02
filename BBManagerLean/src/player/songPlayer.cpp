@@ -1787,10 +1787,7 @@ static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
         uint32_t tickPerBar, uint32_t barTriggerLimit) {
 
-    if(PedalPresswDrumFillFlag > 0 && ((APPtr && CurrPartPtr)||(RequestFlag==DRUMFILL_REQUEST))){
-        return tickPos;
-    }else if ((tickPos % tickPerBar) <= barTriggerLimit) {
-
+    if ((tickPos % tickPerBar) <= barTriggerLimit) {
         return ((0 + ((int32_t) (tickPos / tickPerBar))) * tickPerBar);
     } else {
         return ((1 + ((int32_t) (tickPos / tickPerBar))) * tickPerBar);
