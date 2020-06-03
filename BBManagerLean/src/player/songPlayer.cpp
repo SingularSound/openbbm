@@ -1058,7 +1058,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             if ((PlayerStatus == TRANFILL_WAITING_TRIG) || (PlayerStatus == TRANFILL_ACTIVE)) {
                 TranFillStopSyncTick = CalculateTranFillQuitSyncTick(MasterTick,
                         MAIN_LOOP_PTR(CurrPartPtr)->barLength);
-                if(TRANS_FILL_PTR(CurrPartPtr)->nTick > TRANS_FILL_PTR(CurrPartPtr)->barLength){//longer bars
+
+                if(TRANS_FILL_PTR(CurrPartPtr)->nTick > TRANS_FILL_PTR(CurrPartPtr)->barLength &&
+                   !(MasterTick/(SongPlayer_getbarLength() / TRANS_FILL_PTR(CurrPartPtr)->timeSigNum) >= TRANS_FILL_PTR(CurrPartPtr)->timeSigNum)){
+                    //longer than 1 bar trans fill when main loop is on the first bar
                     TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
                 }
                 PlayerStatus = TRANFILL_QUITING;
