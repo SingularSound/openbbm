@@ -14,6 +14,7 @@
 */
 #include "autopilotsettingsdialog.h"
 #include "ui_autopilotsettingsdialog.h"
+#include <QDebug>
 
 AutoPilotSettingsDialog::AutoPilotSettingsDialog(MIDIPARSER_TrackType type, int sigNum, int playFor, int playAt, QWidget *parent) :
     QDialog(parent)
@@ -33,9 +34,12 @@ AutoPilotSettingsDialog::AutoPilotSettingsDialog(MIDIPARSER_TrackType type, int 
     setWindowTitle("AutoPilot Settings");
     ui->playAtBeatSpinBox->setMaximum(m_sigNum);
     ui->playAtBeatSpinBox->setMinimum(1);
-    ui->playAtMeasureSpinBox->setMinimum(1);
+    ui->playAtMeasureSpinBox->setMinimum(0);
 
-
+    if(ui->playAtMeasureSpinBox->value() == ui->playAtMeasureSpinBox->minimum())
+    {
+     ui->playAtMeasureSpinBox->setValue(playAt);
+    }
     //Dialog Setup
     ui->playForBeatSpinBox->setMaximum(m_sigNum-1);
     switch(m_type)
@@ -47,8 +51,8 @@ AutoPilotSettingsDialog::AutoPilotSettingsDialog(MIDIPARSER_TrackType type, int 
         break;
     case(DRUM_FILL):
         ui->playAtLabel->setText(tr("Trigger Drum Fill At (relative to Main Drum beginning):"));
-        ui->playAtCheckBox->hide();
-        deletePlayForUi();
+        ui->playAtCheckBox->hide();            
+        deletePlayForUi();            
         break;
     case(TRANS_FILL):
         deletePlayAtUi();
@@ -75,7 +79,7 @@ AutoPilotSettingsDialog::~AutoPilotSettingsDialog()
 
 int AutoPilotSettingsDialog::playAt()
 {
-    if(ui->playAtCheckBox->isChecked() || !m_playAtEnabled ){
+    if(ui->playAtCheckBox->isChecked() || !m_playAtEnabled || ui->playAtMeasureSpinBox->value() < 1){
         return 0;
     }
     return (ui->playAtMeasureSpinBox->value()-1)*m_sigNum+ui->playAtBeatSpinBox->value();

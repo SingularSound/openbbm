@@ -84,7 +84,8 @@ void BeatFileWidget::drag()
         return;
     }
 
-    QList<int> settings = model()->getAPSettings(modelIndex());
+    QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
+                                                       ,modelIndex().parent())).value<QList<int>>();
     model()->addAPSettingInQueue(settings);
 
     QDrag* drag = new QDrag(this);
