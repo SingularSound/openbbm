@@ -1624,7 +1624,7 @@ static void CheckAndCountBeat(void) {
         unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
         unsigned int newTickPosition = (MasterTick % ticksPerCount);
         CalculateMainTrim(ticksPerCount, newTickPosition);
-        bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0;
+        bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0 || BeatCounter ==0;
 
         if (shouldcount) {
             BeatCounter++;
