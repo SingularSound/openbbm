@@ -973,7 +973,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 }
                 //Extends the section on autopilot if pedal pressed
                 if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
-                    ResetBeatCounter();
+                    //the beat will be restarted at the end of the drumfill
                     if (CurrPartPtr->shuffleFlag) {
                         if (CurrPartPtr->nDrumFill != 0) {
                             DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
@@ -1249,7 +1249,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick,
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
-            PedalPresswDrumFillFlag = 0;
+            if(PedalPresswDrumFillFlag != 0){
+                //if the pedal was pressed the section must restart
+                ResetBeatCounter();
+                PedalPresswDrumFillFlag = 0;
+            }
             SamePart(TRUE);
             SpecialEffectManager();
         }
