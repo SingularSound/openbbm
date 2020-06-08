@@ -1777,11 +1777,13 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
             return;
     }
     //check if done playing pick up notes to adjust beat counter
-    if(playingPickUp && track->event[track->index].tick >= 0 && APPtr){
-        qDebug() <<"The pick up notes were played and next tick is " << track->event[track->index].tick ;
-        TmpMasterPartTick -=DrumFillPickUpSyncTickLength;
+    if(DrumFillPickUpSyncTickLength > 0 && track->event[track->index].tick >= 0){
+        TmpMasterPartTick -=DrumFillPickUpSyncTickLength;//This avoids displacing the beat
         DrumFillPickUpSyncTickLength = 0;
-        currentLoopTick= 0;
+        if(playingPickUp){//if it played pick up notes, on pedal press pick up notes might not play
+             qDebug() <<"The pick up notes were played and next tick is " << track->event[track->index].tick <<"The current beta is "<<BeatCounter;
+             currentLoopTick= 0;
+        }
     }
 }
 
