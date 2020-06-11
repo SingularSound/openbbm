@@ -1987,7 +1987,12 @@ static void  NO_FILL_TRAN_QUITTING_ButtonHandler(BUTTON_EVENT event){
     switch (event) {
 
     case BUTTON_EVENT_PEDAL_RELEASE:
-        RequestFlag = TRANFILL_CANCEL_REQUEST;
+        if(!WasLongPressed && MultiTapCounter == 0){
+            //if the pedal was pressed during the last bar of AP the user wanted a drumfill
+            PLAYING_MAIN_TRACK_ButtonHandler(event);
+        }else{
+            RequestFlag = TRANFILL_CANCEL_REQUEST;
+        }
         break;
     case BUTTON_EVENT_PEDAL_MULTI_TAP:
         RequestFlag = STOP_REQUEST;
@@ -2047,8 +2052,13 @@ static void  TRANFILL_QUITING_ButtonHandler(BUTTON_EVENT event){
     switch (event) {
     case BUTTON_EVENT_PEDAL_MULTI_TAP:
     case BUTTON_EVENT_PEDAL_RELEASE:
-        RequestFlag = TRANFILL_CANCEL_REQUEST;
-        WasLongPressed = true;
+        if(!WasLongPressed && MultiTapCounter == 0){
+            //if the pedal was pressed during the last bar of AP the user wanted a drumfill
+            PLAYING_MAIN_TRACK_ButtonHandler(event);
+        }else{
+            RequestFlag = TRANFILL_CANCEL_REQUEST;
+            WasLongPressed = true;
+        }
         break;
     default:
         break;
