@@ -201,6 +201,7 @@ static int TranFillPickUpSyncTickLength;
 
 static uint8_t PedalPressFlag; // Important to eliminate drumfill when quitting tap windows by the long pedal press
 static uint8_t PedalPresswDrumFillFlag = 0;
+static uint8_t TransPedalPressFlag = FALSE;
 static uint8_t WasPausedFlag;
 static uint8_t MultiTapCounter;
 static uint8_t WasLongPressed;
@@ -973,7 +974,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 }
                 //Extends the section on autopilot if pedal pressed
                 if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
-                    ResetBeatCounter();
+                    //the beat will be restarted at the end of the drumfill
                     if (CurrPartPtr->shuffleFlag) {
                         if (CurrPartPtr->nDrumFill != 0) {
                             DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
@@ -1249,7 +1250,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick,
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
-            PedalPresswDrumFillFlag = 0;
+            if(PedalPresswDrumFillFlag != 0){
+                //if the pedal was pressed the section must restart
+                ResetBeatCounter();
+                PedalPresswDrumFillFlag = 0;
+            }
             SamePart(TRUE);
             SpecialEffectManager();
         }
@@ -1374,8 +1379,12 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio, 0, MAIN_PART_ID);
 
         if (TmpMasterPartTick >= PartStopSyncTick) {
-
-            StopSong();
+            if(TransPedalPressFlag){
+                NextPart();
+                TransPedalPressFlag = FALSE;
+            }else{
+                StopSong();
+            }
             SpecialEffectManager();
         }
 
@@ -1778,10 +1787,13 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
             return;
     }
     //check if done playing pick up notes to adjust beat counter
-    if(playingPickUp && track->event[track->index].tick >= 0 && APPtr){
-        qDebug() <<"The pick up notes were played and next tick is " << track->event[track->index].tick ;
+    if(DrumFillPickUpSyncTickLength > 0 && track->event[track->index].tick >= 0){
+        TmpMasterPartTick -=DrumFillPickUpSyncTickLength;//This avoids displacing the beat
         DrumFillPickUpSyncTickLength = 0;
-        currentLoopTick= 0;
+        if(playingPickUp){//if it played pick up notes, on pedal press pick up notes might not play
+             qDebug() <<"The pick up notes were played and next tick is " << track->event[track->index].tick <<"The current beta is "<<BeatCounter;
+             currentLoopTick= 0;
+        }
     }
 }
 
@@ -1928,15 +1940,16 @@ static void  PLAYING_MAIN_TRACK_ButtonHandler(BUTTON_EVENT event){
         PedalPresswDrumFillFlag = 1;
         break;
     case BUTTON_EVENT_PEDAL_LONG_PRESS:
-        NextPartNumber = 0; // Means no specefic next part
+        NextPartNumber = 0; // Means no specific next part
         RequestFlag = TRANFILL_REQUEST;
+        TransPedalPressFlag = TRUE;
         break;
     case BUTTON_EVENT_PEDAL_MULTI_TAP:
         if (WasPausedFlag) {
             RequestFlag = SWAP_TO_OUTRO_REQUEST;
         } else {
             RequestFlag = STOP_REQUEST;
-            // will allow futur multi tap
+            // will allow future multi tap
             PedalPressFlag = 0;
             if (!TrippleTapEnable) {
                 MultiTapCounter = 0;
@@ -1983,7 +1996,12 @@ static void  NO_FILL_TRAN_QUITTING_ButtonHandler(BUTTON_EVENT event){
     switch (event) {
 
     case BUTTON_EVENT_PEDAL_RELEASE:
-        RequestFlag = TRANFILL_CANCEL_REQUEST;
+        if(!WasLongPressed && MultiTapCounter == 0){
+            //if the pedal was pressed during the last bar of AP the user wanted a drumfill
+            PLAYING_MAIN_TRACK_ButtonHandler(event);
+        }else{
+            RequestFlag = TRANFILL_CANCEL_REQUEST;
+        }
         break;
     case BUTTON_EVENT_PEDAL_MULTI_TAP:
         RequestFlag = STOP_REQUEST;
@@ -2043,8 +2061,13 @@ static void  TRANFILL_QUITING_ButtonHandler(BUTTON_EVENT event){
     switch (event) {
     case BUTTON_EVENT_PEDAL_MULTI_TAP:
     case BUTTON_EVENT_PEDAL_RELEASE:
-        RequestFlag = TRANFILL_CANCEL_REQUEST;
-        WasLongPressed = true;
+        if(!WasLongPressed && MultiTapCounter == 0){
+            //if the pedal was pressed during the last bar of AP the user wanted a drumfill
+            PLAYING_MAIN_TRACK_ButtonHandler(event);
+        }else{
+            RequestFlag = TRANFILL_CANCEL_REQUEST;
+            WasLongPressed = true;
+        }
         break;
     default:
         break;
