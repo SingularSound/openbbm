@@ -20,6 +20,8 @@ The project beatbuddy-manager-lite.pro will hold all project of the BeatBuddy Ma
 
 While dependencies don't change, future builds can be done with just `make`.
 
+To start using the BBManager you can download the default drumsets from [here](https://mybeatbuddy.s3.amazonaws.com/BeatBuddy_Default_Content_v2.0.zip).
+
 To pack for deployment - ie: to share with other people - you need to run `BBManager/mac_deployment/deploy.sh` with `BBManager/project/BBManager.app` as an argument; this will make the dynamic libraries be loaded from the BBManager.app bundle, instead of them being sought elsewhere in the system.
 
 
@@ -37,6 +39,8 @@ Finally make sure your `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\b
 
 ### Building and Deploying
 The project file is `BBManagerLean/BBManagerLean.pro`. When opening the project select the corresponding kit, Clean, Build, and Run.
+
+To start using the BBManager you can download the default drumsets from [here](https://mybeatbuddy.s3.amazonaws.com/BeatBuddy_Default_Content_v2.0.zip).
 
 To pack for deployment - ie: to share with other people make the .pro file is set for release, and set the Build(The computer above the Run button on the Qt Creator) to 'Release' and build the application. Go to the folder containing the .exe and delete all but the .exe file, open the command prompt and run `windeployqt.exe --quick .` this will generate all the necessary .dll, and it is ready.
 
