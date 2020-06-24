@@ -307,6 +307,7 @@ void PartColumnWidget::populate(QModelIndex const& modelIndex)
       if (childIndex.isValid()){
          p_BeatFileWidget = new BeatFileWidget(model(), this);
          p_BeatFileWidget->populate(childIndex);
+         p_BeatFileWidget->updateAPText(label.contains("Main") && modelIndex.siblingAtRow(2).model()->rowCount(modelIndex.siblingAtRow(2)) > 0);
          mp_ChildrenItems->append(p_BeatFileWidget);
 
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));

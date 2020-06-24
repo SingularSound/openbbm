@@ -497,10 +497,28 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    mp_PlayButton->setObjectName(QStringLiteral("playButton"));
    mp_PlayButton->setToolTip(tr("Play this track"));
 
+   mp_APBox = new QCheckBox("AP",this);
+   mp_APBox->setChecked(false);
+   mp_APBox->setObjectName(QStringLiteral("APBox"));
+   mp_APBox->setToolTip(tr("Turn On or Off the AutoPilot for this track"));
+   mp_APBox->setLayoutDirection(Qt::RightToLeft);
+   rightl->addWidget(mp_APBox);
+
+   APBar = new QLineEdit(this);
+   APText = new QLabel(this);
+   APText->setText("Trigger at bar");
+   leftl->addWidget(APText);
+   leftl->addWidget(APBar);
+   leftl->addLayout(rightl);
+
+
    connect(mp_DeleteButton, SIGNAL(clicked()), this, SLOT(deleteButtonClicked()));
    connect(mp_FileButton  , SIGNAL(clicked()), this, SLOT( trackButtonClicked()));
    connect(mp_FileButton  , SIGNAL(   drag()), this, SLOT(               drag()));
    connect(mp_PlayButton  , SIGNAL(clicked()), this, SLOT(  playButtonClicked()));
+   connect(mp_APBox  , SIGNAL(clicked()), this, SLOT(  APBoxStatusChanged()));
+   connect(APBar, SIGNAL(textChanged(const QString &)), this, SLOT(ApValueChanged()));
+
 
    connect(p_Model, &BeatsProjectModel::endEditMidi, this, &BeatFileWidget::endEditMidi);
 }
@@ -539,7 +557,8 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
    // Populate self's data
    QVariant labelVatiant = modelIndex.data();
    QString label = labelVatiant.toString();
-   mp_FileButton->setText( label );
+   mp_FileButton->setText( label +"\n\n");
+
 
    if (modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PLAYING).data().toBool() == true) {
 
@@ -584,11 +603,19 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
         mp_acPaste = m->addAction(tr("Paste") + "\t"+mod+"V", this, SLOT(paste()));
         m->addSeparator();
 
+        MIDIPARSER_MidiTrack data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+        int sigNum = data.timeSigNum;
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex.row(), AbstractTreeItem::TRACK_TYPE, modelIndex.parent()).data().toInt();
-        if(trackType != INTRO_FILL && trackType != OUTRO_FILL)
+        bool songapOn = model()->data(modelIndex.parent().parent().parent().sibling(modelIndex.parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
+
+        if(trackType != INTRO_FILL && trackType != OUTRO_FILL && songapOn)
         {
-            m->addAction("AutoPilot Settings...", this, SLOT(openAutopilotSettings()));
-            m->addSeparator();
+            showAPSettings(trackType, sigNum);
+        }else{
+            mp_APBox->hide();
+            APBar->hide();
+            APText->hide();
+            mp_FileButton->setText(label);
         }
         m->addAction(tr("Export MIDI file..."), this, SLOT(exportMIDI()));
     } else {
@@ -596,7 +623,7 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
         mp_acPaste = new QAction(m);
     }
     mp_FileButton->setMenu(m);
-   // }
+
 }
 
 void BeatFileWidget::updateMinimumSize()
@@ -621,6 +648,9 @@ void BeatFileWidget::updateLayout()
 
    // 5 px from upper left corner, 15 px size.
    mp_PlayButton->setGeometry( 5, 5 , 15, 15);
+
+   APBar->setFixedSize(17,15);
+   leftl->setAlignment(Qt::AlignBottom);
 }
 
 void BeatFileWidget::dataChanged(const QModelIndex &left, const QModelIndex &right)
@@ -805,7 +835,31 @@ bool BeatFileWidget::trackButtonClicked(const QString& dropFileName)
 
     return true;
 }
+void BeatFileWidget::ApValueChanged(){
+    //set new ap value
+    MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+    m_PlayAt = (APBar->text().toInt()-1)*data.timeSigNum+1;
+    qDebug()<<"apbar text"<<APBar->text()<<"TIMESIG"<<data.timeSigNum<<"PLAYAT"<<m_PlayAt;
+    QList<QVariant> settings = QList<QVariant>() << m_PlayAt << m_PlayFor;
+    model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
+                     ,QVariant(settings),Qt::EditRole);
+}
 
+void BeatFileWidget::APBoxStatusChanged(){
+
+    if(mp_APBox->isChecked()){
+        //todo if main change label
+        APText->show();
+        APBar->show();
+        APBar->setText("1");
+    }else{
+        //todo if main part change label
+        APBar->setText("0");
+        ApValueChanged();
+        APText->hide();
+        APBar->hide();
+    }
+}
 
 void BeatFileWidget::playButtonClicked()
 {
@@ -851,4 +905,52 @@ void BeatFileWidget::edit()
     qDebug() << "begin edit midi" << trackData.length();
     emit m->beginEditMidi(tr("Editing %2 of %1", "Context: Editing '*Song Name* - *Part Name*'")
         .arg(song.data().toString()).arg(m->songFileName(ix)), m_editingTrackData = trackData);
+}
+
+void BeatFileWidget::showAPSettings(int type,int sigNum){
+
+     mp_FileButton->setLayout(leftl);
+     if(type == MAIN_DRUM_LOOP){
+         //check if there will be a trans fill here
+         /*auto lastrow = modelIndex().parent().parent().parent().model()->rowCount()-1;
+         int type = model()->index(lastrow,
+                                   AbstractTreeItem::TRACK_TYPE,
+                                   modelIndex().parent().parent().parent()).data().toInt();*/
+         //get last fill
+         //get type f last fill
+         if(m_PlayAt > 0){
+             mp_APBox->setChecked(true);
+             APText->setText("Play For");
+             APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+             infiniteMain = false;
+         }else{
+             APText->setText("Loop infinitely");
+             APBar->hide();
+             infiniteMain = true;
+         }
+     }else if(type == TRANS_FILL){
+         if(!infiniteMain){
+             mp_APBox->setChecked(true);
+             APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+             APText->setText("Additional bars");
+         }else{
+             infiniteMain = !infiniteMain;
+             APBar->hide();
+             APText->setText("Manual Trigger Only");
+         }
+     }else{
+         if(m_PlayAt > 0){
+             mp_APBox->setChecked(true);
+             APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+         }else{
+             APBar->hide();
+             APText->hide();
+         }
+     }
+}
+
+void BeatFileWidget::updateAPText(bool hasTrans){
+    if(hasTrans){
+        APText->setText("Transition Fill at bar");
+    }
 }
