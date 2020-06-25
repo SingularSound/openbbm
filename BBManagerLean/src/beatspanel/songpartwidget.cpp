@@ -47,6 +47,11 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
    mp_DeleteHandleWidget = new DeleteHandleWidget(this,0);
    mp_DeleteHandleWidget->setMinimumWidth(mp_DeleteHandleWidget->PREFERRED_WIDTH);
    mp_DeleteHandleWidget->setMaximumWidth(mp_DeleteHandleWidget->PREFERRED_WIDTH);
+   mp_Title = new QLineEdit(this);
+   mp_Title->setObjectName(QStringLiteral("titleEdit"));
+   mp_Title->setMinimumHeight(20);
+   mp_Title->setToolTip(tr("Set the name of the song part"));
+   mp_Title->setStyleSheet("#titleEdit { background-color: transparent;  qproperty-frame: false ; }");
 
    mp_LoopCount = new LoopCountDialog(this);
    mp_LoopCount->setMinimumWidth(mp_DeleteHandleWidget->PREFERRED_WIDTH);
@@ -64,7 +69,10 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
    connect(mp_DeleteHandleWidget, SIGNAL(sigSubWidgetClicked()), this, SLOT(slotSubWidgetClicked()));
    connect(mp_LoopCount, SIGNAL(sigSetLoopCount()), this, SLOT(slotLoopCountEntered()));
    connect(mp_LoopCount, SIGNAL(sigSubWidgetClicked()), this, SLOT(slotSubWidgetClicked()));
-
+   connect(mp_Title    , SIGNAL(editingFinished()), this,         SLOT(slotTitleChangeByUI (   )));
+   connect(mp_Title    , SIGNAL(selectionChanged()), this,         SLOT(slotTitleChangeByUI (   )));
+   connect(mp_Title    , SIGNAL(textChanged(QString)), this,         SLOT(slotTitleChangeByUI (   )));
+   connect(mp_Title    , SIGNAL(textEdited(QString)), this,         SLOT(slotTitleChangeByUI (   )));
 }
 
 // Required to apply stylesheet
@@ -112,26 +120,27 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
       mp_DeleteHandleWidget->hideButton();
       mp_DeleteHandleWidget->setVisible((false));
       mp_LoopCount->setVisible(false);
+      mp_Title->setVisible(false);
    } else if (m_outro){
       mp_MoveHandleWidget->setLabelText(tr("O", "Very narrow field - acronym for \"Outro\""));
       mp_MoveHandleWidget->hideArrows();
       mp_DeleteHandleWidget->hideButton();
       mp_DeleteHandleWidget->setVisible((false));
       mp_LoopCount->setVisible(false);
+      mp_Title->setVisible(false);
    } else {
       mp_MoveHandleWidget->setLabelText(QString::number(modelIndex.row()));
 
       if (p_PartColumnWidget){
          p_PartColumnWidget->changeToolTip(tr("Add wav file"));
       }
-
       
       mp_LoopCount->setLoopCount(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::LOOP_COUNT).data().toInt());
       // Disable autopilot by hiding Loop button
-      QSettings settings;
       mp_LoopCount->setVisible(true);
    }
-
+   partName = (modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PART_NAME).data().toString() == nullptr)?"Part "+QString::number(modelIndex.row()):partName;
+   mp_Title->setText(partName);
    m_playingInternal = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PLAYING).data().toBool();
    m_validInternal   = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::INVALID).data().toString().isEmpty();
 
@@ -227,6 +236,8 @@ void SongPartWidget::updateLayout()
       mp_ChildrenItems->at(i)->updateLayout();
       xPositionMult = nextXPositionMult;
    }
+   //Part Name
+   mp_Title->setAlignment(Qt::AlignRight);
 }
 
 void SongPartWidget::dataChanged(const QModelIndex &left, const QModelIndex &right)
@@ -400,6 +411,14 @@ void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex
 
 void SongPartWidget::slotLoopCountEntered()
 {
-    qDebug() << "loopCountEntered:" << mp_LoopCount->getLoopCount() << modelIndex().row();
+
     model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::LOOP_COUNT), mp_LoopCount->getLoopCount());
+}
+
+void SongPartWidget::slotTitleChangeByUI()
+{
+    if(mp_Title->text() != partName){
+        qDebug() << "Part Name Entered:" << mp_Title->text();
+        model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
+    }
 }

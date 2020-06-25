@@ -271,6 +271,7 @@ void SongTitleWidget::slotBlankSaved() {
 void SongTitleWidget::slotAPBoxClicked(bool checked)
 {
     emit sigAPEnableChangeByUI(mp_APBox->checkState());
+    emit sigSubWidgetClicked();
 }
 
 void SongTitleWidget::slotTitleChangeByUI()

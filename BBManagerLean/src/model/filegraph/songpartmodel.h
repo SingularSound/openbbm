@@ -24,6 +24,7 @@ public:
    void setTimeSig(uint32_t num, uint32_t den);
    void setTicksPerBar(uint32_t ticks);
    void setLoopCount(uint32_t count);
+   void setPartName(QString partName);
    void setMainLoop(const QString &midiFilePath);
    void setTransFill(const QString &midiFilePath);
    void appendDrumFill(const QString &midiFilePath);

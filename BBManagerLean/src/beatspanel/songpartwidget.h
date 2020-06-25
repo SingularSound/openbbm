@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QModelIndex>
 #include <QLineEdit>
+#include <QHBoxLayout>
 
 #include "songfolderviewitem.h"
 #include "../dialogs/loopCountDialog.h"
@@ -44,6 +45,7 @@ public slots:
    void slotIsLast(bool last);
    void slotIsAlone(bool alone);
    void slotOrderChanged(int number);
+   void slotTitleChangeByUI();
    void slotMovePartUpClicked();
    void slotMovePartDownClicked();
    void slotSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
@@ -63,6 +65,9 @@ private:
    bool m_outro;
    bool m_playingInternal;
    bool m_validInternal;
+   QString partName;
+   QLineEdit *mp_Title;
+   QVBoxLayout *l = new QVBoxLayout();
 
    typedef enum {
        STYLE_NONE,
