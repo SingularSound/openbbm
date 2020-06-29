@@ -36,7 +36,7 @@ SongWidget::SongWidget(BeatsProjectModel *p_Model, QWidget *parent) :
  , m_MaxChildrenWidth(0)
 {
    mp_NewPartWidgets = new QList<NewPartWidget*>;
-
+   mp_SongPartItems = new QList<SongPartWidget*>;
    /* Create the song title widget */
    mp_SongTitleWidget = new SongTitleWidget(p_Model, this);
 
@@ -152,7 +152,7 @@ void SongWidget::populate(QModelIndex const& modelIndex)
          }
 
          p_SongPartWidget->populate(childIndex);
-
+         mp_SongPartItems->append(p_SongPartWidget);
          mp_ChildrenItems->append(p_SongPartWidget);
 
          connect(p_SongPartWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
@@ -538,6 +538,11 @@ void SongWidget::slotAPEnableChangeByUI(const bool state)
 
     if(model()->data(songAPEnable).toBool() != state){
        model()->setData(songAPEnable, QVariant(state));
+
+       //this next part updates the AP layout for each beat
+       for(int i = 0; i < mp_SongPartItems->size();i++){
+           mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
+       }
     }
 }
 

@@ -38,7 +38,7 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
    m_outro = false;
 
    m_selectedStyleSheet = STYLE_NONE;
-
+   mp_PartColumnItems = new QList<PartColumnWidget*>();
    // 4 main components
    mp_ContentPanel = new QWidget(this);
    mp_MoveHandleWidget = new MoveHandleWidget(this);
@@ -109,6 +109,7 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          p_PartColumnWidget = new PartColumnWidget(model(), mp_ContentPanel);
          p_PartColumnWidget->populate(childIndex);
          mp_ChildrenItems->append(p_PartColumnWidget);
+         mp_PartColumnItems->append(p_PartColumnWidget);
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
       }
@@ -420,5 +421,12 @@ void SongPartWidget::slotTitleChangeByUI()
     if(mp_Title->text() != partName){
         qDebug() << "Part Name Entered:" << mp_Title->text();
         model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
+    }
+}
+
+void SongPartWidget::parentAPBoxStatusChanged()
+{
+    for(int i = 0; i < mp_PartColumnItems->size();i++){
+        mp_PartColumnItems->at(i)->parentAPBoxStatusChanged();
     }
 }

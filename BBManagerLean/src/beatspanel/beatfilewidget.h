@@ -30,7 +30,7 @@ public:
    explicit BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent = nullptr);
 
    void setLabel(QString const& label);
-   void showAPSettings(int type, int sigNum);
+   void showAPSettings(int type, int sigNum, bool APOn);
 
    void populate(QModelIndex const& modelIndex);
    void updateLayout();
@@ -55,6 +55,7 @@ public slots:
    bool trackButtonClicked(const QString& dropFileName = nullptr);
    void playButtonClicked();
    void APBoxStatusChanged();
+   void parentAPBoxStatusChanged();
    void ApValueChanged();
    void edit();
    void slotSetPlayerEnabled(bool enabled);

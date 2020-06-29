@@ -7,6 +7,7 @@
 
 #include "songfolderviewitem.h"
 #include "copypastable.h"
+#include "beatfilewidget.h"
 
 class DropPanel : public QWidget, public CopyPaste::Pastable
 {
@@ -44,6 +45,7 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
+   void parentAPBoxStatusChanged();
 
    // Accessor
    int maxFileCount();
@@ -91,6 +93,7 @@ private:
    QPushButton *mp_MFPAddButton;
 
    QByteArray m_editingTrackData;
+   QList<BeatFileWidget*> *mp_BeatFileItems;
 
 };
 

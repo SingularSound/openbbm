@@ -8,6 +8,7 @@
 
 #include "newpartwidget.h"
 #include "songfolderviewitem.h"
+#include "songpartwidget.h"
 
 class MoveHandleWidget;
 class DeleteHandleWidget;
@@ -74,6 +75,7 @@ private:
    MoveHandleWidget *mp_MoveHandleWidget;
    DeleteHandleWidget *mp_DeleteHandleWidget;
    QList<NewPartWidget*> *mp_NewPartWidgets;
+   QList<SongPartWidget*> *mp_SongPartItems;
 
 };
 

@@ -609,15 +609,8 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex.row(), AbstractTreeItem::TRACK_TYPE, modelIndex.parent()).data().toInt();
         bool songapOn = model()->data(modelIndex.parent().parent().parent().sibling(modelIndex.parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
 
-        if(trackType != INTRO_FILL && trackType != OUTRO_FILL && songapOn)
-        {
-            showAPSettings(trackType, sigNum);
-        }else{
-            mp_APBox->hide();
-            APBar->hide();
-            APText->hide();
-            mp_FileButton->setText(label);
-        }
+        showAPSettings(trackType, sigNum,songapOn);
+
         m->addAction(tr("Export MIDI file..."), this, SLOT(exportMIDI()));
     } else {
         mp_acCopy = new QAction(m);
@@ -857,17 +850,33 @@ void BeatFileWidget::ApValueChanged(){
     model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
                      ,QVariant(settings),Qt::EditRole);
 }
+void BeatFileWidget::parentAPBoxStatusChanged(){
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+    bool songAPOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
+    MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+    int sigNum = data.timeSigNum;
+
+    showAPSettings(trackType,sigNum,songAPOn);
+}
 
 void BeatFileWidget::APBoxStatusChanged(){
 
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     if(mp_APBox->isChecked()){
         APText->show();
         APBar->show();
+        if (trackType == MAIN_DRUM_LOOP){
+            APText->setText("Play For");
+        }
         APBar->setText("1");
     }else{
         APBar->setText("0");
         ApValueChanged();
-        APText->hide();
+        if (trackType != MAIN_DRUM_LOOP){
+            APText->hide();
+        }else{
+            APText->setText("Loop infinitely");
+        }
         APBar->hide();
     }
 }
@@ -918,17 +927,15 @@ void BeatFileWidget::edit()
         .arg(song.data().toString()).arg(m->songFileName(ix)), m_editingTrackData = trackData);
 }
 
-void BeatFileWidget::showAPSettings(int type,int sigNum){
+void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
 
+    if(type != INTRO_FILL && type != OUTRO_FILL && APOn)
+    {
      mp_FileButton->setLayout(leftl);
+     mp_APBox->show();
+     APBar->show();
+     APText->show();
      if(type == MAIN_DRUM_LOOP){
-         //check if there will be a trans fill here
-         /*auto lastrow = modelIndex().parent().parent().parent().model()->rowCount()-1;
-         int type = model()->index(lastrow,
-                                   AbstractTreeItem::TRACK_TYPE,
-                                   modelIndex().parent().parent().parent()).data().toInt();*/
-         //get last fill
-         //get type f last fill
          if(m_PlayAt > 0){
              mp_APBox->setChecked(true);
              APText->setText("Play For");
@@ -958,6 +965,12 @@ void BeatFileWidget::showAPSettings(int type,int sigNum){
              APText->hide();
          }
      }
+    }else{
+        mp_APBox->hide();
+        APBar->hide();
+        APText->hide();
+        //mp_FileButton->setText(label);
+    }
 }
 
 void BeatFileWidget::updateAPText(bool hasTrans){

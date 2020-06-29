@@ -133,6 +133,7 @@ PartColumnWidget::PartColumnWidget(BeatsProjectModel *p_Model, QWidget *parent) 
    m_MaxFileCount = 1;
    m_ShuffleEnabled = false;
    m_ShuffleActivated = false;
+   mp_BeatFileItems = new QList<BeatFileWidget*>();
 
    // Create No File Panel (NFP)
    mp_NoFilePanel = new DropPanel(this);
@@ -309,6 +310,7 @@ void PartColumnWidget::populate(QModelIndex const& modelIndex)
          p_BeatFileWidget->populate(childIndex);
          p_BeatFileWidget->updateAPText(label.contains("Main") && modelIndex.siblingAtRow(2).model()->rowCount(modelIndex.siblingAtRow(2)) > 0);
          mp_ChildrenItems->append(p_BeatFileWidget);
+         mp_BeatFileItems->append(p_BeatFileWidget);
 
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
@@ -756,4 +758,15 @@ void PartColumnWidget::slotSelectTrack(const QByteArray &trackData, int trackInd
    // Note: typeId = row... except for intro and outro
 
    emit sigSelectTrack(trackData, trackIndex, modelIndex().row());
+}
+
+void PartColumnWidget::parentAPBoxStatusChanged()
+{
+    QVariant labelVatiant = modelIndex().data();
+    QString label = labelVatiant.toString();
+
+    for(int i = 0; i < mp_BeatFileItems->size();i++){
+        mp_BeatFileItems->at(i)->parentAPBoxStatusChanged();
+        mp_BeatFileItems->at(i)->updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0);
+    }
 }

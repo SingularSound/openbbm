@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 
 #include "songfolderviewitem.h"
+#include "partcolumnwidget.h"
 #include "../dialogs/loopCountDialog.h"
 
 class MoveHandleWidget;
@@ -26,6 +27,7 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
+   void parentAPBoxStatusChanged();
 
    // Accessors
    void setIntro(bool intro);
@@ -60,6 +62,7 @@ private:
    MoveHandleWidget *mp_MoveHandleWidget;
    DeleteHandleWidget *mp_DeleteHandleWidget;
    LoopCountDialog *mp_LoopCount;
+   QList<PartColumnWidget*> *mp_PartColumnItems;
 
    bool m_intro;
    bool m_outro;
