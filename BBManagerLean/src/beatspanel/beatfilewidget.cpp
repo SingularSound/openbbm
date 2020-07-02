@@ -867,6 +867,7 @@ void BeatFileWidget::APBoxStatusChanged(){
         APBar->show();
         if (trackType == MAIN_DRUM_LOOP){
             APText->setText("Play For");
+            emit mainAPChanged();
         }
         APBar->setText("1");
     }else{
@@ -874,6 +875,7 @@ void BeatFileWidget::APBoxStatusChanged(){
         ApValueChanged();
         if (trackType != MAIN_DRUM_LOOP){
             APText->hide();
+            emit mainAPChanged();
         }else{
             APText->setText("Loop infinitely");
         }
@@ -936,7 +938,7 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
      APBar->show();
      APText->show();
      if(type == MAIN_DRUM_LOOP){
-         if(m_PlayAt > 0){
+         if(m_PlayAt > 0 ||mp_APBox->isChecked()){
              mp_APBox->setChecked(true);
              APText->setText("Play For");
              APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
@@ -954,6 +956,7 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
          }else{
              infiniteMain = !infiniteMain;
              APBar->hide();
+             mp_APBox->hide();
              APText->setText("Manual Trigger Only");
          }
      }else{
@@ -973,8 +976,11 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
     }
 }
 
-void BeatFileWidget::updateAPText(bool hasTrans){
-    if(hasTrans){
+void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
+    if(hasTrans && !infiniteMain){
+        //if is a main with transition fill
         APText->setText("Transition Fill at bar");
+    }else if(hasMain){
+        //if main is infinite and is a trans fill
     }
 }
