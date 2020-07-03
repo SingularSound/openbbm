@@ -141,7 +141,7 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
       // Disable autopilot by hiding Loop button
       mp_LoopCount->setVisible(true);
    }
-   partName = (modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PART_NAME).data().toString() == nullptr)?"Part "+QString::number(modelIndex.row()):partName;
+   partName = "Part "+QString::number(modelIndex.row());
    mp_Title->setText(partName);
    m_playingInternal = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PLAYING).data().toBool();
    m_validInternal   = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::INVALID).data().toString().isEmpty();
@@ -421,7 +421,7 @@ void SongPartWidget::slotTitleChangeByUI()
 {
     if(mp_Title->text() != partName){
         qDebug() << "Part Name Entered:" << mp_Title->text();
-        model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
+        //model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
     }
 }
 

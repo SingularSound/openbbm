@@ -543,6 +543,9 @@ void SongWidget::slotAPEnableChangeByUI(const bool state)
        for(int i = 0; i < mp_SongPartItems->size();i++){
            mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
        }
+       for(int i = 0; i < mp_SongPartItems->size();i++){
+        mp_SongPartItems->at(i)->updateTransMain();
+       }
     }
 }
 
