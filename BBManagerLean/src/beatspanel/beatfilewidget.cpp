@@ -520,7 +520,6 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    connect(mp_APBox  , SIGNAL(clicked()), this, SLOT(  APBoxStatusChanged()));
    connect(APBar, SIGNAL(textChanged(const QString &)), this, SLOT(ApValueChanged()));
 
-
    connect(p_Model, &BeatsProjectModel::endEditMidi, this, &BeatFileWidget::endEditMidi);
 }
 
@@ -867,7 +866,6 @@ void BeatFileWidget::APBoxStatusChanged(){
         APBar->show();
         if (trackType == MAIN_DRUM_LOOP){
             APText->setText("Play For");
-            emit mainAPChanged();
         }
         APBar->setText("1");
     }else{
@@ -875,7 +873,6 @@ void BeatFileWidget::APBoxStatusChanged(){
         ApValueChanged();
         if (trackType != MAIN_DRUM_LOOP){
             APText->hide();
-            emit mainAPChanged();
         }else{
             APText->setText("Loop infinitely");
         }
@@ -942,23 +939,17 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
              mp_APBox->setChecked(true);
              APText->setText("Play For");
              APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-             infiniteMain = false;
+             isfiniteMain = true;
          }else{
              APText->setText("Loop infinitely");
              APBar->hide();
-             infiniteMain = true;
+             isfiniteMain = false;
          }
      }else if(type == TRANS_FILL){
-         if(!infiniteMain){
-             mp_APBox->setChecked(true);
-             APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-             APText->setText("Additional bars");
-         }else{
-             infiniteMain = !infiniteMain;
+             isfiniteMain = false;
              APBar->hide();
              mp_APBox->hide();
              APText->setText("Manual Trigger Only");
-         }
      }else{
          if(m_PlayAt > 0){
              mp_APBox->setChecked(true);
@@ -977,10 +968,23 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
 }
 
 void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
-    if(hasTrans && !infiniteMain){
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+    if(hasTrans && isfiniteMain && trackType == MAIN_DRUM_LOOP){
         //if is a main with transition fill
         APText->setText("Transition Fill at bar");
-    }else if(hasMain){
-        //if main is infinite and is a trans fill
+    }else if(hasMain && trackType == TRANS_FILL){
+        //if main is finite and change trans fill
+        MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+        int sigNum = data.timeSigNum;
+
+        mp_APBox->setChecked(true);
+        APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+        APText->setText("Additional bars");
+        mp_APBox->show();
+        APBar->show();
     }
+}
+bool BeatFileWidget::finiteMain(){    
+     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+ return isfiniteMain;
 }

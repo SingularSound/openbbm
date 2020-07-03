@@ -308,9 +308,9 @@ void PartColumnWidget::populate(QModelIndex const& modelIndex)
       if (childIndex.isValid()){
          p_BeatFileWidget = new BeatFileWidget(model(), this);
          p_BeatFileWidget->populate(childIndex);
-         p_BeatFileWidget->updateAPText(label.contains("Main") && modelIndex.siblingAtRow(2).model()->rowCount(modelIndex.siblingAtRow(2)) > 0);
          mp_ChildrenItems->append(p_BeatFileWidget);
          mp_BeatFileItems->append(p_BeatFileWidget);
+         updateAPText(label.contains("Main") && modelIndex.siblingAtRow(2).model()->rowCount(modelIndex.siblingAtRow(2)) > 0,false,i);
 
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
@@ -767,6 +767,23 @@ void PartColumnWidget::parentAPBoxStatusChanged()
 
     for(int i = 0; i < mp_BeatFileItems->size();i++){
         mp_BeatFileItems->at(i)->parentAPBoxStatusChanged();
-        mp_BeatFileItems->at(i)->updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0);
+        updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,i);
     }
+}
+
+bool PartColumnWidget::finitePart(){
+
+    if(mp_BeatFileItems->size() > 0 && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0){//if there are children and has trans fill
+       return mp_BeatFileItems->at(0)->finiteMain();
+    }
+    return false;
+}
+void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain, int idx){
+    if(hasMain){
+        idx = mp_BeatFileItems->size()-1;//to pick trans fill
+    }
+    if(mp_BeatFileItems->size() > idx && idx>=0){
+       mp_BeatFileItems->at(idx)->updateAPText(hasTrans,hasMain);
+    }
+
 }

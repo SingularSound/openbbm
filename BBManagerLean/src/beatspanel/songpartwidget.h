@@ -28,6 +28,7 @@ public:
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
    void parentAPBoxStatusChanged();
+   void updateTransMain();
 
    // Accessors
    void setIntro(bool intro);

@@ -46,6 +46,8 @@ public:
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
    void parentAPBoxStatusChanged();
+   void updateAPText(bool hasTrans,bool hasMain, int idx);
+   bool finitePart();
 
    // Accessor
    int maxFileCount();

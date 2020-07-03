@@ -110,6 +110,7 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          p_PartColumnWidget->populate(childIndex);
          mp_ChildrenItems->append(p_PartColumnWidget);
          mp_PartColumnItems->append(p_PartColumnWidget);
+         updateTransMain();
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
       }
@@ -428,5 +429,18 @@ void SongPartWidget::parentAPBoxStatusChanged()
 {
     for(int i = 0; i < mp_PartColumnItems->size();i++){
         mp_PartColumnItems->at(i)->parentAPBoxStatusChanged();
+    }
+}
+
+void SongPartWidget::updateTransMain(){
+//to do code here
+    bool finiteMain = false;
+    //fill variable with true if transfill should be additional bars
+    if(!m_intro && !m_outro){
+        finiteMain = mp_PartColumnItems->at(0)->finitePart();
+        if(finiteMain && mp_PartColumnItems->size() > 0){
+           mp_PartColumnItems->at(mp_PartColumnItems->size() - 1)->updateAPText(false,finiteMain,0);//the last number does not matter here
+        }
+
     }
 }

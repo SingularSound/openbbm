@@ -44,7 +44,8 @@ public:
 
    void enterEvent(QEvent *event);
    void leaveEvent(QEvent *event);
-   void updateAPText(bool hasTrans);
+   void updateAPText(bool hasTrans, bool hasMain);
+   bool finiteMain();
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);
@@ -82,7 +83,7 @@ private:
    QLineEdit *APBar = new QLineEdit();
    QCheckBox *mp_APBox;
    bool m_dragging;
-   bool infiniteMain;
+   bool isfiniteMain;
    bool TransFill;
 
    int m_PlayFor;
