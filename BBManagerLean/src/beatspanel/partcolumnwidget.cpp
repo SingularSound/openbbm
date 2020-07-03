@@ -164,7 +164,7 @@ PartColumnWidget::PartColumnWidget(BeatsProjectModel *p_Model, QWidget *parent) 
 
    mp_NFPAddButton->setObjectName(QStringLiteral("addButton"));
    mp_NFPAddButton->setSizePolicy(
-            QSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum ) );
+   QSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum ) );
    mp_NFPAddButton->setMinimumWidth(30);
    mp_NFPAddButton->setMaximumWidth(30);
 
@@ -314,6 +314,7 @@ void PartColumnWidget::populate(QModelIndex const& modelIndex)
 
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
+         connect(p_BeatFileWidget, &BeatFileWidget::sigMainAPUpdated, this, &PartColumnWidget::slotMainAPUpdated);
       }
    }
 
@@ -758,6 +759,10 @@ void PartColumnWidget::slotSelectTrack(const QByteArray &trackData, int trackInd
    // Note: typeId = row... except for intro and outro
 
    emit sigSelectTrack(trackData, trackIndex, modelIndex().row());
+}
+
+void PartColumnWidget::slotMainAPUpdated(bool hasMain){
+    emit sigUpdateTran();
 }
 
 void PartColumnWidget::parentAPBoxStatusChanged()

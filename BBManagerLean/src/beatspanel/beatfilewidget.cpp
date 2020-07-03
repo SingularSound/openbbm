@@ -603,8 +603,10 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
         mp_acPaste = m->addAction(tr("Paste") + "\t"+mod+"V", this, SLOT(paste()));
         m->addSeparator();
 
-        MIDIPARSER_MidiTrack data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-        int sigNum = data.timeSigNum;
+       // MIDIPARSER_MidiTrack data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+
+        QByteArray trackData = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
+        int sigNum = ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex.row(), AbstractTreeItem::TRACK_TYPE, modelIndex.parent()).data().toInt();
         bool songapOn = model()->data(modelIndex.parent().parent().parent().sibling(modelIndex.parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
 
@@ -865,7 +867,9 @@ void BeatFileWidget::APBoxStatusChanged(){
         APText->show();
         APBar->show();
         if (trackType == MAIN_DRUM_LOOP){
-            APText->setText("Play For");
+            QString text =(TransFill)?"Transition Fill at bar":"Play For";
+            APText->setText(text);
+             emit sigMainAPUpdated(true);
         }
         APBar->setText("1");
     }else{
@@ -875,6 +879,7 @@ void BeatFileWidget::APBoxStatusChanged(){
             APText->hide();
         }else{
             APText->setText("Loop infinitely");
+            emit sigMainAPUpdated(true);
         }
         APBar->hide();
     }
@@ -969,20 +974,33 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
 
 void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-    if(hasTrans && isfiniteMain && trackType == MAIN_DRUM_LOOP){
-        //if is a main with transition fill
-        APText->setText("Transition Fill at bar");
-    }else if(hasMain && trackType == TRANS_FILL){
-        //if main is finite and change trans fill
-        MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-        int sigNum = data.timeSigNum;
-
-        mp_APBox->setChecked(true);
-        APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-        APText->setText("Additional bars");
-        mp_APBox->show();
-        APBar->show();
+    bool songapOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
+    if(songapOn){
+        if(hasTrans && isfiniteMain && trackType == MAIN_DRUM_LOOP){
+            //if is a main with transition fill
+            APText->setText("Transition Fill at bar");
+            TransFill = true;
+        }else if(hasMain && trackType == TRANS_FILL){
+            //if main is finite and change trans fill
+            MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+            int sigNum = data.timeSigNum;
+            if(mp_APBox->isVisible()){
+                //if it was showing it mean the main was set infinite
+                 qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
+                APBar->hide();
+                mp_APBox->hide();
+                APText->setText("Manual Trigger Only");
+            }else{
+                qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
+                mp_APBox->setChecked(true);
+                APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+                APText->setText("Additional bars");
+                mp_APBox->show();
+                APBar->show();
+            }
+        }
     }
+
 }
 bool BeatFileWidget::finiteMain(){    
      MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();

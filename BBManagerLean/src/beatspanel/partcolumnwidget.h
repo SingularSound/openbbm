@@ -57,6 +57,7 @@ signals:
    void sigIsShuffleEnabled(bool first);
    void sigIsShuffleActivated(bool first);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
+   void sigUpdateTran();
 
 public slots:
    void endEditMidi(const QByteArray& data);
@@ -65,6 +66,7 @@ public slots:
    void slotCreateNewFile();
    void slotShuffleButtonClicked(bool checked);
    void slotSelectTrack(const QByteArray &trackData, int trackIndex);
+   void slotMainAPUpdated(bool hasMain);
 
 protected:
    virtual void paintEvent(QPaintEvent * event);

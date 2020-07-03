@@ -49,6 +49,7 @@ public:
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);
+   void sigMainAPUpdated(bool hasMain);
 
 public slots:
    void endEditMidi(const QByteArray& data);
@@ -84,7 +85,7 @@ private:
    QCheckBox *mp_APBox;
    bool m_dragging;
    bool isfiniteMain;
-   bool TransFill;
+   bool TransFill = false;
 
    int m_PlayFor;
    int m_PlayAt;

@@ -113,6 +113,7 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          updateTransMain();
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
+         connect(p_PartColumnWidget, &PartColumnWidget::sigUpdateTran, this, &SongPartWidget::updateTransMain);
       }
    }
 
@@ -439,7 +440,8 @@ void SongPartWidget::updateTransMain(){
     if(!m_intro && !m_outro){
         finiteMain = mp_PartColumnItems->at(0)->finitePart();
         if(finiteMain && mp_PartColumnItems->size() > 0){
-           mp_PartColumnItems->at(mp_PartColumnItems->size() - 1)->updateAPText(false,finiteMain,0);//the last number does not matter here
+           int idx = (mp_PartColumnItems->size() > 3)?2:mp_PartColumnItems->size() - 1;
+           mp_PartColumnItems->at(idx)->updateAPText(false,finiteMain,0);//the last number does not matter here
         }
 
     }
