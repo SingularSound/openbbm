@@ -48,6 +48,7 @@ public:
    void parentAPBoxStatusChanged();
    void updateAPText(bool hasTrans,bool hasMain, int idx);
    bool finitePart();
+   void setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile);
 
    // Accessor
    int maxFileCount();

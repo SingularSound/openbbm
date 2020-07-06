@@ -603,15 +603,6 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
         mp_acPaste = m->addAction(tr("Paste") + "\t"+mod+"V", this, SLOT(paste()));
         m->addSeparator();
 
-       // MIDIPARSER_MidiTrack data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-
-        QByteArray trackData = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
-        int sigNum = ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
-        MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex.row(), AbstractTreeItem::TRACK_TYPE, modelIndex.parent()).data().toInt();
-        bool songapOn = model()->data(modelIndex.parent().parent().parent().sibling(modelIndex.parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
-
-        showAPSettings(trackType, sigNum,songapOn);
-
         m->addAction(tr("Export MIDI file..."), this, SLOT(exportMIDI()));
     } else {
         mp_acCopy = new QAction(m);

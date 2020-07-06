@@ -310,7 +310,7 @@ void PartColumnWidget::populate(QModelIndex const& modelIndex)
          p_BeatFileWidget->populate(childIndex);
          mp_ChildrenItems->append(p_BeatFileWidget);
          mp_BeatFileItems->append(p_BeatFileWidget);
-         updateAPText(label.contains("Main") && modelIndex.siblingAtRow(2).model()->rowCount(modelIndex.siblingAtRow(2)) > 0,false,i);
+         setBeatFileAPSettings(label, modelIndex, childIndex, i, p_BeatFileWidget);
 
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
@@ -791,4 +791,18 @@ void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain, int idx){
        mp_BeatFileItems->at(idx)->updateAPText(hasTrans,hasMain);
     }
 
+}
+
+void PartColumnWidget::setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile){
+
+    // MIDIPARSER_MidiTrack data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+
+   QByteArray trackData = child.sibling(child.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
+   int sigNum = ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
+   MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(child.row(), AbstractTreeItem::TRACK_TYPE, child.parent()).data().toInt();
+   bool songapOn = model()->data(parent.parent().parent().sibling(parent.parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
+
+   beatFile->showAPSettings(trackType, sigNum,songapOn);
+
+   updateAPText(label.contains("Main") && parent.siblingAtRow(2).model()->rowCount(parent.siblingAtRow(2)) > 0,false,i);
 }

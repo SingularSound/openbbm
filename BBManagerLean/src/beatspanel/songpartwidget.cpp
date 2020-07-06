@@ -434,7 +434,7 @@ void SongPartWidget::parentAPBoxStatusChanged()
 }
 
 void SongPartWidget::updateTransMain(){
-//to do code here
+
     bool finiteMain = false;
     //fill variable with true if transfill should be additional bars
     if(!m_intro && !m_outro){
