@@ -662,7 +662,7 @@ void BeatFileWidget::dataChanged(const QModelIndex &left, const QModelIndex &rig
 
       switch(column){
          case AbstractTreeItem::NAME:
-            mp_FileButton->setText(index.data().toString());
+            mp_FileButton->setText(index.data().toString()+"\n\n");
             break;
          case AbstractTreeItem::PLAYING:
             if (index.data().toBool() == true) {
