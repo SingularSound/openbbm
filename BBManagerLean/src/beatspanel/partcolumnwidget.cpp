@@ -124,6 +124,8 @@ void PartColumnWidget::slotDrop(QDropEvent *event)
     }
     if (accept){
         event->accept();
+        parentAPBoxStatusChanged();
+        emit sigUpdateTran();
     }
 }
 
@@ -708,8 +710,11 @@ void PartColumnWidget::rowsInserted(int start, int end)
          p_BeatFileWidget = new BeatFileWidget(model(), this);
          p_BeatFileWidget->populate(childIndex);
          mp_ChildrenItems->append(p_BeatFileWidget);
+         mp_BeatFileItems->append(p_BeatFileWidget);
+
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
+         connect(p_BeatFileWidget, &BeatFileWidget::sigMainAPUpdated, this, &PartColumnWidget::slotMainAPUpdated);
          p_BeatFileWidget->show();
       }
    }
