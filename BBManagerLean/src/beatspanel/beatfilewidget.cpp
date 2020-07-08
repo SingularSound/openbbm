@@ -70,7 +70,6 @@ void DragButton::mouseReleaseEvent(QMouseEvent* event)
  
 void BeatFileWidget::drag()
 {
-    bool swapped = false;
     QModelIndex exportDirIndex = modelIndex().sibling(modelIndex().row(), AbstractTreeItem::EXPORT_DIR);
     QString path = dragClipboardDir().absoluteFilePath(exportDirIndex.data().toString());
     QFile file(path);
@@ -122,17 +121,13 @@ void BeatFileWidget::drag()
     else if (path == drag->mimeData()->urls().first().toLocalFile())
         deleteButtonClicked();
     else
-    {   //swap with other fill
-        //to do save parent and if it was swapped
+    {   //swap with another fill
         path = drag->mimeData()->urls().first().toLocalFile();
         trackButtonClicked(path);
     }
     // remove exported file at the end of operation
     if (file.exists()){
         file.remove();
-    }
-    if(swapped){
-
     }
 }
 
@@ -990,7 +985,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             //if main is finite and change trans fill
             MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
             int sigNum = data.timeSigNum;
-            if(mp_APBox->isVisible()){
+            if(mp_APBox->isVisible() && !newFill){
                 //if it was showing it mean the main was set infinite
                  qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
                 APBar->hide();

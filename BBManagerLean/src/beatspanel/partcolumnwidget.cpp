@@ -734,6 +734,7 @@ void PartColumnWidget::rowsRemoved(int start, int end)
       p_BeatFileWidget = mp_ChildrenItems->at(i);
       type = p_BeatFileWidget->model()->index(p_BeatFileWidget->modelIndex().row(),AbstractTreeItem::TRACK_TYPE,p_BeatFileWidget->modelIndex().parent()).data().toInt();
       mp_ChildrenItems->removeAt(i);
+      mp_BeatFileItems->removeAt(i);
       delete p_BeatFileWidget;
       emit sigRowDeleted(type-2);//send type to exclude column from being updated
    }
