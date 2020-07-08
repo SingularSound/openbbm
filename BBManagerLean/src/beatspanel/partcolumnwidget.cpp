@@ -711,6 +711,7 @@ void PartColumnWidget::rowsInserted(int start, int end)
          p_BeatFileWidget->populate(childIndex);
          mp_ChildrenItems->append(p_BeatFileWidget);
          mp_BeatFileItems->append(p_BeatFileWidget);
+         justInserted = true;
 
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
@@ -780,6 +781,11 @@ void PartColumnWidget::parentAPBoxStatusChanged(int sigNum)
     QString label = labelVatiant.toString();
 
     for(int i = 0; i < mp_BeatFileItems->size();i++){
+        if(justInserted && i == mp_BeatFileItems->size()-1){
+            //if this fill was recently inserted to this part should reset beat->m_playAt
+            mp_BeatFileItems->at(i)->setAsNew();
+            justInserted = false;
+        }
         mp_BeatFileItems->at(i)->parentAPBoxStatusChanged(sigNum);
         updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,i);
     }

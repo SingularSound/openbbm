@@ -28,6 +28,7 @@ public:
     void enterEvent(QEvent *event);
     void leaveEvent(QEvent *event);
     bool paste();
+
 };
 
 class PartColumnWidget : public SongFolderViewItem
@@ -91,6 +92,7 @@ private:
    bool m_ShuffleActivated;
    bool m_intro;
    bool m_outro;
+   bool justInserted=false;
 
    // No file panel
    DropPanel *mp_NoFilePanel;

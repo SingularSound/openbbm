@@ -70,6 +70,7 @@ void DragButton::mouseReleaseEvent(QMouseEvent* event)
  
 void BeatFileWidget::drag()
 {
+    bool swapped = false;
     QModelIndex exportDirIndex = modelIndex().sibling(modelIndex().row(), AbstractTreeItem::EXPORT_DIR);
     QString path = dragClipboardDir().absoluteFilePath(exportDirIndex.data().toString());
     QFile file(path);
@@ -121,13 +122,17 @@ void BeatFileWidget::drag()
     else if (path == drag->mimeData()->urls().first().toLocalFile())
         deleteButtonClicked();
     else
-    {
+    {   //swap with other fill
+        //to do save parent and if it was swapped
         path = drag->mimeData()->urls().first().toLocalFile();
         trackButtonClicked(path);
     }
     // remove exported file at the end of operation
     if (file.exists()){
         file.remove();
+    }
+    if(swapped){
+
     }
 }
 
@@ -945,7 +950,7 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
              mp_APBox->hide();
              APText->setText("Manual Trigger Only");
      }else{
-         if(m_PlayAt > 0){
+         if(m_PlayAt > 0 && !newFill){
              mp_APBox->setChecked(true);
              APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
          }else{
@@ -1001,9 +1006,13 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             }
         }
     }
-
+    newFill =false;
 }
 bool BeatFileWidget::finiteMain(){    
      MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
  return isfiniteMain;
+}
+
+void BeatFileWidget::setAsNew(){
+    newFill = true;
 }

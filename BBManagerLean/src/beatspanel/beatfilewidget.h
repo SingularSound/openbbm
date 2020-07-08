@@ -46,6 +46,7 @@ public:
    void leaveEvent(QEvent *event);
    void updateAPText(bool hasTrans, bool hasMain);
    bool finiteMain();
+   void setAsNew();
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);
@@ -86,6 +87,7 @@ private:
    bool m_dragging;
    bool isfiniteMain;
    bool TransFill = false;
+   bool newFill = false;
 
    int m_PlayFor;
    int m_PlayAt;
