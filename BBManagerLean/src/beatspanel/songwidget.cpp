@@ -539,11 +539,12 @@ void SongWidget::slotAPEnableChangeByUI(const bool state)
     if(model()->data(songAPEnable).toBool() != state){
        model()->setData(songAPEnable, QVariant(state));
 
+       auto size = mp_SongPartItems->size()-1;//to exclude outro
        //this next part updates the AP layout for each beat
-       for(int i = 0; i < mp_SongPartItems->size();i++){
+       for(int i = 1; i < size;i++){//starts on 1 to exclude intro
            mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
        }
-       for(int i = 0; i < mp_SongPartItems->size();i++){
+       for(int i = 1; i < size;i++){
         mp_SongPartItems->at(i)->updateTransMain();
        }
     }
