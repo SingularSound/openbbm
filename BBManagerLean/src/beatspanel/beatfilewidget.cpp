@@ -842,11 +842,9 @@ void BeatFileWidget::ApValueChanged(){
     model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
                      ,QVariant(settings),Qt::EditRole);
 }
-void BeatFileWidget::parentAPBoxStatusChanged(){
+void BeatFileWidget::parentAPBoxStatusChanged(int sigNum){
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     bool songAPOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
-    MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-    int sigNum = data.timeSigNum;
 
     showAPSettings(trackType,sigNum,songAPOn);
 }
@@ -971,6 +969,18 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             //if is a main with transition fill
             APText->setText("Transition Fill at bar");
             TransFill = true;
+        }else if(!hasTrans && APText->text().contains("Transition") && trackType == MAIN_DRUM_LOOP){//means the trans fill was removed
+            if(m_PlayAt > 0 ||mp_APBox->isChecked()){
+                mp_APBox->setChecked(true);
+                APText->setText("Play For");
+                MIDIPARSER_MidiTrack data = (MIDIPARSER_MidiTrack)model()->index(modelIndex().row(), AbstractTreeItem::RAW_DATA, modelIndex().parent()).data().toByteArray();
+                APBar->setText(QString::number((m_PlayAt-1)/data.timeSigNum+1));
+                isfiniteMain = true;
+            }else{
+                APText->setText("Loop infinitely");
+                APBar->hide();
+                isfiniteMain = false;
+            }
         }else if(hasMain && trackType == TRANS_FILL){
             //if main is finite and change trans fill
             MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());

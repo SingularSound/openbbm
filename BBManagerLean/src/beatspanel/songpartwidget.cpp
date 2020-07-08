@@ -114,6 +114,8 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
          connect(p_PartColumnWidget, &PartColumnWidget::sigUpdateTran, this, &SongPartWidget::updateTransMain);
+         connect(p_PartColumnWidget, &PartColumnWidget::sigRowInserted, this, &SongPartWidget::parentAPBoxStatusChanged);
+         connect(p_PartColumnWidget, &PartColumnWidget::sigRowDeleted, this, &SongPartWidget::updateOnDeletedChild);
       }
    }
 
@@ -428,8 +430,22 @@ void SongPartWidget::slotTitleChangeByUI()
 
 void SongPartWidget::parentAPBoxStatusChanged()
 {
+    int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
     for(int i = 0; i < mp_PartColumnItems->size();i++){
-        mp_PartColumnItems->at(i)->parentAPBoxStatusChanged();
+        mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
+    }
+}
+void SongPartWidget::updateOnDeletedChild(int type){
+    //only update  unchanged parts means if the change was on main fill main fill does not gets updated, if trans fill, transfill does not get updated
+    int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
+    for(int i = 0; i < mp_PartColumnItems->size();i++){
+        if(i != type){
+          mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
+          if(type == 2){
+              //if the transfill was removed main fill should update
+              mp_PartColumnItems->at(i)->updateAPText(false,false,i);
+          }
+        }
     }
 }
 

@@ -124,7 +124,7 @@ void PartColumnWidget::slotDrop(QDropEvent *event)
     }
     if (accept){
         event->accept();
-        parentAPBoxStatusChanged();
+        parentAPBoxStatusChanged(getNumSignature());
         emit sigUpdateTran();
     }
 }
@@ -718,6 +718,7 @@ void PartColumnWidget::rowsInserted(int start, int end)
          p_BeatFileWidget->show();
       }
    }
+   emit sigRowInserted();
    updatePanels();
 
 }
@@ -726,11 +727,14 @@ void PartColumnWidget::rowsRemoved(int start, int end)
 {
    // remove all widgets corresponding to rows
    SongFolderViewItem *p_BeatFileWidget;
+   int type = 0;
 
    for(int i = end; i >= start; i--){
       p_BeatFileWidget = mp_ChildrenItems->at(i);
+      type = p_BeatFileWidget->model()->index(p_BeatFileWidget->modelIndex().row(),AbstractTreeItem::TRACK_TYPE,p_BeatFileWidget->modelIndex().parent()).data().toInt();
       mp_ChildrenItems->removeAt(i);
       delete p_BeatFileWidget;
+      emit sigRowDeleted(type-2);//send type to exclude column from being updated
    }
 
    updatePanels();
@@ -770,13 +774,13 @@ void PartColumnWidget::slotMainAPUpdated(bool hasMain){
     emit sigUpdateTran();
 }
 
-void PartColumnWidget::parentAPBoxStatusChanged()
+void PartColumnWidget::parentAPBoxStatusChanged(int sigNum)
 {
     QVariant labelVatiant = modelIndex().data();
     QString label = labelVatiant.toString();
 
     for(int i = 0; i < mp_BeatFileItems->size();i++){
-        mp_BeatFileItems->at(i)->parentAPBoxStatusChanged();
+        mp_BeatFileItems->at(i)->parentAPBoxStatusChanged(sigNum);
         updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,i);
     }
 }
@@ -810,4 +814,10 @@ void PartColumnWidget::setBeatFileAPSettings(QString label,QModelIndex parent, Q
    beatFile->showAPSettings(trackType, sigNum,songapOn);
 
    updateAPText(label.contains("Main") && parent.siblingAtRow(2).model()->rowCount(parent.siblingAtRow(2)) > 0,false,i);
+}
+
+int PartColumnWidget::getNumSignature(){
+    QModelIndex child = mp_BeatFileItems->at(0)->modelIndex();//to get the main loop data
+    QByteArray trackData = child.sibling(child.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
+    return ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
 }

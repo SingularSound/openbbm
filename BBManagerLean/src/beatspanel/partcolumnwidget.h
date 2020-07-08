@@ -45,7 +45,7 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
-   void parentAPBoxStatusChanged();
+   void parentAPBoxStatusChanged(int sigNum);
    void updateAPText(bool hasTrans,bool hasMain, int idx);
    bool finitePart();
    void setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile);
@@ -53,12 +53,17 @@ public:
    // Accessor
    int maxFileCount();
 
+   int getNumSignature();
+   QList<BeatFileWidget*> *mp_BeatFileItems;
+
 signals:
    void sigIsMultiFileAddEnabled(bool first);
    void sigIsShuffleEnabled(bool first);
    void sigIsShuffleActivated(bool first);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
    void sigUpdateTran();
+   void sigRowInserted();
+   void sigRowDeleted(int type);
 
 public slots:
    void endEditMidi(const QByteArray& data);
@@ -98,7 +103,7 @@ private:
    QPushButton *mp_MFPAddButton;
 
    QByteArray m_editingTrackData;
-   QList<BeatFileWidget*> *mp_BeatFileItems;
+
 
 };
 

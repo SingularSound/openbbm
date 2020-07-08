@@ -29,6 +29,7 @@ public:
    void updateMinimumSize();
    void parentAPBoxStatusChanged();
    void updateTransMain();
+   void updateOnDeletedChild(int type);
 
    // Accessors
    void setIntro(bool intro);
