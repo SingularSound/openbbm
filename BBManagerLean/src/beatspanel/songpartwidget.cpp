@@ -431,8 +431,10 @@ void SongPartWidget::slotTitleChangeByUI()
 void SongPartWidget::parentAPBoxStatusChanged()
 {
     int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
-    for(int i = 0; i < mp_PartColumnItems->size();i++){
-        mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
+    if(sigNum >0){//if zero means part is empty
+        for(int i = 0; i < mp_PartColumnItems->size();i++){
+            mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
+        }
     }
 }
 void SongPartWidget::updateOnDeletedChild(int type){

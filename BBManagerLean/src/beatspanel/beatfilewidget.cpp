@@ -557,7 +557,14 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
    // Populate self's data
    QVariant labelVatiant = modelIndex.data();
    QString label = labelVatiant.toString();
-   mp_FileButton->setText( label +"\n\n");
+   MIDIPARSER_TrackType type = (MIDIPARSER_TrackType)model()->index(modelIndex.row(), AbstractTreeItem::TRACK_TYPE, modelIndex.parent()).data().toInt();
+   if(type != INTRO_FILL && type != OUTRO_FILL)
+   {
+       mp_FileButton->setText( label +"\n\n");
+   }else{
+       mp_FileButton->setText( label);
+   }
+
 
 
    if (modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PLAYING).data().toBool() == true) {
@@ -660,9 +667,20 @@ void BeatFileWidget::dataChanged(const QModelIndex &left, const QModelIndex &rig
          continue;
       }
 
+      QString label;
+      if(column == AbstractTreeItem::NAME){
+          MIDIPARSER_TrackType type = (MIDIPARSER_TrackType)model()->index(index.row(), AbstractTreeItem::TRACK_TYPE, index.parent()).data().toInt();
+          if(type != INTRO_FILL && type != OUTRO_FILL)
+          {
+              label = index.data().toString()+"\n\n";
+          }else{
+             label = index.data().toString();
+          }
+      }
+
       switch(column){
          case AbstractTreeItem::NAME:
-            mp_FileButton->setText(index.data().toString()+"\n\n");
+                mp_FileButton->setText( label);
             break;
          case AbstractTreeItem::PLAYING:
             if (index.data().toBool() == true) {

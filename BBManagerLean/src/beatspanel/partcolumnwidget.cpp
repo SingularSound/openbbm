@@ -824,7 +824,10 @@ void PartColumnWidget::setBeatFileAPSettings(QString label,QModelIndex parent, Q
 }
 
 int PartColumnWidget::getNumSignature(){
-    QModelIndex child = mp_BeatFileItems->at(0)->modelIndex();//to get the main loop data
-    QByteArray trackData = child.sibling(child.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
-    return ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
+    if(mp_BeatFileItems->size()>0){
+        QModelIndex child = mp_BeatFileItems->at(0)->modelIndex();//to get the main loop data
+        QByteArray trackData = child.sibling(child.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
+        return ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
+    }
+    return 0;
 }
