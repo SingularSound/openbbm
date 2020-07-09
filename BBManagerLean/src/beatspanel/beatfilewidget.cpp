@@ -1022,7 +1022,6 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
     newFill =false;
 }
 bool BeatFileWidget::finiteMain(){    
-     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
  return isfiniteMain;
 }
 

@@ -110,7 +110,9 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          p_PartColumnWidget->populate(childIndex);
          mp_ChildrenItems->append(p_PartColumnWidget);
          mp_PartColumnItems->append(p_PartColumnWidget);
-         updateTransMain();
+         if(mp_PartColumnItems->size() > 1){
+            updateTransMain();//only enter on part # 2 for trans fill
+         }
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
          connect(p_PartColumnWidget, &PartColumnWidget::sigUpdateTran, this, &SongPartWidget::updateTransMain);
