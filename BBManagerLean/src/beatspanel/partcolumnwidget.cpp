@@ -811,8 +811,6 @@ void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain, int idx){
 
 void PartColumnWidget::setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile){
 
-    // MIDIPARSER_MidiTrack data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-
    QByteArray trackData = child.sibling(child.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
    int sigNum = ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(child.row(), AbstractTreeItem::TRACK_TYPE, child.parent()).data().toInt();

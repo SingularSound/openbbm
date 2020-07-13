@@ -961,10 +961,15 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
              isfiniteMain = false;
          }
      }else if(type == TRANS_FILL){
+         if(m_PlayAt > 0){
              isfiniteMain = false;
              APBar->hide();
              mp_APBox->hide();
              APText->setText("Manual Trigger Only");
+         }else{
+             APBar->hide();
+             APText->hide();
+         }
      }else{
          if(m_PlayAt > 0 && !newFill){
              mp_APBox->setChecked(true);
@@ -1005,7 +1010,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             }
         }else if(hasTrans && !isfiniteMain && trackType == MAIN_DRUM_LOOP){
             TransFill = (hasTrans)? true:false;
-        }else if(trackType == TRANS_FILL){
+        }else if(trackType == TRANS_FILL && m_PlayAt >0){
             //if main is finite and change trans fill
             if(mp_APBox->isVisible() && !newFill){
                 //if it was showing it mean the main was set infinite
