@@ -459,7 +459,7 @@ void SongPartWidget::updateTransMain(){
     //fill variable with true if transfill should be additional bars
     if(!m_intro && !m_outro){
         finiteMain = mp_PartColumnItems->at(0)->finitePart();
-        if(finiteMain && mp_PartColumnItems->size() > 0){
+        if(mp_PartColumnItems->size() > 0){
            int idx = (mp_PartColumnItems->size() > 3)?2:mp_PartColumnItems->size() - 1;
            mp_PartColumnItems->at(idx)->updateAPText(false,finiteMain,0);//the last number does not matter here
         }
