@@ -1007,8 +1007,6 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             TransFill = (hasTrans)? true:false;
         }else if(trackType == TRANS_FILL){
             //if main is finite and change trans fill
-            MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-            int sigNum = data.timeSigNum;
             if(mp_APBox->isVisible() && !newFill){
                 //if it was showing it mean the main was set infinite
                  qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
@@ -1016,6 +1014,8 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
                 mp_APBox->hide();
                 APText->setText("Manual Trigger Only");
             }else if (hasMain){
+                MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+                int sigNum = data.timeSigNum;
                 qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
                 mp_APBox->setChecked(true);
                 APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
