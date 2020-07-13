@@ -1022,6 +1022,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
                 APText->setText("Additional bars");
                 mp_APBox->show();
                 APBar->show();
+                APText->show();
             }
         }
     }
