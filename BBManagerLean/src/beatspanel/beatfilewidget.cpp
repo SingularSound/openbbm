@@ -1019,7 +1019,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             TransFill = (hasTrans)? true:false;
         }else if(trackType == TRANS_FILL && m_PlayAt >0){
             //if main is finite and change trans fill
-            if(mp_APBox->isVisible() && !newFill){
+            if(!newFill && !hasMain){
                 //if it was showing it mean the main was set infinite
                  qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
                 APBar->hide();
@@ -1041,8 +1041,10 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
         }else if(trackType == TRANS_FILL  && m_PlayAt < 0){
             if(hasMain){
                 isfiniteMain = true;
+                mp_APBox->show();
             }else{
                 isfiniteMain = false;
+                 mp_APBox->hide();
             }
         }
     }
