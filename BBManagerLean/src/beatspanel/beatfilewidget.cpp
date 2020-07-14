@@ -878,6 +878,13 @@ void BeatFileWidget::APBoxStatusChanged(){
             APText->setText(text);
             isfiniteMain =true;
              emit sigMainAPUpdated(true);
+        }else if(trackType == TRANS_FILL){
+            if(isfiniteMain){
+                APText->setText("Additional bars");
+            }else{
+                APText->setText("Manual Trigger Only");
+                APBar->hide();
+            }
         }
         APBar->setText("1");
     }else{
@@ -966,6 +973,7 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
              APBar->hide();
              mp_APBox->hide();
              APText->setText("Manual Trigger Only");
+             isfiniteMain = false;
          }else{
              APBar->hide();
              APText->hide();
@@ -1018,6 +1026,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
                 APBar->hide();
                 mp_APBox->hide();
                 APText->setText("Manual Trigger Only");
+                isfiniteMain = false;
             }else if (hasMain){
                 MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
                 int sigNum = data.timeSigNum;
@@ -1028,6 +1037,13 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
                 mp_APBox->show();
                 APBar->show();
                 APText->show();
+                isfiniteMain = true;
+            }
+        }else if(trackType == TRANS_FILL  && m_PlayAt < 0){
+            if(hasMain){
+                isfiniteMain = true;
+            }else{
+                isfiniteMain = false;
             }
         }
     }
