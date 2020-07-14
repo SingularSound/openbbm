@@ -1042,6 +1042,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             if(hasMain){
                 isfiniteMain = true;
                 mp_APBox->show();
+                APText->hide();
             }else{
                 APBar->hide();
                 mp_APBox->hide();
