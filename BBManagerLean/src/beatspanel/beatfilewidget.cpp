@@ -884,6 +884,7 @@ void BeatFileWidget::APBoxStatusChanged(){
             }else{
                 APText->setText("Manual Trigger Only");
                 APBar->hide();
+                mp_APBox->hide();
             }
         }
         APBar->setText("1");
@@ -969,7 +970,6 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
          }
      }else if(type == TRANS_FILL){
          if(m_PlayAt > 0){
-             isfiniteMain = false;
              APBar->hide();
              mp_APBox->hide();
              APText->setText("Manual Trigger Only");
@@ -991,7 +991,6 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
         mp_APBox->hide();
         APBar->hide();
         APText->hide();
-        //mp_FileButton->setText(label);
     }
 }
 
