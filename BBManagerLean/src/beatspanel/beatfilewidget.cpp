@@ -1043,8 +1043,13 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
                 isfiniteMain = true;
                 mp_APBox->show();
             }else{
+                APBar->hide();
+                mp_APBox->hide();
+                APText->show();
+                APText->setText("Manual Trigger Only");
+                APBar->setText("0");
+                ApValueChanged();//turn it on to show the label
                 isfiniteMain = false;
-                 mp_APBox->hide();
             }
         }
     }
