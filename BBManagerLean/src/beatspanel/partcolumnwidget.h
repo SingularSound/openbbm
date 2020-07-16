@@ -7,6 +7,7 @@
 
 #include "songfolderviewitem.h"
 #include "copypastable.h"
+#include "beatfilewidget.h"
 
 class DropPanel : public QWidget, public CopyPaste::Pastable
 {
@@ -27,6 +28,7 @@ public:
     void enterEvent(QEvent *event);
     void leaveEvent(QEvent *event);
     bool paste();
+
 };
 
 class PartColumnWidget : public SongFolderViewItem
@@ -44,15 +46,25 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
+   void parentAPBoxStatusChanged(int sigNum);
+   void updateAPText(bool hasTrans,bool hasMain, int idx);
+   bool finitePart();
+   void setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile);
 
    // Accessor
    int maxFileCount();
+
+   int getNumSignature();
+   QList<BeatFileWidget*> *mp_BeatFileItems;
 
 signals:
    void sigIsMultiFileAddEnabled(bool first);
    void sigIsShuffleEnabled(bool first);
    void sigIsShuffleActivated(bool first);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
+   void sigUpdateTran();
+   void sigRowInserted();
+   void sigRowDeleted(int type);
 
 public slots:
    void endEditMidi(const QByteArray& data);
@@ -61,6 +73,7 @@ public slots:
    void slotCreateNewFile();
    void slotShuffleButtonClicked(bool checked);
    void slotSelectTrack(const QByteArray &trackData, int trackIndex);
+   void slotMainAPUpdated(bool hasMain);
 
 protected:
    virtual void paintEvent(QPaintEvent * event);
@@ -79,6 +92,7 @@ private:
    bool m_ShuffleActivated;
    bool m_intro;
    bool m_outro;
+   bool justInserted=false;
 
    // No file panel
    DropPanel *mp_NoFilePanel;
@@ -91,6 +105,7 @@ private:
    QPushButton *mp_MFPAddButton;
 
    QByteArray m_editingTrackData;
+
 
 };
 

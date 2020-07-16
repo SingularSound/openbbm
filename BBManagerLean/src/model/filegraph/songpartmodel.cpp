@@ -129,8 +129,6 @@ uint8_t *SongPartModel::internalData()
    return (uint8_t *)&m_SongPart;
 }
 
-
-
 void SongPartModel::setRepeatFlag(bool repeat)
 {
    m_SongPart.repeatFlag = repeat?1:0;
@@ -160,6 +158,11 @@ void SongPartModel::setTicksPerBar(uint32_t ticks)
 void SongPartModel::setLoopCount(uint32_t count)
 {
    m_SongPart.loopCount = count;
+}
+
+void SongPartModel::setPartName(QString partName)
+{
+  m_Name = partName;
 }
 
 void SongPartModel::setMainLoop(SongTrack * p_Track, int /*position*/)
