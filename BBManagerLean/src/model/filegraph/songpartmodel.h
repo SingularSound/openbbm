@@ -24,11 +24,11 @@ public:
    void setTimeSig(uint32_t num, uint32_t den);
    void setTicksPerBar(uint32_t ticks);
    void setLoopCount(uint32_t count);
-   void setPartName(QString partName);
    void setMainLoop(const QString &midiFilePath);
    void setTransFill(const QString &midiFilePath);
    void appendDrumFill(const QString &midiFilePath);
    void setEffectFileName(const QString &fileName);
+   void setPartFileName(const QString &fileName);
 
    bool repeatFlag();
    bool shuffleFlag();
@@ -44,6 +44,7 @@ public:
    SongTrack *mainTrackPtr();
    SongTrack *transFill();
    QString effectFileName();
+   QString PartFileName();
 
    const uint32_t *drumFillIndexes();
    uint32_t drumFillIndex(uint32_t index);

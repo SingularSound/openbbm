@@ -433,7 +433,7 @@ void SongPartWidget::slotTitleChangeByUI()
 void SongPartWidget::parentAPBoxStatusChanged()
 {
     int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
-    if(sigNum >0){//if zero means part is empty
+    if(sigNum >0){//if zero means part is empty or new
         for(int i = 0; i < mp_PartColumnItems->size();i++){
             mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
         }

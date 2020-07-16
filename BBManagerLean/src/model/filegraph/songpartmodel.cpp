@@ -160,11 +160,6 @@ void SongPartModel::setLoopCount(uint32_t count)
    m_SongPart.loopCount = count;
 }
 
-void SongPartModel::setPartName(QString partName)
-{
-  m_Name = partName;
-}
-
 void SongPartModel::setMainLoop(SongTrack * p_Track, int /*position*/)
 {
 
@@ -461,3 +456,18 @@ QString SongPartModel::effectFileName()
    return (char*)m_SongPart.effectName;
 }
 
+void SongPartModel::setPartFileName(const QString &fileName)
+{
+   const QByteArray& hold_this_byte_array_ffs = fileName.toLocal8Bit();
+   const char* charPtr = hold_this_byte_array_ffs.data();
+
+   // "<=" to copy the extra character '\0'
+   for(int i = 0; i <= fileName.count() && i < (MAX_EFFECT_NAME - 1); i++){
+      m_SongPart.partName[i] = charPtr[i];
+   }
+}
+
+QString SongPartModel::PartFileName()
+{
+   return (char*)m_SongPart.partName;
+}

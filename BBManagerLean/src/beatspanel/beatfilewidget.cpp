@@ -1060,6 +1060,10 @@ bool BeatFileWidget::finiteMain(){
  return isfiniteMain;
 }
 
-void BeatFileWidget::setAsNew(){
-    newFill = true;
+void BeatFileWidget::setAsNew(bool value){
+    newFill = value;
+}
+
+bool BeatFileWidget::isNew(){
+    return newFill;
 }
