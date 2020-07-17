@@ -39,7 +39,8 @@ public:
       DEFAULT_DRM,
       EXPORT_DIR,  // Write: Used to export tracks/accent hit while setting location. Read - get default export file name.
       LOOP_COUNT,
-      ENUM_SIZE
+      ENUM_SIZE,
+      PART_NAME
    };
 
    static QString columnName(int col) {
@@ -68,6 +69,7 @@ public:
        case DEFAULT_DRM: return tr("Default Drumset");
        case EXPORT_DIR: return tr("Export Filename");
        case LOOP_COUNT: return tr("MIDI Id");
+       case PART_NAME:return tr("Part Name");
        default: return QString::null;
        }
    }

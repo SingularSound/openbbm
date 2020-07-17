@@ -426,7 +426,9 @@ void SongPartWidget::slotTitleChangeByUI()
 {
     if(mp_Title->text() != partName){
         qDebug() << "Part Name Entered:" << mp_Title->text();
-        //model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
+        auto index = model()->data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME));
+        //to do code here saltar de aqui a trackpartitem a ver
+        model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
     }
 }
 

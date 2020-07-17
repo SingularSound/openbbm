@@ -30,7 +30,9 @@ signals:
 
 private:
    QList<QVariant> autoPilotValues();
+   QVariant partNameValue();
    void setAutoPilotValues(QList<QVariant> value);
+   void setPartNameValue(QString value);
 
 
    SongTrack * mp_SongTrack;         // Reference received in constructor, or returned by track model, no need to delete

@@ -84,6 +84,7 @@ SongPartItem::SongPartItem(SongPartModel * songPart, AbstractTreeItem *parent):
       }
 
       songPart->setLoopCount(loopCount());
+      songPart->setPartFileName(PartFileName());
    }
 }
 
@@ -103,6 +104,8 @@ QVariant SongPartItem::data(int column)
         return QVariant();
       case LOOP_COUNT:
         return ((SongPartModel*)filePart())->loopCount();
+       case PART_NAME:
+        return ((SongPartModel*)filePart())->PartFileName();
       default:
          return FilePartItem::data(column);
    }
@@ -126,6 +129,11 @@ bool SongPartItem::setData(int column, const QVariant & value)
              parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
              model()->itemDataChanged(parent(), SAVE);
              return true;
+      case PART_NAME:
+           ((SongPartModel*)filePart())->setPartFileName(value.toString());
+           parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
+           model()->itemDataChanged(parent(), SAVE);
+           return true;
       default:
          if(FilePartItem::setData(column, value)){
             parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
@@ -194,3 +202,21 @@ uint32_t SongPartItem::loopCount()
 {
     return static_cast<SongPartModel *>(filePart())->loopCount();
 }
+
+void SongPartItem::setPartFileName(const QString &fileName, bool init)
+{
+   SongPartModel *songPart = static_cast<SongPartModel *>(filePart());
+   songPart->setPartFileName(fileName);
+   if(!init){
+      parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
+      model()->itemDataChanged(parent(), SAVE);
+   }
+}
+
+QString SongPartItem::PartFileName()
+{
+   SongPartModel *songPart = static_cast<SongPartModel *>(filePart());
+   return songPart->PartFileName();
+}
+
+

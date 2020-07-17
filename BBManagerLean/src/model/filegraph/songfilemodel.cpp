@@ -127,7 +127,7 @@ uint32_t SongFileModel::readFromBuffer(uint8_t * p_Buffer, uint32_t size, QStrin
    p_Buffer += usedSize;
    totalUsedSize += usedSize;
 
-//   // 7 - Parse Autopilot data (if offset and size != 0)
+   // 7 - Parse Autopilot data (if offset and size != 0)
    delete mp_SubParts->takeAt(5);
    mp_SubParts->insert(5, new AutoPilotDataModel());
 

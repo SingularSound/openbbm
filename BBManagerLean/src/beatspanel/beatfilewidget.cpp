@@ -511,6 +511,9 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    leftl->addWidget(APBar);
    leftl->addStretch();//to group bar information to the left and the checkbox to the right
    leftl->addLayout(rightl);
+   mp_APBox->hide();
+   APText->hide();
+   APBar->hide();
 
 
    connect(mp_DeleteButton, SIGNAL(clicked()), this, SLOT(deleteButtonClicked()));

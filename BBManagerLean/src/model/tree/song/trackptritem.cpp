@@ -67,6 +67,8 @@ QVariant TrackPtrItem::data(int column)
     case EXPORT_DIR:
         // used to read the file name used to export the track
         return mp_SongTrack ? QString("%1.%2").arg(mp_SongTrack->name(), BMFILES_SONG_TRACK_EXTENSION) : QVariant();
+    case PART_NAME:
+        return partNameValue();
     default:
         return AbstractTreeItem::data(column);
     }
@@ -97,6 +99,9 @@ bool TrackPtrItem::setData(int column, const QVariant & value)
     case EXPORT_DIR:
         // used trigger track export and choose export location
         return exportTo(value.toString());
+    case PART_NAME:
+        setPartNameValue(value.toString());
+        return true;
     default:
         return AbstractTreeItem::setData(column, value);
     }
@@ -104,7 +109,7 @@ bool TrackPtrItem::setData(int column, const QVariant & value)
 
 
 bool TrackPtrItem::setName(const QString &name, bool init)
-{
+{//This refers to the file location
    int trackType = -1;
    if(parent()->data(TRACK_TYPE).isValid()){
       trackType = parent()->data(TRACK_TYPE).toInt();
@@ -278,6 +283,20 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
     lastCall.start();
 }
 
+void TrackPtrItem::setPartNameValue(QString value)
+{
+    TrackArrayItem      * tai = static_cast<TrackArrayItem *>(parent());
+    SongPartItem        * spi = static_cast<SongPartItem*>(tai->parent());
+    SongPartModel       * spm = static_cast<SongPartModel*>(spi->filePart());
+    SongFileItem        * sfi = static_cast<SongFileItem*>(spi->parent());
+    SongFileModel       * sfm  = static_cast<SongFileModel*>(sfi->filePart());
+
+    auto ppp = parent()->parent()->parent();
+    ppp->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
+    model()->itemDataChanged(ppp, SAVE);
+    lastCall.start();
+}
+
 QList<QVariant> TrackPtrItem::autoPilotValues()
 {
     TrackArrayItem      * tai = static_cast<TrackArrayItem *>(parent());
@@ -320,3 +339,14 @@ QList<QVariant> TrackPtrItem::autoPilotValues()
     }
     return QList<QVariant>() << 0 << 0;
 }
+
+QVariant TrackPtrItem::partNameValue()
+{
+    TrackArrayItem      * tai = static_cast<TrackArrayItem *>(parent());
+    SongPartItem        * spi = static_cast<SongPartItem*>(tai->parent());
+    SongPartModel       * spm = static_cast<SongPartModel*>(spi->filePart());
+
+
+    return spm->PartFileName();
+}
+

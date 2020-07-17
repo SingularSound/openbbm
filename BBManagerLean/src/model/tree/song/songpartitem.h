@@ -15,7 +15,9 @@ public:
    virtual bool setData(int column, const QVariant & value);
 
    void setEffectFileName(const QString &fileName, bool init = false);
+   void setPartFileName(const QString &fileName, bool init = false);
    QString effectFileName();
+   QString PartFileName();
    void clearEffectUsage();
 
    uint32_t timeSigNum();
