@@ -67,7 +67,6 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
    connect(mp_MoveHandleWidget, SIGNAL(sigDownClicked()), this, SLOT(slotMovePartDownClicked()));
    connect(mp_DeleteHandleWidget, SIGNAL(sigDeleteClicked()), this, SLOT(deleteButtonClicked()));
    connect(mp_DeleteHandleWidget, SIGNAL(sigSubWidgetClicked()), this, SLOT(slotSubWidgetClicked()));
-   connect(mp_LoopCount, SIGNAL(sigSetLoopCount()), this, SLOT(slotLoopCountEntered()));
    connect(mp_LoopCount, SIGNAL(sigSubWidgetClicked()), this, SLOT(slotSubWidgetClicked()));
    connect(mp_Title    , SIGNAL(editingFinished()), this,         SLOT(slotTitleChangeByUI (   )));
    connect(mp_Title    , SIGNAL(selectionChanged()), this,         SLOT(slotTitleChangeByUI (   )));
@@ -142,11 +141,17 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          p_PartColumnWidget->changeToolTip(tr("Add wav file"));
       }
       
-      mp_LoopCount->setLoopCount(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::LOOP_COUNT).data().toInt());
+      mp_LoopCount->setLoopCount(0);
       // Disable autopilot by hiding Loop button
       mp_LoopCount->setVisible(true);
    }
+   QString savedpartName = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::LOOP_COUNT).data().toString();//songpartitem::data
    partName = "Part "+QString::number(modelIndex.row());
+   if(savedpartName.isEmpty()){
+     model()->setData(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::LOOP_COUNT), partName);
+   }else{
+      partName = savedpartName;
+   }
    mp_Title->setText(partName);
    m_playingInternal = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PLAYING).data().toBool();
    m_validInternal   = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::INVALID).data().toString().isEmpty();
@@ -416,19 +421,11 @@ void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex
    emit sigSelectTrack(trackData, trackIndex, typeId, modelIndex().row());
 }
 
-void SongPartWidget::slotLoopCountEntered()
-{
-
-    model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::LOOP_COUNT), mp_LoopCount->getLoopCount());
-}
-
 void SongPartWidget::slotTitleChangeByUI()
 {
     if(mp_Title->text() != partName){
-        qDebug() << "Part Name Entered:" << mp_Title->text();
-        auto index = model()->data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME));
-        //to do code here saltar de aqui a trackpartitem a ver
-        model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
+        qDebug() << "New Part Name:" << mp_Title->text()<< modelIndex().column();
+        model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::LOOP_COUNT), mp_Title->text());
     }
 }
 

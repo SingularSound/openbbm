@@ -53,7 +53,6 @@ public slots:
    void slotMovePartUpClicked();
    void slotMovePartDownClicked();
    void slotSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
-   void slotLoopCountEntered();
 
 
 protected:
