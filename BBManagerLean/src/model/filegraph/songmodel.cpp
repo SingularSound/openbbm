@@ -15,7 +15,6 @@
 #include <QVariant>
 #include <QDebug>
 #include "songmodel.h"
-#include "songmodel.h"
 #include "songpartmodel.h"
 #include "songtracksmodel.h"
 
@@ -319,13 +318,4 @@ void SongModel::replaceEffectFile(const QString &originalName, const QString &ne
          part(i)->setEffectFileName(newName);
       }
    }
-}
-
-QList<QString> SongModel::getPartsNames(){
-    QList<QString> result;
-
-    for(int i = 2;i<mp_SubParts->size();i++){//0 and 1 are intro and outro
-       result.push_back(((SongPartModel *)mp_SubParts->at(i))->PartFileName());
-    }
-    return result;
 }

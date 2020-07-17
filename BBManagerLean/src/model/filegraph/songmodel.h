@@ -41,7 +41,6 @@ public:
 
    void replaceEffectFile(const QString &originalName, const QString &newName);
 
-   QList<QString> getPartsNames();
 protected:
    virtual uint32_t maxInternalSize();
    virtual uint32_t minInternalSize();
