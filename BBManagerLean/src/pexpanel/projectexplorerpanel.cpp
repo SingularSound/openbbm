@@ -416,7 +416,7 @@ void ProjectExplorerPanel::setProxyBeatsModel(SongFolderProxyModel * p_model)
     mp_beatsTreeView->setModel(p_model);
     if (p_model) {
         for (int i=1;i<=p_model->columnCount(); i++) { // hide all the columns but midi id
-            if (AbstractTreeItem::LOOP_COUNT != i)
+            if (AbstractTreeItem::PART_NAME != i)
                 mp_beatsTreeView->setColumnHidden(i,true);
         }
         mp_beatsTreeView->header()->resizeSection(0,200); // set up some reasonable sizes
@@ -425,7 +425,7 @@ void ProjectExplorerPanel::setProxyBeatsModel(SongFolderProxyModel * p_model)
 }
 
 void ProjectExplorerPanel::setMidiColumn() {
-    mp_beatsTreeView->setColumnHidden(AbstractTreeItem::LOOP_COUNT,!Settings::midiIdEnabled());
+    mp_beatsTreeView->setColumnHidden(AbstractTreeItem::PART_NAME,!Settings::midiIdEnabled());
     if (Settings::midiIdEnabled()) {
         mp_beatsTreeView->header()->resizeSection(0,200);
         mp_beatsTreeView->header()->resizeSection(1,40);
@@ -572,13 +572,13 @@ void ProjectExplorerPanel::slotOnDoubleClick(const QModelIndex &index){
        if (type2 == "SongFolderTreeItem" || type2 == "SongFileItem") {
 
            const QString name = index.sibling(index.row(), AbstractTreeItem::Column::NAME).data().toString();
-           const int midiId = index.sibling(index.row(), AbstractTreeItem::Column::LOOP_COUNT).data().toInt();
+           const int midiId = index.sibling(index.row(), AbstractTreeItem::Column::PART_NAME).data().toInt();
 
            qDebug() << "ProjectExplorerPanel::slotOnDoubleClick" << type2 << name << midiId;
            nameAndIdDialog = new NameAndIdDialog(this, name, midiId);
 
            const QModelIndex nameIndex = index.sibling(index.row(), AbstractTreeItem::Column::NAME);
-           const QModelIndex midiIdIndex = index.sibling(index.row(), AbstractTreeItem::Column::LOOP_COUNT);
+           const QModelIndex midiIdIndex = index.sibling(index.row(), AbstractTreeItem::Column::PART_NAME);
            QAbstractItemModel *treeModel = mp_beatsTreeView->model();
            connect(nameAndIdDialog,&NameAndIdDialog::itemNameAndMidiIdChanged, [nameIndex,midiIdIndex,treeModel](QString name, int midiId){
                treeModel->setData(nameIndex, name);

@@ -887,11 +887,11 @@ void SongsFolderTreeItem::initMidiIds() {
     for(int row = 0; row < childCount(); row++){
        tmpChild = static_cast<SongFolderTreeItem *>(child(row));
        for (int row2 = 0; row2 < tmpChild->childCount(); row2++) {
-           if (tmpChild->child(row2)->data(LOOP_COUNT).toInt() > 1) {
+           if (tmpChild->child(row2)->data(PART_NAME).toInt() > 1) {
                doInit = false;
-               id = tmpChild->child(row2)->data(LOOP_COUNT).toInt();
+               id = tmpChild->child(row2)->data(PART_NAME).toInt();
                break;
-           } else if (tmpChild->child(row2)->data(LOOP_COUNT).toInt() < 1) {
+           } else if (tmpChild->child(row2)->data(PART_NAME).toInt() < 1) {
                zeros++;
            } else {
                ones++;
@@ -905,7 +905,7 @@ void SongsFolderTreeItem::initMidiIds() {
         for(int row = 0; row < childCount(); row++){
             tmpChild = static_cast<SongFolderTreeItem *>(child(row));
             for (int row2 = 0; row2 < tmpChild->childCount(); row2++) {
-                tmpChild->child(row2)->setData(LOOP_COUNT, 0);
+                tmpChild->child(row2)->setData(PART_NAME, 0);
             }
         }
 

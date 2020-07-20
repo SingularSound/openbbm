@@ -119,7 +119,7 @@ void SongWidget::populate(QModelIndex const& modelIndex)
 
    // Populate self's data
    mp_SongTitleWidget->setTitle(modelIndex.data().toString());
-   mp_SongTitleWidget->setNumber(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::LOOP_COUNT).data().toInt());
+   mp_SongTitleWidget->setNumber(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PART_NAME).data().toInt());
    mp_SongTitleWidget->setUnsavedChanges(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::SAVE).data().toBool());
    mp_SongTitleWidget->slotTempoChangeByModel(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::TEMPO).data().toInt());
    mp_SongTitleWidget->populateDrmCombo(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::DEFAULT_DRM));
@@ -529,7 +529,7 @@ void SongWidget::slotTitleChangeByUI(const QString &title)
 void SongWidget::slotNumberChangeByUI(const QString &num)
 {
    qDebug() << "num changed:" << num;
-   model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::LOOP_COUNT), num);
+   model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), num);
 }
 
 void SongWidget::slotAPEnableChangeByUI(const bool state)

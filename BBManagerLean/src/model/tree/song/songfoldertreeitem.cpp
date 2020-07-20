@@ -43,7 +43,7 @@ SongFolderTreeItem::SongFolderTreeItem(BeatsProjectModel *p_Model, SongsFolderTr
    setSubFoldersAllowed(false);
    setSubFilesAllowed(true);
    midiId=0;
-   setData(LOOP_COUNT, midiId);
+   setData(PART_NAME, midiId);
 }
 
 SongFolderTreeItem::~SongFolderTreeItem()
@@ -69,7 +69,7 @@ QVariant SongFolderTreeItem::data(int column)
     switch (column){
     case NAME:
         return QVariant(name());
-    case LOOP_COUNT:
+    case PART_NAME:
         return midiId;
     case INVALID:
         for(int i = 0; i < childCount(); i++){
@@ -112,7 +112,7 @@ bool SongFolderTreeItem::setData(int column, const QVariant & value)
         propagateHashChange();
         model()->setProjectDirty();
         return true;
-    case LOOP_COUNT:
+    case PART_NAME:
     {
         midiId = value.toInt();
         qDebug() << "setting midi id" << midiId << isFile() << isFolder() << data(NAME);

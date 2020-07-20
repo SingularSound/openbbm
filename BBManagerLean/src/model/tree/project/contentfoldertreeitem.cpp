@@ -243,7 +243,7 @@ void ContentFolderTreeItem::updateModelWithData(bool cleanAll)
 
         for (int i=0; i<m_CSVFile.count(); i++) {
 
-            childItems()->at(i)->setData(LOOP_COUNT, QVariant(m_CSVFile.midiIdAt(i)));
+            childItems()->at(i)->setData(PART_NAME, QVariant(m_CSVFile.midiIdAt(i)));
         }
    }
 
@@ -439,7 +439,7 @@ void ContentFolderTreeItem::updateChildContentAt(int index, bool save)
 
       QString longName = childItems()->at(index)->data(NAME).toString();
       QString fileName = childItems()->at(index)->data(FILE_NAME).toString();
-      QString midiId = childItems()->at(index)->data(LOOP_COUNT).toString();
+      QString midiId = childItems()->at(index)->data(PART_NAME).toString();
 
       qDebug() << "update config" << longName << fileName << midiId;
       CsvConfigFile::FileType fileType(CsvConfigFile::FOLDER);

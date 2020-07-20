@@ -75,7 +75,7 @@ QVariant FolderTreeItem::data(int column)
         return folderFI().absoluteFilePath();
     case ERROR_MSG:
         return m_ErrorMsg;
-    case LOOP_COUNT:
+    case PART_NAME:
         return midiId;
     case SAVE:
         for (int i = 0; i < childCount(); ++i) {
@@ -116,7 +116,7 @@ bool FolderTreeItem::setData(int column, const QVariant & value)
     case ERROR_MSG:
         m_ErrorMsg = value.toStringList();
         return true;
-    case LOOP_COUNT:
+    case PART_NAME:
         midiId = value.toInt();
         return true;
     case SAVE:

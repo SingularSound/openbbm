@@ -46,6 +46,7 @@ uint32_t TrackMetaCollection::readFromBuffer(uint8_t * p_Buffer, uint32_t size, 
 
    for(int i = 0; i < metaOffsetList.count(); i++){
       SongTrackMetaItem *p_Meta = new SongTrackMetaItem();
+      qDebug()<<p_Buffer<< "+"<<(uint32_t)metaOffsetList.at(i)<<(uint32_t)sizeList.at(i)<<p_ParseErrors;
       processedSize = p_Meta->readFromBuffer(p_Buffer + (uint32_t)metaOffsetList.at(i), (uint32_t)sizeList.at(i), p_ParseErrors);
       if((int)processedSize < 0){
          qWarning() << "TrackMetaCollection::readFromBuffer - ERROR - (processedSize < 0)";

@@ -53,7 +53,7 @@ bool SongFolderProxyModel::hasChildren(const QModelIndex & parent) const
 
 QModelIndex	SongFolderProxyModel::index(int row, int column, const QModelIndex & parent) const
 {
-   if(column > 1 && column != AbstractTreeItem::LOOP_COUNT){
+   if(column > 1 && column != AbstractTreeItem::PART_NAME){
       return QModelIndex();
    }
 

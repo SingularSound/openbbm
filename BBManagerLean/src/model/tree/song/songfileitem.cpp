@@ -105,7 +105,7 @@ QVariant SongFileItem::data(int column)
    switch (column){
       case TEMPO:
          return static_cast<SongFileModel *>(filePart())->getSongModel()->bpm();
-      case LOOP_COUNT:
+      case PART_NAME:
 		return static_cast<SongFileModel *>(filePart())->getSongModel()->loopSong();
       case SAVE:
          return m_UnsavedChanges;
@@ -234,7 +234,7 @@ bool SongFileItem::setData(int column, const QVariant & value)
          model()->itemDataChanged(this, SAVE);
          // Clear playing status of all children
          return setData(PLAYING, QVariant(false));
-      case LOOP_COUNT:
+      case PART_NAME:
          qDebug() << "---------------------saving loopSong" << value.toUInt();
          static_cast<SongFileModel *>(filePart())->getSongModel()->setLoopSong(value.toUInt());
          m_UnsavedChanges = true;

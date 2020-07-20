@@ -102,10 +102,8 @@ QVariant SongPartItem::data(int column)
             }
         }
         return QVariant();
-      case LOOP_COUNT:
+      case PART_NAME:
         return ((SongPartModel*)filePart())->PartFileName();//loopcount is not longer being used, its created child was used to return the partname data
-       case PART_NAME:
-        return ((SongPartModel*)filePart())->PartFileName();
       default:
          return FilePartItem::data(column);
    }
@@ -124,16 +122,11 @@ bool SongPartItem::setData(int column, const QVariant & value)
             }
          }
          return true;
-      case LOOP_COUNT:
+      case PART_NAME:
         ((SongPartModel*)filePart())->setPartFileName(value.toString());// //loopcount is not longer being used, its created child was used to return the partname data
              parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
              model()->itemDataChanged(parent(), SAVE);
              return true;
-      case PART_NAME:
-           ((SongPartModel*)filePart())->setPartFileName(value.toString());
-           parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
-           model()->itemDataChanged(parent(), SAVE);
-           return true;
       default:
          if(FilePartItem::setData(column, value)){
             parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty

@@ -57,7 +57,7 @@ QVariant TrackArrayItem::data(int column)
                 return m_trackType;
             }
             return QVariant();
-        case LOOP_COUNT:
+        case PART_NAME:
             return m_loopCount;
     }
     return AbstractTreeItem::data(column);
@@ -104,7 +104,7 @@ bool TrackArrayItem::setData(int column, const QVariant & value)
                 }
             }
             return true;
-        case LOOP_COUNT:
+        case PART_NAME:
             m_loopCount = value.toInt();
             return true;
     default:
