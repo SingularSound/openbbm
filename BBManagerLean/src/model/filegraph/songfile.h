@@ -76,6 +76,8 @@
 *       Revision 0 : AutoPilot Mode Addition
 *                   -Added Autopilot File Structure
 *                   -Added New Place Holders for future Versions
+*    SONGFILE Version #4 :
+*       Revision 0 :  Added partname column
 *
 */
 

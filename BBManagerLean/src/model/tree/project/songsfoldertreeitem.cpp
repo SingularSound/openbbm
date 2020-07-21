@@ -328,7 +328,7 @@ bool SongsFolderTreeItem::importFoldersModal(QWidget *p_parentWidget, const QStr
          }
       }
 
-      // Validate that the verison number is supported
+      // Validate that the version number is supported
       if(!(fileVersion == 0 && fileRevision == 0) &&
          !(fileVersion == 1 && fileRevision == 0)){
          QMessageBox::warning(p_parentWidget, tr("Import Folder"), tr("File version for file %1 is not supported (version = %2, revision = %3, build = 0x%4\n\nSkipping file...").arg(QFileInfo(srcFileName).absoluteFilePath()).arg(fileVersion).arg(fileRevision).arg(fileBuild,4,16,QChar('0')));
