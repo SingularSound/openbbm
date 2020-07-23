@@ -46,7 +46,8 @@ public:
    void leaveEvent(QEvent *event);
    void updateAPText(bool hasTrans, bool hasMain);
    bool finiteMain();
-   void setAsNew();
+   void setAsNew(bool value);
+   bool isNew();
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);

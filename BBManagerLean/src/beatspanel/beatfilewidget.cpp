@@ -511,6 +511,9 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    leftl->addWidget(APBar);
    leftl->addStretch();//to group bar information to the left and the checkbox to the right
    leftl->addLayout(rightl);
+   mp_APBox->hide();
+   APText->hide();
+   APBar->hide();
 
 
    connect(mp_DeleteButton, SIGNAL(clicked()), this, SLOT(deleteButtonClicked()));
@@ -654,7 +657,8 @@ void BeatFileWidget::updateLayout()
         mp_PlayButton->setGeometry( 4, 12 , 15, 15);
     }
 
-   APBar->setFixedSize(17,15);
+   APBar->setFixedSize(26,15);
+   APBar->setAlignment(Qt::AlignCenter);
    leftl->setAlignment(Qt::AlignBottom);
 }
 
@@ -1060,6 +1064,10 @@ bool BeatFileWidget::finiteMain(){
  return isfiniteMain;
 }
 
-void BeatFileWidget::setAsNew(){
-    newFill = true;
+void BeatFileWidget::setAsNew(bool value){
+        newFill = value;
+}
+
+bool BeatFileWidget::isNew(){
+        return newFill;
 }
