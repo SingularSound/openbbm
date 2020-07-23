@@ -878,7 +878,7 @@ void BeatFileWidget::APBoxStatusChanged(){
         APText->show();
         APBar->show();
         if (trackType == MAIN_DRUM_LOOP){
-            QString text =(TransFill)?"Transition Fill at bar":"Play For";
+            QString text =(TransFill)?"Transition Fill at Bar":"Play For";
             APText->setText(text);
             isfiniteMain =true;
              emit sigMainAPUpdated(true);
@@ -998,13 +998,18 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
     }
 }
 
-void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
+void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro){
+
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     bool songapOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
+    int partrow = modelIndex().parent().parent().row();
+    QModelIndex partscount = modelIndex().parent().parent().siblingAtRow(partrow+2);
+    bool islastpart = (partscount.isValid())?false:true;
+
     if(songapOn){
         if(hasTrans && isfiniteMain && trackType == MAIN_DRUM_LOOP){
             //if is a main with transition fill
-            APText->setText("Transition Fill at bar");
+            APText->setText("Transition Fill at Bar");
             TransFill = true;
         }else if(!hasTrans && APText->text().contains("Transition") && trackType == MAIN_DRUM_LOOP){//means the trans fill was removed
             if(m_PlayAt > 0 ||mp_APBox->isChecked()){
@@ -1021,11 +1026,15 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain){
             }
         }else if(hasTrans && !isfiniteMain && trackType == MAIN_DRUM_LOOP){
             TransFill = (hasTrans)? true:false;
+        }else if(trackType == MAIN_DRUM_LOOP && isfiniteMain  && islastpart){
+            if(APText->text() != "Transition Fill at Bar" && hasOutro){
+                APText->setText("Play Outro Fill At Bar");
+            }else if(APText->text() != "Transition Fill at Bar" && !hasOutro){
+                APText->setText("End After Bars");
+            }
         }else if(trackType == TRANS_FILL && m_PlayAt >0){
             //if main is finite and change trans fill
             if(!newFill && !hasMain){
-                //if it was showing it mean the main was set infinite
-                 qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
                 APBar->hide();
                 mp_APBox->hide();
                 APText->setText("Manual Trigger Only");

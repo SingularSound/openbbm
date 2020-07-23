@@ -28,7 +28,7 @@ public:
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
    void parentAPBoxStatusChanged();
-   void updateTransMain();
+   void updateTransMain(bool hasOutro = NULL);
    void updateOnDeletedChild(int type);
 
    // Accessors
@@ -36,6 +36,8 @@ public:
    bool isIntro() const;
    void setOutro(bool outro);
    bool isOutro() const;
+   void setLast(bool last);
+   bool isLast() const;
 
 signals:
    void sigIsFirst(bool first);
@@ -68,6 +70,7 @@ private:
 
    bool m_intro;
    bool m_outro;
+   bool m_last;
    bool m_playingInternal;
    bool m_validInternal;
    QString partName;

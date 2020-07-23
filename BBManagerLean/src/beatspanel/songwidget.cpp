@@ -155,8 +155,18 @@ void SongWidget::populate(QModelIndex const& modelIndex)
          mp_SongPartItems->append(p_SongPartWidget);
          mp_ChildrenItems->append(p_SongPartWidget);
 
+         //to do code here ver si es el ultimo songpart y si tiene children osea si hay outro entonces cambiar el song part anterior
+
          connect(p_SongPartWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_SongPartWidget, &SongPartWidget::sigSelectTrack, this, &SongWidget::slotSelectTrack);
+
+         if(mp_SongPartItems->at(i)->isOutro()){
+          QModelIndex partmodelindex = childIndex.model()->index(1, 0, childIndex);
+
+           mp_SongPartItems->at(i-1)->setLast(true);
+           bool hasOutro = (partmodelindex.model()->rowCount(partmodelindex))?true:false;
+           mp_SongPartItems->at(i-1)->updateTransMain(hasOutro);
+         }
       }
    }
 
@@ -545,7 +555,7 @@ void SongWidget::slotAPEnableChangeByUI(const bool state)
            mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
        }
        for(int i = 1; i < size;i++){
-        mp_SongPartItems->at(i)->updateTransMain();
+        mp_SongPartItems->at(i)->updateTransMain(false);
        }
     }
 }
@@ -608,4 +618,3 @@ void SongWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex, in
 {
   emit sigSelectTrack(trackData, trackIndex, typeId, partIndex);
 }
-

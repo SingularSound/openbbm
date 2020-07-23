@@ -47,7 +47,7 @@ public:
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
    void parentAPBoxStatusChanged(int sigNum);
-   void updateAPText(bool hasTrans,bool hasMain, int idx);
+   void updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx);
    bool finitePart();
    void setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile);
 
@@ -62,7 +62,7 @@ signals:
    void sigIsShuffleEnabled(bool first);
    void sigIsShuffleActivated(bool first);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
-   void sigUpdateTran();
+   void sigUpdateTran(bool hasOutro = false);
    void sigRowInserted();
    void sigRowDeleted(int type);
 

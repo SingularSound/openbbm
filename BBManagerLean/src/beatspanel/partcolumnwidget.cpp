@@ -791,8 +791,9 @@ void PartColumnWidget::parentAPBoxStatusChanged(int sigNum)
             justInserted = false;
         }
         mp_BeatFileItems->at(i)->parentAPBoxStatusChanged(sigNum);
-        updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,i);
-         mp_BeatFileItems->at(i)->setAsNew(false);
+        MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+        updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL,i);
+        mp_BeatFileItems->at(i)->setAsNew(false);
     }
 }
 
@@ -803,12 +804,13 @@ bool PartColumnWidget::finitePart(){
     }
     return false;
 }
-void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain, int idx){
+void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx){
     if(hasMain){
         idx = mp_BeatFileItems->size()-1;//to pick trans fill
     }
+
     if(mp_BeatFileItems->size() > idx && idx>=0){
-       mp_BeatFileItems->at(idx)->updateAPText(hasTrans,hasMain);
+       mp_BeatFileItems->at(idx)->updateAPText(hasTrans,hasMain,hasOutro);
     }
 
 }
@@ -822,7 +824,7 @@ void PartColumnWidget::setBeatFileAPSettings(QString label,QModelIndex parent, Q
 
    beatFile->showAPSettings(trackType, sigNum,songapOn);
 
-   updateAPText(label.contains("Main") && parent.siblingAtRow(2).model()->rowCount(parent.siblingAtRow(2)) > 0,false,i);
+   updateAPText(label.contains("Main") && parent.siblingAtRow(2).model()->rowCount(parent.siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL ,i);
 }
 
 int PartColumnWidget::getNumSignature(){

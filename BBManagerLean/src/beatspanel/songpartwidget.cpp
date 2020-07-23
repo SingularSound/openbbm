@@ -111,7 +111,7 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          mp_ChildrenItems->append(p_PartColumnWidget);
          mp_PartColumnItems->append(p_PartColumnWidget);
          if(mp_PartColumnItems->size() > 1){
-            updateTransMain();//only enter on part # 2 for trans fill
+            updateTransMain(false);//only enter on part # 2 for trans fill
          }
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
@@ -346,7 +346,17 @@ void SongPartWidget::setOutro(bool outro)
 }
 bool SongPartWidget::isOutro() const
 {
-   return m_outro;
+    return m_outro;
+}
+
+void SongPartWidget::setLast(bool last)
+{
+    m_last = last;
+}
+
+bool SongPartWidget::isLast() const
+{
+    return m_last;
 }
 
 int SongPartWidget::headerColumnWidth(int columnIndex)
@@ -447,22 +457,22 @@ void SongPartWidget::updateOnDeletedChild(int type){
           mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
           if(type == 2){
               //if the transfill was removed main fill should update
-              mp_PartColumnItems->at(i)->updateAPText(false,false,i);
+              mp_PartColumnItems->at(i)->updateAPText(false,false,false,i);
           }
         }
     }
 }
 
-void SongPartWidget::updateTransMain(){
+void SongPartWidget::updateTransMain(bool hasOutro){
 
     bool finiteMain = false;
     //fill variable with true if transfill should be additional bars
     if(!m_intro && !m_outro){
         finiteMain = mp_PartColumnItems->at(0)->finitePart();
         if(mp_PartColumnItems->size() > 0){
-           int idx = (mp_PartColumnItems->size() > 3)?2:mp_PartColumnItems->size() - 1;
-           mp_PartColumnItems->at(idx)->updateAPText(false,finiteMain,0);//the last number does not matter here
+           int partidx = (mp_PartColumnItems->size() > 3)?2:mp_PartColumnItems->size() - 1;
+           partidx = (m_last)?0:partidx;
+           mp_PartColumnItems->at(partidx)->updateAPText(false,finiteMain, hasOutro,0);//the last number does not matter here
         }
-
     }
 }
