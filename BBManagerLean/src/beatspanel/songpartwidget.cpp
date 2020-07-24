@@ -407,11 +407,13 @@ void SongPartWidget::slotOrderChanged(int number)
 void SongPartWidget::slotMovePartUpClicked()
 {
     model()->moveItem(modelIndex(), -1);
+    emit sigUpdateAP();
 }
 
 void SongPartWidget::slotMovePartDownClicked()
 {
     model()->moveItem(modelIndex(), 1);
+    emit sigUpdateAP();
 }
 
 void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex, int typeId)

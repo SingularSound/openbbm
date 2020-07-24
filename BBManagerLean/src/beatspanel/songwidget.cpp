@@ -155,10 +155,9 @@ void SongWidget::populate(QModelIndex const& modelIndex)
          mp_SongPartItems->append(p_SongPartWidget);
          mp_ChildrenItems->append(p_SongPartWidget);
 
-         //to do code here ver si es el ultimo songpart y si tiene children osea si hay outro entonces cambiar el song part anterior
-
          connect(p_SongPartWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_SongPartWidget, &SongPartWidget::sigSelectTrack, this, &SongWidget::slotSelectTrack);
+         connect(p_SongPartWidget, &SongPartWidget::sigUpdateAP, this, &SongWidget::slotAPUpdate);
 
          if(mp_SongPartItems->at(i)->isOutro()){
           QModelIndex partmodelindex = childIndex.model()->index(1, 0, childIndex);
@@ -548,21 +547,18 @@ void SongWidget::slotAPEnableChangeByUI(const bool state)
 
     if(model()->data(songAPEnable).toBool() != state){
        model()->setData(songAPEnable, QVariant(state));
-
-       auto size = mp_SongPartItems->size()-1;//to exclude outro
-       //this next part updates the AP layout for each beat
-       for(int i = 1; i < size;i++){//starts on 1 to exclude intro
-           mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
-       }
-       for(int i = 1; i < size;i++){
-        mp_SongPartItems->at(i)->updateTransMain(false);
-       }
+        UpdateAP();
     }
 }
 
 void SongWidget::slotAPStateRequested()
 {
     emit sigAPUpdate(model()->data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool());
+}
+
+void SongWidget::slotAPUpdate()
+{
+    UpdateAP();
 }
 
 void SongWidget::slotMoveSongUpClicked()
@@ -617,4 +613,16 @@ void SongWidget::updateOrderSlots()
 void SongWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex, int typeId, int partIndex)
 {
   emit sigSelectTrack(trackData, trackIndex, typeId, partIndex);
+}
+
+void SongWidget::UpdateAP()
+{
+    auto size = mp_SongPartItems->size()-1;//to exclude outro
+    //this next part updates the AP layout for each beat
+    for(int i = 1; i < size;i++){//starts on 1 to exclude intro
+        mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
+    }
+    for(int i = 1; i < size;i++){
+     mp_SongPartItems->at(i)->updateTransMain(false);
+    }
 }

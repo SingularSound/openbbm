@@ -44,6 +44,7 @@ signals:
    void sigIsLast(bool last);
    void sigIsAlone(bool alone);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId, int partIndex);
+   void sigUpdateAP();
 
 public slots:
    void deleteButtonClicked();
