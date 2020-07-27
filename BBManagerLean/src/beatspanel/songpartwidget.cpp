@@ -116,7 +116,7 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
          connect(p_PartColumnWidget, &PartColumnWidget::sigUpdateTran, this, &SongPartWidget::updateTransMain);
-         connect(p_PartColumnWidget, &PartColumnWidget::sigRowInserted, this, &SongPartWidget::parentAPBoxStatusChanged);
+         connect(p_PartColumnWidget, &PartColumnWidget::sigRowInserted, this, &SongPartWidget::updateOnDeletedChild);
          connect(p_PartColumnWidget, &PartColumnWidget::sigRowDeleted, this, &SongPartWidget::updateOnDeletedChild);
       }
    }
