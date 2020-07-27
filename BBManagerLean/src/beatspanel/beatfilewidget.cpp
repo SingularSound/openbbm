@@ -886,6 +886,7 @@ void BeatFileWidget::APBoxStatusChanged(){
         }else if(trackType == TRANS_FILL){
             if(isfiniteMain){
                 APText->setText("Additional bars");
+                emit sigMainAPUpdated(true);
             }else{
                 APText->setText("Manual Trigger Only");
                 APBar->hide();
