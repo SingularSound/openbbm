@@ -998,13 +998,13 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
     }
 }
 
-void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro){
+void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, bool lastpart){
 
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     bool songapOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
     int partrow = modelIndex().parent().parent().row();
     QModelIndex partscount = modelIndex().parent().parent().siblingAtRow(partrow+2);
-    bool islastpart = (partscount.isValid())?false:true;
+    bool islastpart = (partscount.isValid() && !lastpart)?false:true;
 
     if(songapOn){
         if(hasTrans && isfiniteMain && trackType == MAIN_DRUM_LOOP){

@@ -158,17 +158,11 @@ void SongWidget::populate(QModelIndex const& modelIndex)
          connect(p_SongPartWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_SongPartWidget, &SongPartWidget::sigSelectTrack, this, &SongWidget::slotSelectTrack);
          connect(p_SongPartWidget, &SongPartWidget::sigUpdateAP, this, &SongWidget::slotAPUpdate);
-
-         if(mp_SongPartItems->at(i)->isOutro()){
-          QModelIndex partmodelindex = childIndex.model()->index(1, 0, childIndex);
-
-           mp_SongPartItems->at(i-1)->setLast(true);
-           bool hasOutro = (partmodelindex.model()->rowCount(partmodelindex))?true:false;
-           mp_SongPartItems->at(i-1)->updateTransMain(hasOutro);
-         }
+         connect(p_SongPartWidget, &SongPartWidget::sigMoveUp, this, &SongWidget::slotSawapPart);
+         connect(p_SongPartWidget, &SongPartWidget::sigMoveDown, this, &SongWidget::slotSawapPart);
       }
    }
-
+   APOutroUpdate();
    // Determine if new part widgets can be enabled
    int maxChildrenCnt = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::MAX_CHILD_CNT).data().toInt();
 
@@ -430,10 +424,12 @@ void SongWidget::rowsInserted(int start, int end)
          p_SongPartWidget = new SongPartWidget(model(), this);
          p_SongPartWidget->populate(childIndex);
          mp_ChildrenItems->insert(i, p_SongPartWidget);
+         mp_SongPartItems->insert(i,p_SongPartWidget);
          p_SongPartWidget->show();
 
          connect(p_SongPartWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_SongPartWidget, &SongPartWidget::sigSelectTrack, this, &SongWidget::slotSelectTrack);
+         connect(p_SongPartWidget, &SongPartWidget::sigUpdateAP, this, &SongWidget::slotAPUpdate);
       }
    }
 
@@ -450,7 +446,7 @@ void SongWidget::rowsInserted(int start, int end)
          mp_NewPartWidgets->at(i)->setEnabled(false);
       }
    }
-
+   UpdateAP();
    updateOrderSlots();
 
 }
@@ -463,7 +459,12 @@ void SongWidget::rowsRemoved(int start, int end)
 
    for(int i = end; i >= start; i--){
       p_SongPart = mp_ChildrenItems->at(i);
+
       mp_ChildrenItems->removeAt(i);
+      if(i == mp_SongPartItems->size()-2){//if the last part(excluding outro) was deleted
+          mp_SongPartItems->at(i-1)->setLast(true);
+      }
+      mp_SongPartItems->removeAt(i);
       delete p_SongPart;
 
       p_NewPartWidget = mp_NewPartWidgets->last();
@@ -485,7 +486,7 @@ void SongWidget::rowsRemoved(int start, int end)
          mp_NewPartWidgets->at(i)->setEnabled(true);
       }
    }
-
+   UpdateAP();
    updateOrderSlots();
 }
 
@@ -560,6 +561,10 @@ void SongWidget::slotAPUpdate()
 {
     UpdateAP();
 }
+void SongWidget::slotSawapPart(int start, int end){
+
+    mp_SongPartItems->swap(start,end);
+}
 
 void SongWidget::slotMoveSongUpClicked()
 {
@@ -582,6 +587,7 @@ void SongWidget::rowsMovedInsert(int start, QList<SongFolderViewItem *> *p_List)
 {
    for(int i = 0; i < p_List->count(); i++){
       mp_ChildrenItems->insert(start++, p_List->at(i));
+      mp_SongPartItems->insert(start++,(SongPartWidget*)p_List->at(i));
       if(p_List->at(i)->parent() != this){
          p_List->at(i)->setParent(this);
       }
@@ -594,6 +600,7 @@ void SongWidget::rowsMovedRemove(int start, int end)
 {
    for(int i = end; i >= start; i--){
       mp_ChildrenItems->removeAt(i);
+      mp_SongPartItems->removeAt(i);
    }
 
    updateOrderSlots();
@@ -625,4 +632,14 @@ void SongWidget::UpdateAP()
     for(int i = 1; i < size;i++){
      mp_SongPartItems->at(i)->updateTransMain(false);
     }
+    APOutroUpdate();
 }
+
+void SongWidget::APOutroUpdate(){
+
+    int oidx = mp_SongPartItems->size()-1;
+    mp_SongPartItems->at(oidx-1)->setLast(true);
+    bool hasOutro = !(mp_SongPartItems->at(oidx)->getChildItemAt(1)->isPartEmpty());
+    mp_SongPartItems->at(oidx-1)->updateTransMain(hasOutro);
+
+ }

@@ -33,6 +33,8 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
 
+   void APOutroUpdate();
+
 signals:
    void sigIsFirst(bool first);
    void sigIsLast(bool last);
@@ -60,6 +62,7 @@ public slots:
    void slotAPEnableChangeByUI(const bool state);
    void slotAPStateRequested();
    void slotAPUpdate();
+   void slotSawapPart(int start, int end);
 
 protected:
    virtual void paintEvent(QPaintEvent * event);

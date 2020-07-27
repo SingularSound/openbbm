@@ -359,6 +359,10 @@ bool SongPartWidget::isLast() const
     return m_last;
 }
 
+PartColumnWidget *SongPartWidget::getChildItemAt(int i){
+    return mp_PartColumnItems->at(i);
+}
+
 int SongPartWidget::headerColumnWidth(int columnIndex)
 {
    if (columnIndex == 0){
@@ -407,12 +411,14 @@ void SongPartWidget::slotOrderChanged(int number)
 void SongPartWidget::slotMovePartUpClicked()
 {
     model()->moveItem(modelIndex(), -1);
+    emit sigMoveUp(modelIndex().row(),modelIndex().row()-1);
     emit sigUpdateAP();
 }
 
 void SongPartWidget::slotMovePartDownClicked()
 {
     model()->moveItem(modelIndex(), 1);
+    emit sigMoveDown(modelIndex().row(),modelIndex().row()+1);
     emit sigUpdateAP();
 }
 
@@ -430,7 +436,6 @@ void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex
 
 void SongPartWidget::slotLoopCountEntered()
 {
-
     model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::LOOP_COUNT), mp_LoopCount->getLoopCount());
 }
 
@@ -445,36 +450,28 @@ void SongPartWidget::slotTitleChangeByUI()
 void SongPartWidget::parentAPBoxStatusChanged()
 {
     int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
-    if(sigNum >0){//if zero means part is empty
+    if(sigNum > 0){//if zero means part is empty
         for(int i = 0; i < mp_PartColumnItems->size();i++){
             mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
         }
     }
 }
-void SongPartWidget::updateOnDeletedChild(int type){
-    //only update  unchanged parts means if the change was on main fill main fill does not gets updated, if trans fill, transfill does not get updated
-    int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
-    for(int i = 0; i < mp_PartColumnItems->size();i++){
-        if(i != type){
-          mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
-          if(type == 2){
-              //if the transfill was removed main fill should update
-              mp_PartColumnItems->at(i)->updateAPText(false,false,false,i);
-          }
-        }
-    }
+void SongPartWidget::updateOnDeletedChild(){
+    emit sigUpdateAP();
 }
 
 void SongPartWidget::updateTransMain(bool hasOutro){
-
+    bool hasTrans =false;
     bool finiteMain = false;
-    //fill variable with true if transfill should be additional bars
+    if(mp_PartColumnItems->size() > 3){
+        hasTrans = !(mp_PartColumnItems->at(2)->isPartEmpty());
+    }
     if(!m_intro && !m_outro){
         finiteMain = mp_PartColumnItems->at(0)->finitePart();
         if(mp_PartColumnItems->size() > 0){
            int partidx = (mp_PartColumnItems->size() > 3)?2:mp_PartColumnItems->size() - 1;
-           partidx = (m_last)?0:partidx;
-           mp_PartColumnItems->at(partidx)->updateAPText(false,finiteMain, hasOutro,0);//the last number does not matter here
+           partidx = (m_last && hasOutro)?0:partidx;
+           mp_PartColumnItems->at(partidx)->updateAPText(hasTrans,finiteMain, hasOutro,0,m_last);
         }
     }
 }

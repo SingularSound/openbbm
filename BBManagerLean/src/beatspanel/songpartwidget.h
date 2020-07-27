@@ -28,8 +28,8 @@ public:
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
    void parentAPBoxStatusChanged();
-   void updateTransMain(bool hasOutro = NULL);
-   void updateOnDeletedChild(int type);
+   void updateTransMain(bool hasOutro = false);
+   void updateOnDeletedChild();
 
    // Accessors
    void setIntro(bool intro);
@@ -39,12 +39,15 @@ public:
    void setLast(bool last);
    bool isLast() const;
 
+   PartColumnWidget *getChildItemAt(int i);
 signals:
    void sigIsFirst(bool first);
    void sigIsLast(bool last);
    void sigIsAlone(bool alone);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId, int partIndex);
    void sigUpdateAP();
+   void sigMoveUp(int start, int end);
+   void sigMoveDown(int start, int end);
 
 public slots:
    void deleteButtonClicked();
