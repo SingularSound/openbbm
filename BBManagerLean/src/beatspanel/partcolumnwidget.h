@@ -47,7 +47,7 @@ public:
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
    void parentAPBoxStatusChanged(int sigNum);
-   void updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx, bool isLast=false);
+   void updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx,int sigNum, bool isLast=false);
    bool finitePart();
    void setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile);
 

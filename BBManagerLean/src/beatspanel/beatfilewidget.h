@@ -44,7 +44,7 @@ public:
 
    void enterEvent(QEvent *event);
    void leaveEvent(QEvent *event);
-   void updateAPText(bool hasTrans, bool hasMain,bool hasOutro, bool lastpart = false);
+   void updateAPText(bool hasTrans, bool hasMain,bool hasOutro, int sigNum, bool lastpart = false);
    bool finiteMain();
    void setAsNew(bool value);
    bool isNew();

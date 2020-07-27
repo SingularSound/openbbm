@@ -463,6 +463,7 @@ void SongPartWidget::updateOnDeletedChild(){
 void SongPartWidget::updateTransMain(bool hasOutro){
     bool hasTrans =false;
     bool finiteMain = false;
+    int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
     if(mp_PartColumnItems->size() > 3){
         hasTrans = !(mp_PartColumnItems->at(2)->isPartEmpty());
     }
@@ -471,7 +472,7 @@ void SongPartWidget::updateTransMain(bool hasOutro){
         if(mp_PartColumnItems->size() > 0){
            int partidx = (mp_PartColumnItems->size() > 3)?2:mp_PartColumnItems->size() - 1;
            partidx = (m_last && hasOutro)?0:partidx;
-           mp_PartColumnItems->at(partidx)->updateAPText(hasTrans,finiteMain, hasOutro,0,m_last);
+           mp_PartColumnItems->at(partidx)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
         }
     }
 }

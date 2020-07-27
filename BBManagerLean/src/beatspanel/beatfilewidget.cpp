@@ -506,6 +506,7 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
 
    APBar = new QLineEdit(this);
    APText = new QLabel(this);
+   APBar->setText("1");
    APText->setText("Trigger at bar");
    leftl->addWidget(APText);
    leftl->addWidget(APBar);
@@ -998,7 +999,7 @@ void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
     }
 }
 
-void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, bool lastpart){
+void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, int sigNum, bool lastpart){
 
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     bool songapOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
@@ -1015,8 +1016,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, bo
             if(m_PlayAt > 0 ||mp_APBox->isChecked()){
                 mp_APBox->setChecked(true);
                 APText->setText("Play For");
-                MIDIPARSER_MidiTrack data = (MIDIPARSER_MidiTrack)model()->index(modelIndex().row(), AbstractTreeItem::RAW_DATA, modelIndex().parent()).data().toByteArray();
-                APBar->setText(QString::number((m_PlayAt-1)/data.timeSigNum+1));
+                APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
                 isfiniteMain = true;
             }else{
                 APText->setText("Loop infinitely");
@@ -1040,12 +1040,11 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, bo
                 APText->setText("Manual Trigger Only");
                 isfiniteMain = false;
             }else if (hasMain){
-                MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-                int sigNum = data.timeSigNum;
-                qDebug()<<"box visible"<<mp_APBox->isVisible()<<"text"<<APText->isVisible()<<"value"<<APBar->isVisible();
                 mp_APBox->setChecked(true);
-                APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
                 APText->setText("Additional bars");
+                if(m_PlayAt > 1){
+                    APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+                }
                 mp_APBox->show();
                 APBar->show();
                 APText->show();
