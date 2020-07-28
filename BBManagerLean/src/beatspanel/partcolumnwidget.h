@@ -58,6 +58,7 @@ public:
    bool isPartEmpty();
    QList<BeatFileWidget*> *mp_BeatFileItems;
 
+   void setPartEmpty(bool value);
 signals:
    void sigIsMultiFileAddEnabled(bool first);
    void sigIsShuffleEnabled(bool first);

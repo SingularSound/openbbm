@@ -470,9 +470,18 @@ void SongPartWidget::updateTransMain(bool hasOutro){
     if(!m_intro && !m_outro){
         finiteMain = mp_PartColumnItems->at(0)->finitePart();
         if(mp_PartColumnItems->size() > 0){
-           int partidx = (mp_PartColumnItems->size() > 3)?2:mp_PartColumnItems->size() - 1;
-           partidx = (m_last && hasOutro)?0:partidx;
-           mp_PartColumnItems->at(partidx)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
+            if(hasTrans){
+                //update main
+                mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
+                //update trans fill with main
+                mp_PartColumnItems->at(2)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
+            }else if(hasOutro){
+                //update main fill only
+                mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
+            }else if(m_last && !hasTrans && !hasOutro){
+                //update main fill only
+                mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
+            }
         }
     }
 }

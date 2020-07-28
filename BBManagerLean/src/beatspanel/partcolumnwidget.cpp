@@ -317,6 +317,7 @@ void PartColumnWidget::populate(QModelIndex const& modelIndex)
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
          connect(p_BeatFileWidget, &BeatFileWidget::sigMainAPUpdated, this, &PartColumnWidget::slotMainAPUpdated);
+         connect(p_BeatFileWidget, &BeatFileWidget::sigPartEmpty, this, &PartColumnWidget::setPartEmpty);
          isEmpty = false;
       }
    }
@@ -718,6 +719,7 @@ void PartColumnWidget::rowsInserted(int start, int end)
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
          connect(p_BeatFileWidget, &BeatFileWidget::sigMainAPUpdated, this, &PartColumnWidget::slotMainAPUpdated);
+         connect(p_BeatFileWidget, &BeatFileWidget::sigPartEmpty, this, &PartColumnWidget::setPartEmpty);
          p_BeatFileWidget->show();
       }
       emit sigRowInserted();//This updates AP labels
@@ -805,11 +807,8 @@ bool PartColumnWidget::finitePart(){
     return false;
 }
 void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx,int sigNum, bool isLast){
-    if(hasMain){
-        idx = mp_BeatFileItems->size()-1;//to pick trans fill
-    }
 
-    if(mp_BeatFileItems->size() > idx && idx>=0){
+    if(mp_BeatFileItems->size() > idx && idx >= 0){
        mp_BeatFileItems->at(idx)->updateAPText(hasTrans,hasMain,hasOutro,sigNum,isLast);
     }
 
@@ -839,4 +838,8 @@ int PartColumnWidget::getNumSignature(){
 bool PartColumnWidget::isPartEmpty()
 {
     return isEmpty;
+}
+void PartColumnWidget::setPartEmpty(bool value)
+{
+    isEmpty = value;
 }

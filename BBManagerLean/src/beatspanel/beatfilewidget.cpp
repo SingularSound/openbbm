@@ -886,11 +886,16 @@ void BeatFileWidget::APBoxStatusChanged(){
         }else if(trackType == TRANS_FILL){
             if(isfiniteMain){
                 APText->setText("Additional bars");
+                APText->setVisible(true);
+                emit sigPartEmpty(false);
                 emit sigMainAPUpdated(true);
             }else{
+                APText->setVisible(true);
                 APText->setText("Manual Trigger Only");
                 APBar->hide();
                 mp_APBox->hide();
+                emit sigPartEmpty(false);
+                emit sigMainAPUpdated(false);
             }
         }
         APBar->setText("1");
@@ -898,7 +903,12 @@ void BeatFileWidget::APBoxStatusChanged(){
 
         APBar->setText("0");
         ApValueChanged();
-        if (trackType != MAIN_DRUM_LOOP){
+        if(trackType == TRANS_FILL){
+            APText->setText("Manual Trigger Only");
+            APBar->hide();
+            emit sigPartEmpty(true);
+            emit sigMainAPUpdated(false);
+        }else if (trackType != MAIN_DRUM_LOOP){
             APText->hide();
         }else{
             APText->setText("Loop infinitely");
@@ -1055,7 +1065,6 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
             if(hasMain){
                 isfiniteMain = true;
                 mp_APBox->show();
-                APText->hide();
             }else{
                 APBar->hide();
                 mp_APBox->hide();

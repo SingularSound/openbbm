@@ -52,6 +52,7 @@ public:
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);
    void sigMainAPUpdated(bool hasMain);
+   void sigPartEmpty(bool value);
 
 public slots:
    void endEditMidi(const QByteArray& data);
