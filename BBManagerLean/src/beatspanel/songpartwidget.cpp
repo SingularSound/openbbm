@@ -36,6 +36,7 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
 
    m_intro = false;
    m_outro = false;
+   m_last = false;
 
    m_selectedStyleSheet = STYLE_NONE;
    mp_PartColumnItems = new QList<PartColumnWidget*>();

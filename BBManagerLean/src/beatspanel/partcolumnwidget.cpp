@@ -778,7 +778,7 @@ void PartColumnWidget::slotSelectTrack(const QByteArray &trackData, int trackInd
 }
 
 void PartColumnWidget::slotMainAPUpdated(){
-    emit sigUpdateTran(true);
+    emit sigUpdateTran();
 }
 
 void PartColumnWidget::parentAPBoxStatusChanged(int sigNum)
