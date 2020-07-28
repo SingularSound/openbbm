@@ -162,7 +162,7 @@ void SongWidget::populate(QModelIndex const& modelIndex)
          connect(p_SongPartWidget, &SongPartWidget::sigMoveDown, this, &SongWidget::slotSawapPart);
       }
    }
-   APOutroUpdate();
+
    // Determine if new part widgets can be enabled
    int maxChildrenCnt = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::MAX_CHILD_CNT).data().toInt();
 
@@ -187,6 +187,7 @@ void SongWidget::populate(QModelIndex const& modelIndex)
    }
 
    // Sets the AutoPilot CheckBox in every SongTitle to its desired state on populate.
+   UpdateAP();
    emit sigAPUpdate(model()->data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::AUTOPILOT_ON)).toBool());
 
    // Row related signals
@@ -569,11 +570,13 @@ void SongWidget::slotSawapPart(int start, int end){
 void SongWidget::slotMoveSongUpClicked()
 {
     model()->moveItem(modelIndex(), -1);
+    UpdateAP();
 }
 
 void SongWidget::slotMoveSongDownClicked()
 {
     model()->moveItem(modelIndex(), 1);
+    UpdateAP();
 }
 
 void SongWidget::rowsMovedGet(int start, int end, QList<SongFolderViewItem *> *p_List)
@@ -624,22 +627,18 @@ void SongWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex, in
 
 void SongWidget::UpdateAP()
 {
-    auto size = mp_SongPartItems->size()-1;//to exclude outro
+    auto size = mp_SongPartItems->size()-1;
     //this next part updates the AP layout for each beat
     for(int i = 1; i < size;i++){//starts on 1 to exclude intro
         mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
     }
-    for(int i = 1; i < size;i++){
+    for(int i = 1; i < size-1;i++){//size-1 to avoid last part
+     mp_SongPartItems->at(i)->setLast(false);
      mp_SongPartItems->at(i)->updateTransMain(false);
     }
-    APOutroUpdate();
+    //handle outro interaction
+    mp_SongPartItems->at(size-1)->setLast(true);
+    bool hasOutro = !(mp_SongPartItems->at(size)->getChildItemAt(1)->isPartEmpty());
+    mp_SongPartItems->at(size-1)->updateTransMain(hasOutro);
 }
 
-void SongWidget::APOutroUpdate(){
-
-    int oidx = mp_SongPartItems->size()-1;
-    mp_SongPartItems->at(oidx-1)->setLast(true);
-    bool hasOutro = !(mp_SongPartItems->at(oidx)->getChildItemAt(1)->isPartEmpty());
-    mp_SongPartItems->at(oidx-1)->updateTransMain(hasOutro);
-
- }

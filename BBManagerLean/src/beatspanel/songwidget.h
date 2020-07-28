@@ -33,8 +33,6 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
 
-   void APOutroUpdate();
-
 signals:
    void sigIsFirst(bool first);
    void sigIsLast(bool last);

@@ -512,6 +512,7 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    leftl->addWidget(APBar);
    leftl->addStretch();//to group bar information to the left and the checkbox to the right
    leftl->addLayout(rightl);
+   mp_FileButton->setLayout(leftl);
    mp_APBox->hide();
    APText->hide();
    APBar->hide();
@@ -595,6 +596,7 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
    if(apSettings.size() >= 2){
        m_PlayAt = apSettings.at(0).toInt();
        m_PlayFor = apSettings.at(1).toInt();
+       isfiniteMain = (m_PlayAt > 0)?true:false;
    }
 
     QString cpp = model()->index(modelIndex.row(), AbstractTreeItem::CPP_TYPE, modelIndex.parent()).data().toString();
@@ -866,10 +868,8 @@ void BeatFileWidget::ApValueChanged(){
                      ,QVariant(settings),Qt::EditRole);
 }
 void BeatFileWidget::parentAPBoxStatusChanged(int sigNum){
-    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-    bool songAPOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
 
-    showAPSettings(trackType,sigNum,songAPOn);
+    updateAPText(false, false, false,sigNum,false);
 }
 
 void BeatFileWidget::APBoxStatusChanged(){
@@ -878,44 +878,23 @@ void BeatFileWidget::APBoxStatusChanged(){
     if(mp_APBox->isChecked()){
         APText->show();
         APBar->show();
-        if (trackType == MAIN_DRUM_LOOP){
-            QString text =(TransFill)?"Transition Fill at Bar":"Play For";
-            APText->setText(text);
-            isfiniteMain =true;
-             emit sigMainAPUpdated(true);
-        }else if(trackType == TRANS_FILL){
-            if(isfiniteMain){
-                APText->setText("Additional bars");
-                APText->setVisible(true);
-                emit sigPartEmpty(false);
-                emit sigMainAPUpdated(true);
-            }else{
-                APText->setVisible(true);
-                APText->setText("Manual Trigger Only");
-                APBar->hide();
-                mp_APBox->hide();
-                emit sigPartEmpty(false);
-                emit sigMainAPUpdated(false);
-            }
+        if (trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
+            emit sigPartEmpty(false);
+            emit sigMainAPUpdated();
+        }else{
+            APBar->setText("1");
         }
-        APBar->setText("1");
     }else{
 
         APBar->setText("0");
         ApValueChanged();
-        if(trackType == TRANS_FILL){
-            APText->setText("Manual Trigger Only");
-            APBar->hide();
+        if(trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             emit sigPartEmpty(true);
-            emit sigMainAPUpdated(false);
-        }else if (trackType != MAIN_DRUM_LOOP){
-            APText->hide();
+            emit sigMainAPUpdated();
         }else{
-            APText->setText("Loop infinitely");
-            isfiniteMain = false;
-            emit sigMainAPUpdated(true);
+            APBar->hide();
+            APText->hide();
         }
-        APBar->hide();
     }
 }
 
@@ -965,117 +944,94 @@ void BeatFileWidget::edit()
         .arg(song.data().toString()).arg(m->songFileName(ix)), m_editingTrackData = trackData);
 }
 
-void BeatFileWidget::showAPSettings(int type,int sigNum, bool APOn){
+void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, int sigNum, bool lastpart){
 
-    if(type != INTRO_FILL && type != OUTRO_FILL && APOn)
-    {
-     mp_FileButton->setLayout(leftl);
-     mp_APBox->show();
-     APBar->show();
-     APText->show();
-     if(type == MAIN_DRUM_LOOP){
-         if(m_PlayAt > 0 ||mp_APBox->isChecked()){
-             mp_APBox->setChecked(true);
-             APText->setText("Play For");
-             APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-             isfiniteMain = true;
-         }else{
-             APText->setText("Loop infinitely");
-             APBar->hide();
-             isfiniteMain = false;
-         }
-     }else if(type == TRANS_FILL){
-         if(m_PlayAt > 0){
-             APBar->hide();
-             mp_APBox->hide();
-             APText->setText("Manual Trigger Only");
-             isfiniteMain = false;
-         }else{
-             APBar->hide();
-             APText->hide();
-         }
-     }else{
-         if(m_PlayAt > 0 && !newFill){
-             mp_APBox->setChecked(true);
-             APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-         }else{
-             APBar->hide();
-             APText->hide();
-         }
-     }
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+    bool songapOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
+
+    if(trackType != INTRO_FILL && trackType != OUTRO_FILL && songapOn){
+        mp_APBox->show();
+        APBar->show();
+        APText->show();
+        if(trackType == MAIN_DRUM_LOOP){
+            if(m_PlayAt > 0 ||mp_APBox->isChecked()){
+              mp_APBox->setChecked(true);
+              APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+              isfiniteMain = true;
+             }
+            if(!hasMain){
+                APText->setText("Loop infinitely");
+                APText->show();
+                APBar->hide();
+            }else if(hasTrans){
+                APText->setText("Transition Fill at Bar");
+                APText->show();
+                APBar->show();
+            }else{
+                if(lastpart){
+                    if(hasOutro){
+                        APText->setText("Play Outro Fill At Bar");
+                        APText->show();
+                        APBar->show();
+                    }else{
+                        APText->setText("End After Bars");
+                        APText->show();
+                        APBar->show();
+                    }
+                }else{
+                    APText->setText("Play For");
+                    APText->show();
+                    APBar->show();
+                }
+            }
+         TransFill = hasTrans;
+        }else if(trackType == TRANS_FILL){
+            if(m_PlayAt >0){
+                if(!newFill && !hasMain){
+                    APBar->hide();
+                    mp_APBox->hide();
+                    APText->setText("Manual Trigger Only");
+                    isfiniteMain = false;
+                }else if (hasMain){
+                    mp_APBox->setChecked(true);
+                    APText->setText("Additional bars");
+                    if(m_PlayAt > 1){
+                        APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+                    }
+                    mp_APBox->show();
+                    APBar->show();
+                    APText->show();
+                    isfiniteMain = true;
+                }
+            }else{
+                if(hasMain){
+                    isfiniteMain = true;
+                    mp_APBox->show();
+                }else{
+                    APBar->hide();
+                    mp_APBox->hide();
+                    APText->show();
+                    APText->setText("Manual Trigger Only");
+                    APBar->setText("0");
+                    ApValueChanged();//turn it on to show the label
+                    isfiniteMain = false;
+                }
+            }
+        }else{
+            if(m_PlayAt > 0 && !newFill){
+                     mp_APBox->setChecked(true);
+                     APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+                 }else{
+                     APBar->hide();
+                     APText->hide();
+                 }
+        }
     }else{
         mp_APBox->hide();
         APBar->hide();
         APText->hide();
     }
-}
 
-void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, int sigNum, bool lastpart){
-
-    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-    bool songapOn = model()->data(modelIndex().parent().parent().parent().sibling(modelIndex().parent().parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
-    int partrow = modelIndex().parent().parent().row();
-    QModelIndex partscount = modelIndex().parent().parent().siblingAtRow(partrow+2);
-    bool islastpart = (partscount.isValid() && !lastpart)?false:true;
-
-    if(songapOn){
-        if(hasTrans && isfiniteMain && trackType == MAIN_DRUM_LOOP){
-            //if is a main with transition fill
-            APText->setText("Transition Fill at Bar");
-            TransFill = true;
-        }else if(!hasTrans && APText->text().contains("Transition") && trackType == MAIN_DRUM_LOOP){//means the trans fill was removed
-            if(m_PlayAt > 0 ||mp_APBox->isChecked()){
-                mp_APBox->setChecked(true);
-                APText->setText("Play For");
-                APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-                isfiniteMain = true;
-            }else{
-                APText->setText("Loop infinitely");
-                APBar->hide();
-                isfiniteMain = false;
-                TransFill = (hasTrans)? true:false;
-            }
-        }else if(hasTrans && !isfiniteMain && trackType == MAIN_DRUM_LOOP){
-            TransFill = (hasTrans)? true:false;
-        }else if(trackType == MAIN_DRUM_LOOP && isfiniteMain  && islastpart){
-            if(APText->text() != "Transition Fill at Bar" && hasOutro){
-                APText->setText("Play Outro Fill At Bar");
-            }else if(APText->text() != "Transition Fill at Bar" && !hasOutro){
-                APText->setText("End After Bars");
-            }
-        }else if(trackType == TRANS_FILL && m_PlayAt >0){
-            //if main is finite and change trans fill
-            if(!newFill && !hasMain){
-                APBar->hide();
-                mp_APBox->hide();
-                APText->setText("Manual Trigger Only");
-                isfiniteMain = false;
-            }else if (hasMain){
-                mp_APBox->setChecked(true);
-                APText->setText("Additional bars");
-                if(m_PlayAt > 1){
-                    APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-                }
-                mp_APBox->show();
-                APBar->show();
-                APText->show();
-                isfiniteMain = true;
-            }
-        }else if(trackType == TRANS_FILL  && m_PlayAt < 0){
-            if(hasMain){
-                isfiniteMain = true;
-                mp_APBox->show();
-            }else{
-                APBar->hide();
-                mp_APBox->hide();
-                APText->show();
-                APText->setText("Manual Trigger Only");
-                APBar->setText("0");
-                ApValueChanged();//turn it on to show the label
-                isfiniteMain = false;
-            }
-        }
-    }
     newFill =false;
 }
 bool BeatFileWidget::finiteMain(){    

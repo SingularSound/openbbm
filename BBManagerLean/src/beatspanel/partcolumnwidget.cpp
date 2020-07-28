@@ -312,7 +312,6 @@ void PartColumnWidget::populate(QModelIndex const& modelIndex)
          p_BeatFileWidget->populate(childIndex);
          mp_ChildrenItems->append(p_BeatFileWidget);
          mp_BeatFileItems->append(p_BeatFileWidget);
-         setBeatFileAPSettings(label, modelIndex, childIndex, i, p_BeatFileWidget);
 
          connect(p_BeatFileWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_BeatFileWidget, &BeatFileWidget::sigSelectTrack, this, &PartColumnWidget::slotSelectTrack);
@@ -704,6 +703,8 @@ void PartColumnWidget::rowsInserted(int start, int end)
    // Add all items from model
    // For now, we only read the the immediate children
    BeatFileWidget *p_BeatFileWidget;
+   QVariant labelVatiant = modelIndex().data();
+   QString label = labelVatiant.toString();
 
    for(int i = start; i <= end; i++){
       QModelIndex childIndex = model()->index(i, 0, modelIndex()); // NOTE: Widgets are associated to column 0
@@ -722,10 +723,10 @@ void PartColumnWidget::rowsInserted(int start, int end)
          connect(p_BeatFileWidget, &BeatFileWidget::sigPartEmpty, this, &PartColumnWidget::setPartEmpty);
          p_BeatFileWidget->show();
       }
-      emit sigRowInserted();//This updates AP labels
-      mp_BeatFileItems->at(i)->setAsNew(false);
+      setPartEmpty(label.contains("Trans"));
+      emit sigRowInserted();
+      mp_BeatFileItems->at(i)->setAsNew(false);//todo erase to do delete
    }
-
    updatePanels();
 
 }
@@ -741,7 +742,7 @@ void PartColumnWidget::rowsRemoved(int start, int end)
       mp_BeatFileItems->removeAt(i);
       delete p_BeatFileWidget;
       isEmpty = (mp_ChildrenItems->count() == 0)?true:false;
-      emit sigRowDeleted();//send type to exclude column from being updated
+      emit sigRowDelete();
    }
 
    updatePanels();
@@ -801,7 +802,7 @@ void PartColumnWidget::parentAPBoxStatusChanged(int sigNum)
 
 bool PartColumnWidget::finitePart(){
 
-    if(mp_BeatFileItems->size() > 0 && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0){//if there are children and has trans fill
+    if(mp_BeatFileItems->size() > 0){
        return mp_BeatFileItems->at(0)->finiteMain();
     }
     return false;
@@ -812,18 +813,6 @@ void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain,bool hasOutro, in
        mp_BeatFileItems->at(idx)->updateAPText(hasTrans,hasMain,hasOutro,sigNum,isLast);
     }
 
-}
-
-void PartColumnWidget::setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile){
-
-   QByteArray trackData = child.sibling(child.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
-   int sigNum = ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
-   MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(child.row(), AbstractTreeItem::TRACK_TYPE, child.parent()).data().toInt();
-   bool songapOn = model()->data(parent.parent().parent().sibling(parent.parent().parent().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool();
-
-   beatFile->showAPSettings(trackType, sigNum,songapOn);
-
-   updateAPText(label.contains("Main") && parent.siblingAtRow(2).model()->rowCount(parent.siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL,sigNum ,i);
 }
 
 int PartColumnWidget::getNumSignature(){

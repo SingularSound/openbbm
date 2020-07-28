@@ -30,7 +30,6 @@ public:
    explicit BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent = nullptr);
 
    void setLabel(QString const& label);
-   void showAPSettings(int type, int sigNum, bool APOn);
 
    void populate(QModelIndex const& modelIndex);
    void updateLayout();
@@ -51,7 +50,7 @@ public:
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);
-   void sigMainAPUpdated(bool hasMain);
+   void sigMainAPUpdated();
    void sigPartEmpty(bool value);
 
 public slots:

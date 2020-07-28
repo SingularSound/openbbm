@@ -49,7 +49,6 @@ public:
    void parentAPBoxStatusChanged(int sigNum);
    void updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx,int sigNum, bool isLast=false);
    bool finitePart();
-   void setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile);
 
    // Accessor
    int maxFileCount();
@@ -66,7 +65,7 @@ signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
    void sigUpdateTran(bool hasTrans = false, bool hasOutro = false);
    void sigRowInserted();
-   void sigRowDeleted();
+   void sigRowDelete();
 
 public slots:
    void endEditMidi(const QByteArray& data);

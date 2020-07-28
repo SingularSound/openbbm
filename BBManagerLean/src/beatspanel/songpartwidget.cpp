@@ -111,14 +111,12 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
          p_PartColumnWidget->populate(childIndex);
          mp_ChildrenItems->append(p_PartColumnWidget);
          mp_PartColumnItems->append(p_PartColumnWidget);
-         if(mp_PartColumnItems->size() > 1){
-            updateTransMain(false);//only enter on part # 2 for trans fill
-         }
+
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
          connect(p_PartColumnWidget, &PartColumnWidget::sigUpdateTran, this, &SongPartWidget::updateTransMain);
          connect(p_PartColumnWidget, &PartColumnWidget::sigRowInserted, this, &SongPartWidget::updateOnDeletedChild);
-         connect(p_PartColumnWidget, &PartColumnWidget::sigRowDeleted, this, &SongPartWidget::updateOnDeletedChild);
+         connect(p_PartColumnWidget, &PartColumnWidget::sigRowDelete, this, &SongPartWidget::updateOnDeletedChild);
       }
    }
 
@@ -476,15 +474,9 @@ void SongPartWidget::updateTransMain(bool hasOutro){
                 mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
                 //update trans fill with main
                 mp_PartColumnItems->at(2)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
-            }else if(hasOutro){
+            }else {
                 //update main fill only
                 mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
-            }else if(m_last && !hasTrans && !hasOutro){
-                //update main fill only
-                mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
-            }else{
-                //update main
-                 mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
             }
         }
     }
