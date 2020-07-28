@@ -1005,8 +1005,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         case TRANFILL_REQUEST:
 
 
-            // If there is drum fills in the current part
-              if (TRANS_FILL_PTR(CurrPartPtr)) {
+            // If there is drum fills in the current part and they are turned on
+              if (TRANS_FILL_PTR(CurrPartPtr) ) {
                 if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength){
                     if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength % nTick){
                         TranFillPickUpSyncTickLength = (( 1 + TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength/ nTick) * nTick);
@@ -1043,7 +1043,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     TranFillStartSyncTick += MAIN_LOOP_PTR(CurrPartPtr)->barLength -
                             (TRANS_FILL_PTR(CurrPartPtr)->nTick % TRANS_FILL_PTR(CurrPartPtr)->barLength);
                 }
-
+                //if there is a Transition fill but the fill AP is off
+                if(APPtr && AutopilotAction == 1 && AutopilotCueFill == 1){
+                     PlayerStatus = (APPtr->part[PartIndex].transitionFill.playAt == 0)?NO_FILL_TRAN:PlayerStatus;
+                }
                 PlayerStatus = TRANFILL_WAITING_TRIG;
             } else {
 
