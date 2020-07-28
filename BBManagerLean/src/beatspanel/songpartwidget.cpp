@@ -482,6 +482,9 @@ void SongPartWidget::updateTransMain(bool hasOutro){
             }else if(m_last && !hasTrans && !hasOutro){
                 //update main fill only
                 mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
+            }else{
+                //update main
+                 mp_PartColumnItems->at(0)->updateAPText(hasTrans,finiteMain, hasOutro,0,sigNum,m_last);
             }
         }
     }
