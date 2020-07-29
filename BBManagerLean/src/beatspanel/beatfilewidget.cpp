@@ -956,7 +956,10 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
         if(trackType == MAIN_DRUM_LOOP){
             if(m_PlayAt > 0 ||mp_APBox->isChecked()){
               mp_APBox->setChecked(true);
-              APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+              if(!newFill){
+                  APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+                 // ApValueChanged() not necessary here because this fires a signal
+              }
               isfiniteMain = true;
              }
             if(!hasMain){
@@ -1012,8 +1015,10 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                     mp_APBox->hide();
                     APText->show();
                     APText->setText("Manual Trigger Only");
-                    APBar->setText("0");
-                    ApValueChanged();//turn it on to show the label
+                    if(!newFill){
+                        APBar->setText("0");
+                       // ApValueChanged() not necessary here because this fires a signal
+                    }
                     isfiniteMain = false;
                 }
             }
