@@ -1011,14 +1011,14 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                     isfiniteMain = true;
                     mp_APBox->show();
                 }else{
-                    APBar->hide();
-                    APText->show();
-                    APText->setText("Manual Trigger Only");
                     if(!newFill){
                         APBar->setText("0");
                        // ApValueChanged() not necessary here because this fires a signal
                        mp_APBox->hide();
                     }
+                    APBar->hide();
+                    APText->show();
+                    APText->setText("Manual Trigger Only");
                     isfiniteMain = false;
                 }
             }
