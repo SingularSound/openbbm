@@ -505,7 +505,7 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    rightl->addWidget(mp_APBox);
 
    APBar = new QLineEdit(this);
-   APBar->setValidator( new QIntValidator(0, 99, this) );
+   APBar->setValidator( new QIntValidator(1, 99, this) );
    APText = new QLabel(this);
    APBar->setText("1");
    APText->setText("Trigger at bar");
@@ -873,9 +873,9 @@ void BeatFileWidget::ApValueChanged(){
     model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
                      ,QVariant(settings),Qt::EditRole);
 }
-void BeatFileWidget::parentAPBoxStatusChanged(int sigNum){
+void BeatFileWidget::parentAPBoxStatusChanged(int sigNum, bool hasMain){
 
-    updateAPText(false, false, false,sigNum,false);
+    updateAPText(false, hasMain, false,sigNum,false);
 }
 
 void BeatFileWidget::APBoxStatusChanged(){
@@ -885,15 +885,20 @@ void BeatFileWidget::APBoxStatusChanged(){
         APText->show();
         APBar->show();
         if (trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
+            if(trackType == MAIN_DRUM_LOOP){
+                isfiniteMain = true;
+            }
             emit sigPartEmpty(false);
             emit sigMainAPUpdated();
-        }else{
-            APBar->setText("1");
         }
+        APBar->setText("1");
     }else{
 
         APBar->setText("0");
         if(trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
+            if(trackType == MAIN_DRUM_LOOP){
+                isfiniteMain = false;
+            }
             emit sigPartEmpty(true);
             emit sigMainAPUpdated();
         }else{
@@ -967,7 +972,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
               }
               isfiniteMain = true;
              }
-            if(!hasMain){
+            if(!hasMain && !isfiniteMain){
                 APText->setText("Loop infinitely");
                 APText->show();
                 APBar->hide();
@@ -1030,10 +1035,11 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                 }
             }
         }else{
-            if(m_PlayAt > 0 && !newFill){
+            if(hasMain && !newFill){
                      mp_APBox->setChecked(true);
                      APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
                  }else{
+                     mp_APBox->hide();
                      APBar->hide();
                      APText->hide();
                  }

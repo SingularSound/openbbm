@@ -114,7 +114,7 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
 
          connect(p_PartColumnWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_PartColumnWidget, &PartColumnWidget::sigSelectTrack, this, &SongPartWidget::slotSelectTrack);
-         connect(p_PartColumnWidget, &PartColumnWidget::sigUpdateTran, this, &SongPartWidget::updateTransMain);
+         connect(p_PartColumnWidget, &PartColumnWidget::sigUpdateTran, this, &SongPartWidget::updateOnDeletedChild);
          connect(p_PartColumnWidget, &PartColumnWidget::sigRowInserted, this, &SongPartWidget::updateOnDeletedChild);
          connect(p_PartColumnWidget, &PartColumnWidget::sigRowDelete, this, &SongPartWidget::updateOnDeletedChild);
       }
@@ -449,9 +449,10 @@ void SongPartWidget::slotTitleChangeByUI()
 void SongPartWidget::parentAPBoxStatusChanged()
 {
     int sigNum = mp_PartColumnItems->at(0)->getNumSignature();
+    bool hasMain = mp_PartColumnItems->at(0)->finitePart();
     if(sigNum > 0){//if zero means part is empty
         for(int i = 0; i < mp_PartColumnItems->size();i++){
-            mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum);
+            mp_PartColumnItems->at(i)->parentAPBoxStatusChanged(sigNum,hasMain);
         }
     }
 }

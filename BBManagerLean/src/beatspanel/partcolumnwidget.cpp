@@ -124,7 +124,6 @@ void PartColumnWidget::slotDrop(QDropEvent *event)
     }
     if (accept){
         event->accept();
-        parentAPBoxStatusChanged(getNumSignature());
         emit sigUpdateTran();
     }
 }
@@ -782,7 +781,7 @@ void PartColumnWidget::slotMainAPUpdated(){
     emit sigUpdateTran();
 }
 
-void PartColumnWidget::parentAPBoxStatusChanged(int sigNum)
+void PartColumnWidget::parentAPBoxStatusChanged(int sigNum, bool hasMain)
 {
     QVariant labelVatiant = modelIndex().data();
     QString label = labelVatiant.toString();
@@ -793,7 +792,7 @@ void PartColumnWidget::parentAPBoxStatusChanged(int sigNum)
             mp_BeatFileItems->at(i)->setAsNew(true);
             justInserted = false;
         }
-        mp_BeatFileItems->at(i)->parentAPBoxStatusChanged(sigNum);
+        mp_BeatFileItems->at(i)->parentAPBoxStatusChanged(sigNum, hasMain);
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
         updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL,sigNum,i);
         mp_BeatFileItems->at(i)->setAsNew(false);

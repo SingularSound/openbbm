@@ -46,7 +46,7 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
-   void parentAPBoxStatusChanged(int sigNum);
+   void parentAPBoxStatusChanged(int sigNum, bool hasMain);
    void updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx,int sigNum, bool isLast=false);
    bool finitePart();
 

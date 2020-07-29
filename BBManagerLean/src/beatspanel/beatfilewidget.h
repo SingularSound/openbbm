@@ -59,7 +59,7 @@ public slots:
    bool trackButtonClicked(const QString& dropFileName = nullptr);
    void playButtonClicked();
    void APBoxStatusChanged();
-   void parentAPBoxStatusChanged(int sigNum);
+   void parentAPBoxStatusChanged(int sigNum, bool hasMain = false);
    void ApValueChanged();
    void edit();
    void slotSetPlayerEnabled(bool enabled);
