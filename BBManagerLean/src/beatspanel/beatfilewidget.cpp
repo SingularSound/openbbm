@@ -505,6 +505,7 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    rightl->addWidget(mp_APBox);
 
    APBar = new QLineEdit(this);
+   APBar->setValidator( new QIntValidator(0, 99, this) );
    APText = new QLabel(this);
    APBar->setText("1");
    APText->setText("Trigger at bar");
@@ -660,7 +661,7 @@ void BeatFileWidget::updateLayout()
         mp_PlayButton->setGeometry( 4, 12 , 15, 15);
     }
 
-   APBar->setFixedSize(26,15);
+   APBar->setFixedSize(21,15);
    APBar->setAlignment(Qt::AlignCenter);
    leftl->setAlignment(Qt::AlignBottom);
 }
