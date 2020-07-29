@@ -1066,7 +1066,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 if(TRANS_FILL_PTR(CurrPartPtr)->nTick > TRANS_FILL_PTR(CurrPartPtr)->barLength &&
                    !(MasterTick/(SongPlayer_getbarLength() / TRANS_FILL_PTR(CurrPartPtr)->timeSigNum) >= TRANS_FILL_PTR(CurrPartPtr)->timeSigNum)){
                     //longer than 1 bar trans fill when main loop is on the first bar
-                    TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
+                   TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
+                }
+                if(APPtr && AutopilotAction == 0 && AutopilotCueFill == 1 && APPtr->part[PartIndex].transitionFill.playFor > 0){
+                    qDebug()<<((double)APPtr->part[PartIndex].transitionFill.playFor/(double)TRANS_FILL_PTR(CurrPartPtr)->timeSigNum);
+                     TranFillStopSyncTick *= ((double)APPtr->part[PartIndex].transitionFill.playFor/(double)TRANS_FILL_PTR(CurrPartPtr)->timeSigNum);
                 }
                 PlayerStatus = TRANFILL_QUITING;
             } else {
@@ -1482,6 +1486,7 @@ static void NextPart(void) {
     WasPausedFlag = 0;
     SobrietyDrumTranFill = 0;
     Test = 0;
+    //to do code here if trans fill has extra bars play them here
     
     if (CurrSongPtr->nPart > 0) {
         if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {

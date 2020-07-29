@@ -861,8 +861,13 @@ bool BeatFileWidget::trackButtonClicked(const QString& dropFileName)
 void BeatFileWidget::ApValueChanged(){
     //set new ap value
     MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-    m_PlayAt = (APBar->text().toInt()-1)*data.timeSigNum+1;
-    qDebug()<<"apbar text"<<APBar->text()<<"TIMESIG"<<data.timeSigNum<<"PLAYAT"<<m_PlayAt;
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+    if(trackType == TRANS_FILL){
+        m_PlayFor = APBar->text().toInt();
+    }else{
+        m_PlayAt = (APBar->text().toInt()-1)*data.timeSigNum+1;
+    }
+
     QList<QVariant> settings = QList<QVariant>() << m_PlayAt << m_PlayFor;
     model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
                      ,QVariant(settings),Qt::EditRole);
@@ -887,7 +892,6 @@ void BeatFileWidget::APBoxStatusChanged(){
     }else{
 
         APBar->setText("0");
-        ApValueChanged();
         if(trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             emit sigPartEmpty(true);
             emit sigMainAPUpdated();
@@ -989,7 +993,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
             }
          TransFill = hasTrans;
         }else if(trackType == TRANS_FILL){
-            if(m_PlayAt > 0 || mp_APBox->isChecked()){
+            if(m_PlayFor > 0 || mp_APBox->isChecked()){
                 if(!newFill && !hasMain){
                     APBar->hide();
                     mp_APBox->hide();
@@ -998,8 +1002,8 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                 }else if (hasMain){
                     mp_APBox->setChecked(true);
                     APText->setText("Additional bars");
-                    if(m_PlayAt > 1){
-                        APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+                    if(m_PlayFor > 0){
+                        APBar->setText(QString::number(m_PlayFor));
                     }
                     mp_APBox->show();
                     APBar->show();
