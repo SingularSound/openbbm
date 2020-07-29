@@ -127,7 +127,7 @@ static int CalculateStartBarSyncTick(unsigned int tickPos,
         unsigned int tickPerBar, unsigned int barTriggerLimit);
 
 static unsigned int CalculateTranFillQuitSyncTick(unsigned int tickPos,
-        unsigned int tickPerBar);
+        unsigned int tickPerBar, unsigned int playFor = 1);
 static unsigned int getNextAPIndex();
 static void fillAPIndex();
 
@@ -1068,9 +1068,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     //longer than 1 bar trans fill when main loop is on the first bar
                    TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
                 }
-                if(APPtr && AutopilotAction == 0 && AutopilotCueFill == 1 && APPtr->part[PartIndex].transitionFill.playFor > 0){
-                    qDebug()<<((double)APPtr->part[PartIndex].transitionFill.playFor/(double)TRANS_FILL_PTR(CurrPartPtr)->timeSigNum);
-                     TranFillStopSyncTick *= ((double)APPtr->part[PartIndex].transitionFill.playFor/(double)TRANS_FILL_PTR(CurrPartPtr)->timeSigNum);
+                if(APPtr && AutopilotAction == 0 && AutopilotCueFill == 1 && APPtr->part[PartIndex].transitionFill.playFor > 1){
+                    TranFillStopSyncTick = CalculateTranFillQuitSyncTick(MasterTick, MAIN_LOOP_PTR(CurrPartPtr)->barLength, APPtr->part[PartIndex].transitionFill.playFor);
                 }
                 PlayerStatus = TRANFILL_QUITING;
             } else {
@@ -1805,9 +1804,8 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
     }
 }
 
-static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
-        uint32_t tickPerBar) {
-    return ((1 + ((uint32_t) (tickPos / tickPerBar))) * tickPerBar);
+static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos, uint32_t tickPerBar,uint32_t playFor) {
+    return ((playFor + ((uint32_t) (tickPos / tickPerBar))) * tickPerBar);
 }
 
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
