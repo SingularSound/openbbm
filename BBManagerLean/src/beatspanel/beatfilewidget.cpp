@@ -989,7 +989,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
             }
          TransFill = hasTrans;
         }else if(trackType == TRANS_FILL){
-            if(m_PlayAt >0){
+            if(m_PlayAt > 0 || mp_APBox->isChecked()){
                 if(!newFill && !hasMain){
                     APBar->hide();
                     mp_APBox->hide();
@@ -1010,6 +1010,8 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                 if(hasMain){
                     isfiniteMain = true;
                     mp_APBox->show();
+                    APText->setText("Manual Trigger Only");
+                    APBar->hide();
                 }else{
                     if(!newFill){
                         APBar->setText("0");
