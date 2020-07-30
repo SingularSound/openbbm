@@ -887,6 +887,7 @@ void BeatFileWidget::APBoxStatusChanged(){
 
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     if(mp_APBox->isChecked()){
+        ApValueChanged(false);
         APText->show();
         APBar->show();
         if (trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
@@ -896,7 +897,6 @@ void BeatFileWidget::APBoxStatusChanged(){
             emit sigPartEmpty(false);
             emit sigMainAPUpdated();
         }
-        APBar->setText("1");
     }else{
 
         ApValueChanged(true);
