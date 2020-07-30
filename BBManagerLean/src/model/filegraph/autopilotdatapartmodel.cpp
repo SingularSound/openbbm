@@ -15,6 +15,7 @@
 #include "autopilotdatafillmodel.h"
 #include "autopilotdatapartmodel.h"
 #include "song.h"
+#include "QDebug"
 
 AutoPilotDataPartModel::AutoPilotDataPartModel()
 {
@@ -104,7 +105,9 @@ QString AutoPilotDataPartModel::verifyPartValid(int nbFill)
 
     for(int i = 0; i < nbFill-1; i++)
     {
-
+        if((int)getDrumFill(i)->getPlayAt() < 0){
+            returnString += QString(tr("Drum Fill #%1 Trigger at value can't be empty.\n")).arg(i+1) ;
+        }
         if(getDrumFill(i)->getPlayAt() >= getMainLoop()->getPlayAt() && getMainLoop()->getPlayAt() > 0)
         {
             returnString += QString(tr("Drum Fill #%1 Trigger at value > Main Drum Trigger at value.\n")).arg(i+1) ;

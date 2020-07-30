@@ -859,19 +859,24 @@ bool BeatFileWidget::trackButtonClicked(const QString& dropFileName)
 
     return true;
 }
-void BeatFileWidget::ApValueChanged(){
-    //set new ap value
-    MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-    if(trackType == TRANS_FILL){
-        m_PlayFor = APBar->text().toInt();
-    }else{
-        m_PlayAt = (APBar->text().toInt()-1)*data.timeSigNum+1;
-    }
+void BeatFileWidget::ApValueChanged(bool off){
 
-    QList<QVariant> settings = QList<QVariant>() << m_PlayAt << m_PlayFor;
-    model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
-                     ,QVariant(settings),Qt::EditRole);
+    if(APBar->text().toInt() < 1 && !APBar->text().isEmpty()){
+        APBar->setText("1");
+    }else{
+        //set new ap value
+        MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+        MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+        if(trackType == TRANS_FILL){
+            m_PlayFor = (!off)?APBar->text().toInt():0;
+        }else{
+            m_PlayAt = (!off)?(APBar->text().toInt()-1)*data.timeSigNum+1:0;
+        }
+
+        QList<QVariant> settings = QList<QVariant>() << m_PlayAt << m_PlayFor;
+        model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
+                         ,QVariant(settings),Qt::EditRole);
+    }
 }
 void BeatFileWidget::parentAPBoxStatusChanged(int sigNum, bool hasMain){
 
@@ -894,7 +899,7 @@ void BeatFileWidget::APBoxStatusChanged(){
         APBar->setText("1");
     }else{
 
-        APBar->setText("0");
+        ApValueChanged(true);
         if(trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             if(trackType == MAIN_DRUM_LOOP){
                 isfiniteMain = false;
@@ -1024,8 +1029,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                     APBar->hide();
                 }else{
                     if(!newFill){
-                        APBar->setText("0");
-                       // ApValueChanged() not necessary here because this fires a signal
+                       ApValueChanged(true);
                        mp_APBox->hide();
                     }
                     APBar->hide();
@@ -1035,10 +1039,10 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                 }
             }
         }else{
-            if(hasMain && !newFill){
+            if(!newFill){
                      mp_APBox->setChecked(true);
                      APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-                 }else if(hasMain && newFill){
+                 }else if(newFill){
                     mp_APBox->setChecked(true);
                  }else{
                      mp_APBox->hide();

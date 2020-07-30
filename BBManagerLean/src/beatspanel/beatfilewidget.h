@@ -60,7 +60,7 @@ public slots:
    void playButtonClicked();
    void APBoxStatusChanged();
    void parentAPBoxStatusChanged(int sigNum, bool hasMain = false);
-   void ApValueChanged();
+   void ApValueChanged(bool off = false);
    void edit();
    void slotSetPlayerEnabled(bool enabled);
    void drag();
