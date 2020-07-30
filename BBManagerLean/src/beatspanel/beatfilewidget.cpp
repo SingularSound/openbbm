@@ -1038,6 +1038,8 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
             if(hasMain && !newFill){
                      mp_APBox->setChecked(true);
                      APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
+                 }else if(hasMain && newFill){
+                    mp_APBox->setChecked(true);
                  }else{
                      mp_APBox->hide();
                      APBar->hide();
