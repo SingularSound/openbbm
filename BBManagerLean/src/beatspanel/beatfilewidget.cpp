@@ -887,9 +887,9 @@ void BeatFileWidget::APBoxStatusChanged(){
 
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     if(mp_APBox->isChecked()){
-        ApValueChanged(false);
         APText->show();
         APBar->show();
+        ApValueChanged(false);
         if (trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             if(trackType == MAIN_DRUM_LOOP){
                 isfiniteMain = true;
@@ -911,6 +911,7 @@ void BeatFileWidget::APBoxStatusChanged(){
             APText->hide();
         }
     }
+    model()->setProjectDirty();
 }
 
 void BeatFileWidget::playButtonClicked()
