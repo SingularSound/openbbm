@@ -508,15 +508,19 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    APBar->setValidator( new QIntValidator(1, 99, this) );
    APText = new QLabel(this);
    APBar->setText("1");
+   PostText = new QLabel(this);
+   PostText->setText("Bars");
    APText->setText("Trigger at bar");
    leftl->addWidget(APText);
    leftl->addWidget(APBar);
+   leftl->addWidget(PostText);
    leftl->addStretch();//to group bar information to the left and the checkbox to the right
    leftl->addLayout(rightl);
    mp_FileButton->setLayout(leftl);
    mp_APBox->hide();
    APText->hide();
    APBar->hide();
+   PostText->hide();
 
 
    connect(mp_DeleteButton, SIGNAL(clicked()), this, SLOT(deleteButtonClicked()));
@@ -969,6 +973,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
         mp_APBox->show();
         APBar->show();
         APText->show();
+        PostText->hide();
         if(trackType == MAIN_DRUM_LOOP){
             if(m_PlayAt > 0 ||mp_APBox->isChecked()){
               mp_APBox->setChecked(true);
@@ -993,7 +998,8 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                         APText->show();
                         APBar->show();
                     }else{
-                        APText->setText("End After Bars");
+                        APText->setText("End After");
+                        PostText->show();
                         APText->show();
                         APBar->show();
                     }

@@ -83,6 +83,7 @@ private:
    QHBoxLayout *leftl = new QHBoxLayout();
    QHBoxLayout *rightl = new QHBoxLayout();
    QLabel *APText = new QLabel();
+   QLabel *PostText = new QLabel();
    QLineEdit *APBar = new QLineEdit();
    QCheckBox *mp_APBox;
    bool m_dragging;
