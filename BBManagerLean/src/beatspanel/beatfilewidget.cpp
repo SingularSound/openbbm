@@ -863,7 +863,7 @@ void BeatFileWidget::ApValueChanged(bool off){
 
     if(APBar->text().toInt() < 1 && !APBar->text().isEmpty()){
         APBar->setText("1");
-    }else{
+    }else if(!newFill){
         //set new ap value
         MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
@@ -1029,7 +1029,6 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                     APBar->hide();
                 }else{
                     if(!newFill){
-                       ApValueChanged(true);
                        mp_APBox->hide();
                     }
                     APBar->hide();
@@ -1039,13 +1038,12 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                 }
             }
         }else{
-            if(!newFill){
+            if(!newFill && m_PlayAt > 0){
                      mp_APBox->setChecked(true);
                      APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
                  }else if(newFill){
                     mp_APBox->setChecked(true);
                  }else{
-                     mp_APBox->hide();
                      APBar->hide();
                      APText->hide();
                  }
