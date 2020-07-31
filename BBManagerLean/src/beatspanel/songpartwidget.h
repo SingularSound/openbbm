@@ -28,20 +28,26 @@ public:
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
    void parentAPBoxStatusChanged();
-   void updateTransMain();
-   void updateOnDeletedChild(int type);
+   void updateTransMain(bool hasOutro = false);
+   void updateOnDeletedChild();
 
    // Accessors
    void setIntro(bool intro);
    bool isIntro() const;
    void setOutro(bool outro);
    bool isOutro() const;
+   void setLast(bool last);
+   bool isLast() const;
 
+   PartColumnWidget *getChildItemAt(int i);
 signals:
    void sigIsFirst(bool first);
    void sigIsLast(bool last);
    void sigIsAlone(bool alone);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId, int partIndex);
+   void sigUpdateAP();
+   void sigMoveUp(int start, int end);
+   void sigMoveDown(int start, int end);
 
 public slots:
    void deleteButtonClicked();
@@ -68,6 +74,7 @@ private:
 
    bool m_intro;
    bool m_outro;
+   bool m_last;
    bool m_playingInternal;
    bool m_validInternal;
    QString partName;

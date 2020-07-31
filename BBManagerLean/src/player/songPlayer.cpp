@@ -127,7 +127,7 @@ static int CalculateStartBarSyncTick(unsigned int tickPos,
         unsigned int tickPerBar, unsigned int barTriggerLimit);
 
 static unsigned int CalculateTranFillQuitSyncTick(unsigned int tickPos,
-        unsigned int tickPerBar);
+        unsigned int tickPerBar, unsigned int playFor = 1);
 static unsigned int getNextAPIndex();
 static void fillAPIndex();
 
@@ -1005,8 +1005,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         case TRANFILL_REQUEST:
 
 
-            // If there is drum fills in the current part
-              if (TRANS_FILL_PTR(CurrPartPtr)) {
+            // If there is drum fills in the current part and they are turned on
+              if (TRANS_FILL_PTR(CurrPartPtr) && APPtr->part[PartIndex].transitionFill.playFor >= 1 ) {
                 if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength){
                     if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength % nTick){
                         TranFillPickUpSyncTickLength = (( 1 + TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength/ nTick) * nTick);
@@ -1043,7 +1043,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     TranFillStartSyncTick += MAIN_LOOP_PTR(CurrPartPtr)->barLength -
                             (TRANS_FILL_PTR(CurrPartPtr)->nTick % TRANS_FILL_PTR(CurrPartPtr)->barLength);
                 }
-
+                //if there is a Transition fill but the fill AP is off
+                if(APPtr && AutopilotAction == 1 && AutopilotCueFill == 1){
+                     PlayerStatus = (APPtr->part[PartIndex].transitionFill.playAt == 0)?NO_FILL_TRAN:PlayerStatus;
+                }
                 PlayerStatus = TRANFILL_WAITING_TRIG;
             } else {
 
@@ -1063,7 +1066,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 if(TRANS_FILL_PTR(CurrPartPtr)->nTick > TRANS_FILL_PTR(CurrPartPtr)->barLength &&
                    !(MasterTick/(SongPlayer_getbarLength() / TRANS_FILL_PTR(CurrPartPtr)->timeSigNum) >= TRANS_FILL_PTR(CurrPartPtr)->timeSigNum)){
                     //longer than 1 bar trans fill when main loop is on the first bar
-                    TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
+                   TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
+                }
+                if(APPtr && AutopilotAction == 0 && AutopilotCueFill == 1 && APPtr->part[PartIndex].transitionFill.playFor > 1){
+                    TranFillStopSyncTick = CalculateTranFillQuitSyncTick(MasterTick, MAIN_LOOP_PTR(CurrPartPtr)->barLength, APPtr->part[PartIndex].transitionFill.playFor);
                 }
                 PlayerStatus = TRANFILL_QUITING;
             } else {
@@ -1479,6 +1485,7 @@ static void NextPart(void) {
     WasPausedFlag = 0;
     SobrietyDrumTranFill = 0;
     Test = 0;
+    //to do code here if trans fill has extra bars play them here
     
     if (CurrSongPtr->nPart > 0) {
         if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {
@@ -1797,9 +1804,8 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
     }
 }
 
-static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos,
-        uint32_t tickPerBar) {
-    return ((1 + ((uint32_t) (tickPos / tickPerBar))) * tickPerBar);
+static uint32_t CalculateTranFillQuitSyncTick(uint32_t tickPos, uint32_t tickPerBar,uint32_t playFor) {
+    return ((playFor + ((uint32_t) (tickPos / tickPerBar))) * tickPerBar);
 }
 
 static int32_t CalculateStartBarSyncTick(uint32_t tickPos,

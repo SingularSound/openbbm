@@ -28,6 +28,7 @@ public:
    void populate(QModelIndex const& modelIndex);
    void updateLayout();
    void dataChanged(const QModelIndex &left, const QModelIndex &right);
+   void UpdateAP();
 
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
@@ -58,6 +59,8 @@ public slots:
    void slotDefaultDrmChangedByUI(const QString &drmName, const QString &drmFileName);
    void slotAPEnableChangeByUI(const bool state);
    void slotAPStateRequested();
+   void slotAPUpdate();
+   void slotSawapPart(int start, int end);
 
 protected:
    virtual void paintEvent(QPaintEvent * event);
