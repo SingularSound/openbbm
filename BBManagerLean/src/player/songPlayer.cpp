@@ -1006,7 +1006,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 
             // If there is drum fills in the current part and they are turned on
-              if (TRANS_FILL_PTR(CurrPartPtr) ) {
+              if (TRANS_FILL_PTR(CurrPartPtr) && APPtr->part[PartIndex].transitionFill.playFor > 1 ) {
                 if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength){
                     if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength % nTick){
                         TranFillPickUpSyncTickLength = (( 1 + TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength/ nTick) * nTick);
