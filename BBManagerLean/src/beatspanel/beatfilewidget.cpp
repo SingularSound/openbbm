@@ -1005,6 +1005,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                     }
                 }else{
                     APText->setText("Play For");
+                    PostText->show();
                     APText->show();
                     APBar->show();
                 }
