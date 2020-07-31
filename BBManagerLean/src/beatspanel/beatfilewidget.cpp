@@ -1019,7 +1019,8 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                     isfiniteMain = false;
                 }else if (hasMain){
                     mp_APBox->setChecked(true);
-                    APText->setText("Additional bars");
+                    APText->setText("Play For");
+                    PostText->show();
                     if(m_PlayFor > 0){
                         APBar->setText(QString::number(m_PlayFor));
                     }
