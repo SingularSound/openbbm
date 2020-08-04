@@ -30,7 +30,6 @@ public:
    explicit BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent = nullptr);
 
    void setLabel(QString const& label);
-   void showAPSettings(int type, int sigNum, bool APOn);
 
    void populate(QModelIndex const& modelIndex);
    void updateLayout();
@@ -44,14 +43,15 @@ public:
 
    void enterEvent(QEvent *event);
    void leaveEvent(QEvent *event);
-   void updateAPText(bool hasTrans, bool hasMain);
+   void updateAPText(bool hasTrans, bool hasMain,bool hasOutro, int sigNum, bool lastpart = false);
    bool finiteMain();
    void setAsNew(bool value);
    bool isNew();
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);
-   void sigMainAPUpdated(bool hasMain);
+   void sigMainAPUpdated();
+   void sigPartEmpty(bool value);
 
 public slots:
    void endEditMidi(const QByteArray& data);
@@ -59,8 +59,8 @@ public slots:
    bool trackButtonClicked(const QString& dropFileName = nullptr);
    void playButtonClicked();
    void APBoxStatusChanged();
-   void parentAPBoxStatusChanged(int sigNum);
-   void ApValueChanged();
+   void parentAPBoxStatusChanged(int sigNum, bool hasMain = false);
+   void ApValueChanged(bool off = false);
    void edit();
    void slotSetPlayerEnabled(bool enabled);
    void drag();
@@ -83,6 +83,7 @@ private:
    QHBoxLayout *leftl = new QHBoxLayout();
    QHBoxLayout *rightl = new QHBoxLayout();
    QLabel *APText = new QLabel();
+   QLabel *PostText = new QLabel();
    QLineEdit *APBar = new QLineEdit();
    QCheckBox *mp_APBox;
    bool m_dragging;

@@ -157,6 +157,9 @@ void SongWidget::populate(QModelIndex const& modelIndex)
 
          connect(p_SongPartWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_SongPartWidget, &SongPartWidget::sigSelectTrack, this, &SongWidget::slotSelectTrack);
+         connect(p_SongPartWidget, &SongPartWidget::sigUpdateAP, this, &SongWidget::slotAPUpdate);
+         connect(p_SongPartWidget, &SongPartWidget::sigMoveUp, this, &SongWidget::slotSawapPart);
+         connect(p_SongPartWidget, &SongPartWidget::sigMoveDown, this, &SongWidget::slotSawapPart);
       }
    }
 
@@ -184,6 +187,7 @@ void SongWidget::populate(QModelIndex const& modelIndex)
    }
 
    // Sets the AutoPilot CheckBox in every SongTitle to its desired state on populate.
+   UpdateAP();
    emit sigAPUpdate(model()->data(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::AUTOPILOT_ON)).toBool());
 
    // Row related signals
@@ -421,10 +425,12 @@ void SongWidget::rowsInserted(int start, int end)
          p_SongPartWidget = new SongPartWidget(model(), this);
          p_SongPartWidget->populate(childIndex);
          mp_ChildrenItems->insert(i, p_SongPartWidget);
+         mp_SongPartItems->insert(i,p_SongPartWidget);
          p_SongPartWidget->show();
 
          connect(p_SongPartWidget, SIGNAL(sigSubWidgetClicked(QModelIndex)), this, SLOT(slotSubWidgetClicked(QModelIndex)));
          connect(p_SongPartWidget, &SongPartWidget::sigSelectTrack, this, &SongWidget::slotSelectTrack);
+         connect(p_SongPartWidget, &SongPartWidget::sigUpdateAP, this, &SongWidget::slotAPUpdate);
       }
    }
 
@@ -441,7 +447,7 @@ void SongWidget::rowsInserted(int start, int end)
          mp_NewPartWidgets->at(i)->setEnabled(false);
       }
    }
-
+   UpdateAP();
    updateOrderSlots();
 
 }
@@ -454,7 +460,12 @@ void SongWidget::rowsRemoved(int start, int end)
 
    for(int i = end; i >= start; i--){
       p_SongPart = mp_ChildrenItems->at(i);
+
       mp_ChildrenItems->removeAt(i);
+      if(i == mp_SongPartItems->size()-2){//if the last part(excluding outro) was deleted
+          mp_SongPartItems->at(i-1)->setLast(true);
+      }
+      mp_SongPartItems->removeAt(i);
       delete p_SongPart;
 
       p_NewPartWidget = mp_NewPartWidgets->last();
@@ -476,7 +487,7 @@ void SongWidget::rowsRemoved(int start, int end)
          mp_NewPartWidgets->at(i)->setEnabled(true);
       }
    }
-
+   UpdateAP();
    updateOrderSlots();
 }
 
@@ -538,15 +549,7 @@ void SongWidget::slotAPEnableChangeByUI(const bool state)
 
     if(model()->data(songAPEnable).toBool() != state){
        model()->setData(songAPEnable, QVariant(state));
-
-       auto size = mp_SongPartItems->size()-1;//to exclude outro
-       //this next part updates the AP layout for each beat
-       for(int i = 1; i < size;i++){//starts on 1 to exclude intro
-           mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
-       }
-       for(int i = 1; i < size;i++){
-        mp_SongPartItems->at(i)->updateTransMain();
-       }
+        UpdateAP();
     }
 }
 
@@ -555,14 +558,25 @@ void SongWidget::slotAPStateRequested()
     emit sigAPUpdate(model()->data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::AUTOPILOT_ON)).toBool());
 }
 
+void SongWidget::slotAPUpdate()
+{
+    UpdateAP();
+}
+void SongWidget::slotSawapPart(int start, int end){
+
+    mp_SongPartItems->swap(start,end);
+}
+
 void SongWidget::slotMoveSongUpClicked()
 {
     model()->moveItem(modelIndex(), -1);
+    UpdateAP();
 }
 
 void SongWidget::slotMoveSongDownClicked()
 {
     model()->moveItem(modelIndex(), 1);
+    UpdateAP();
 }
 
 void SongWidget::rowsMovedGet(int start, int end, QList<SongFolderViewItem *> *p_List)
@@ -576,6 +590,7 @@ void SongWidget::rowsMovedInsert(int start, QList<SongFolderViewItem *> *p_List)
 {
    for(int i = 0; i < p_List->count(); i++){
       mp_ChildrenItems->insert(start++, p_List->at(i));
+      mp_SongPartItems->insert(start++,(SongPartWidget*)p_List->at(i));
       if(p_List->at(i)->parent() != this){
          p_List->at(i)->setParent(this);
       }
@@ -588,6 +603,7 @@ void SongWidget::rowsMovedRemove(int start, int end)
 {
    for(int i = end; i >= start; i--){
       mp_ChildrenItems->removeAt(i);
+      mp_SongPartItems->removeAt(i);
    }
 
    updateOrderSlots();
@@ -607,5 +623,22 @@ void SongWidget::updateOrderSlots()
 void SongWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex, int typeId, int partIndex)
 {
   emit sigSelectTrack(trackData, trackIndex, typeId, partIndex);
+}
+
+void SongWidget::UpdateAP()
+{
+    auto size = mp_SongPartItems->size()-1;
+    //this next part updates the AP layout for each beat
+    for(int i = 1; i < size;i++){//starts on 1 to exclude intro
+        mp_SongPartItems->at(i)->parentAPBoxStatusChanged();
+    }
+    for(int i = 1; i < size-1;i++){//size-1 to avoid last part
+     mp_SongPartItems->at(i)->setLast(false);
+     mp_SongPartItems->at(i)->updateTransMain(false);
+    }
+    //handle outro interaction
+    mp_SongPartItems->at(size-1)->setLast(true);
+    bool hasOutro = !(mp_SongPartItems->at(size)->getChildItemAt(1)->isPartEmpty());
+    mp_SongPartItems->at(size-1)->updateTransMain(hasOutro);
 }
 

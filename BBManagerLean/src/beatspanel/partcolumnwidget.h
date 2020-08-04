@@ -46,25 +46,26 @@ public:
    // Hack for header column width
    int headerColumnWidth(int columnIndex);
    void updateMinimumSize();
-   void parentAPBoxStatusChanged(int sigNum);
-   void updateAPText(bool hasTrans,bool hasMain, int idx);
+   void parentAPBoxStatusChanged(int sigNum, bool hasMain);
+   void updateAPText(bool hasTrans,bool hasMain,bool hasOutro, int idx,int sigNum, bool isLast=false);
    bool finitePart();
-   void setBeatFileAPSettings(QString label,QModelIndex parent, QModelIndex child,int i, BeatFileWidget *beatFile);
 
    // Accessor
    int maxFileCount();
 
    int getNumSignature();
+   bool isPartEmpty();
    QList<BeatFileWidget*> *mp_BeatFileItems;
 
+   void setPartEmpty(bool value);
 signals:
    void sigIsMultiFileAddEnabled(bool first);
    void sigIsShuffleEnabled(bool first);
    void sigIsShuffleActivated(bool first);
    void sigSelectTrack(const QByteArray &trackData, int trackIndex, int typeId);
-   void sigUpdateTran();
+   void sigUpdateTran(bool hasTrans = false, bool hasOutro = false);
    void sigRowInserted();
-   void sigRowDeleted(int type);
+   void sigRowDelete();
 
 public slots:
    void endEditMidi(const QByteArray& data);
@@ -73,7 +74,7 @@ public slots:
    void slotCreateNewFile();
    void slotShuffleButtonClicked(bool checked);
    void slotSelectTrack(const QByteArray &trackData, int trackIndex);
-   void slotMainAPUpdated(bool hasMain);
+   void slotMainAPUpdated();
 
 protected:
    virtual void paintEvent(QPaintEvent * event);
@@ -93,6 +94,7 @@ private:
    bool m_intro;
    bool m_outro;
    bool justInserted=false;
+   bool isEmpty = true;
 
    // No file panel
    DropPanel *mp_NoFilePanel;
