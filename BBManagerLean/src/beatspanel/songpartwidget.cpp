@@ -518,7 +518,7 @@ QString SongPartWidget::readUpdatePartName(char CRUD, int start, int end){
     QFile file(nameFile);
 
     switch(CRUD){
-    case 'C'://INSETRS PART X ON THE ROW POSITION, WILL WORK ON BOTH SCENARIOS
+    case 'C':
         if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text |QIODevice::Truncate)){
 
             //partsNames = in.readAll().split(',', QString::SkipEmptyParts);
