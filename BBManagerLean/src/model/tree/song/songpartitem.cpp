@@ -123,7 +123,7 @@ bool SongPartItem::setData(int column, const QVariant & value)
          }
          return true;
       case PART_NAME:
-        ((SongPartModel*)filePart())->setPartFileName(value.toString());
+       ((SongPartModel*)filePart())->setPartFileName(value.toString());
              parent()->setData(SAVE, QVariant(true)); // unsaved changes, handles set dirty
              model()->itemDataChanged(parent(), SAVE);
              return true;

@@ -22,7 +22,7 @@
 #define MAX_SONG_PARTS  (32)
 #define MAX_EFFECT_NAME  (16)
 #define MAX_DRM_NAME  (16)
-#define MAX_PTR_NAME (20)
+#define MAX_PTR_NAME (16)
 
 PACK typedef struct SongPartStruct {
     uint32_t nDrumFill;
@@ -47,7 +47,6 @@ PACK typedef struct SongPartStruct {
     uint32_t effectVolume; // 100 = no volume, 0-200 are % of original sound
 
     uint32_t loopCount;
-    int8_t partName[MAX_PTR_NAME];
     uint32_t reserved2;
     uint32_t reserved3;
 
@@ -73,9 +72,7 @@ PACK typedef struct SongPartStruct {
        for (int i = 0; i<MAX_EFFECT_NAME; i++){
           effectName[i] = 0;
        }
-       for (int i = 0; i<MAX_PTR_NAME; i++){
-          partName[i] = 0;
-       }
+
     }
 #endif
 } PACKED SONG_SongPartStruct;

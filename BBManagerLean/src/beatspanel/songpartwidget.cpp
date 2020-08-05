@@ -13,7 +13,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <QHBoxLayout>
+#include <QFile>
+#include<QDir>
 #include <QDebug>
+#include <QIODevice>
 #include <QPainter>
 #include <QStyleOption>
 #include <QLineEdit>
@@ -29,11 +32,33 @@
 #include "../dialogs/loopCountDialog.h"
 #include <QSettings>
 
-SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
+SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent, QString filepath) :
    SongFolderViewItem(p_Model, parent)
 {
    // Data
+    QString path = filepath.replace("/","\\");
+    filepath.chop(4);
+    path.chop(12);
+    QString fileName = path + filepath.remove(0,filepath.size()-8)  + ".txt";
+    QFile file(fileName);
 
+    if(!file.exists()){
+        //creates it
+        if (file.open(QIODevice::ReadOnly|QIODevice::WriteOnly | QIODevice::Text)){
+            QTextStream txtstream(&file);
+            txtstream << "";
+        file.close();
+        }
+    }else{
+        if (file.open(QFile::ReadOnly | QFile::Text)){
+            QTextStream in(&file);
+            if(file.size() > 0){
+                partsNames = in.readAll().split(',', QString::SkipEmptyParts);
+            }
+            file.close();
+        }
+    }
+   nameFile = fileName;
    m_intro = false;
    m_outro = false;
    m_last = false;
@@ -86,6 +111,7 @@ void SongPartWidget::paintEvent(QPaintEvent * /*event*/)
 
 void SongPartWidget::populate(QModelIndex const& modelIndex)
 {
+
    // Delete all previous children widgets (if any)
    for(int i = 0; i < mp_ChildrenItems->size(); i++){
       // TODO verify if needs to hide before deleting
@@ -139,18 +165,19 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
       if (p_PartColumnWidget){
          p_PartColumnWidget->changeToolTip(tr("Add wav file"));
       }
-      
-      mp_LoopCount->setLoopCount(0);
-      // Disable autopilot by hiding Loop button
-      mp_LoopCount->setVisible(true);
+
    }
-   QString savedpartName = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PART_NAME).data().toString();//songpartitem::data
-   partName = "Part "+QString::number(modelIndex.row());
-   if(savedpartName.isEmpty()){
-     model()->setData(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PART_NAME), partName);
-   }else{
-      partName = savedpartName;
+
+   if(partsNames.size() < modelIndex.parent().model()->rowCount(modelIndex.parent())-2 && !m_intro && !m_outro){//check if size is bigger than all children count for the cases of insert between 2
+       //write in the previusly created file
+       //2 scenarios is the first widget on a new song or is an inserted widget in a existing song
+       readUpdatePartName('C',modelIndex.row()-1);
    }
+   if (!m_intro && !m_outro){
+       //read
+       partName = partsNames[modelIndex.row()-1];
+   }
+
    mp_Title->setText(partName);
    m_playingInternal = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PLAYING).data().toBool();
    m_validInternal   = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::INVALID).data().toString().isEmpty();
@@ -417,6 +444,7 @@ void SongPartWidget::slotMovePartUpClicked()
     model()->moveItem(modelIndex(), -1);
     emit sigMoveUp(modelIndex().row(),modelIndex().row()-1);
     emit sigUpdateAP();
+    readUpdatePartName('U',1,0);
 }
 
 void SongPartWidget::slotMovePartDownClicked()
@@ -424,6 +452,7 @@ void SongPartWidget::slotMovePartDownClicked()
     model()->moveItem(modelIndex(), 1);
     emit sigMoveDown(modelIndex().row(),modelIndex().row()+1);
     emit sigUpdateAP();
+    readUpdatePartName('U',0,1);
 }
 
 void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex, int typeId)
@@ -441,8 +470,8 @@ void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex
 void SongPartWidget::slotTitleChangeByUI()
 {
     if(mp_Title->text() != partName){
-        qDebug() << "New Part Name:" << mp_Title->text()<< modelIndex().column();
-        model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
+        readUpdatePartName('U');
+        partName = mp_Title->text();
     }
 }
 
@@ -483,4 +512,65 @@ void SongPartWidget::updateTransMain(bool hasOutro){
             }
         }
     }
+}
+
+QString SongPartWidget::readUpdatePartName(char CRUD, int start, int end){
+    QFile file(nameFile);
+
+    switch(CRUD){
+    case 'C'://INSETRS PART X ON THE ROW POSITION, WILL WORK ON BOTH SCENARIOS
+        if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text |QIODevice::Truncate)){
+
+            //partsNames = in.readAll().split(',', QString::SkipEmptyParts);
+            partsNames.insert(start,"Part " + QString::number(start+1));
+
+            QString Text = partsNames.join(',');
+            QTextStream txtstream(&file);
+            txtstream << Text;
+            file.close();
+        }
+        break;
+    case 'U':
+        //on swap parts or name update
+        readUpdatePartName('X');
+        if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text | QIODevice::Truncate)){
+            if(start == end){
+                partsNames[modelIndex().row()-1] = mp_Title->text();
+            }
+            if(start > 0){
+                //part moved up -1
+                partsNames.swap(modelIndex().row(),modelIndex().row()-1);
+            }
+            if(end > 0){
+                //part moved down +1
+                partsNames.swap(modelIndex().row()-2,modelIndex().row()-1);
+            }
+
+            QString Text = partsNames.join(',');
+            QTextStream txtstream(&file);
+            txtstream << Text;
+            file.close();
+        }
+        break;
+    case 'D':
+        readUpdatePartName('X');
+        if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text | QIODevice::Truncate)){
+            partsNames.removeAt(modelIndex().row()-1);
+            QString Text = partsNames.join(',');
+            QTextStream txtstream(&file);
+            txtstream << Text;
+            file.close();
+        }
+        break;
+    default:
+        if (file.open(QFile::ReadOnly | QFile::Text)){
+            QTextStream in(&file);
+            if(file.size() > 0){
+                partsNames = in.readAll().split(',', QString::SkipEmptyParts);
+            }
+            file.close();
+        }
+        break;
+    }
+    return "";
 }

@@ -6,6 +6,7 @@
 #include <QModelIndex>
 #include <QLineEdit>
 #include <QHBoxLayout>
+#include <QFile>
 
 #include "songfolderviewitem.h"
 #include "partcolumnwidget.h"
@@ -19,7 +20,7 @@ class SongPartWidget : public SongFolderViewItem
 {
    Q_OBJECT
 public:
-   explicit SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent = nullptr);
+   explicit SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent = nullptr, QString filepath = "");
 
    void populate(QModelIndex const& modelIndex);
    void updateLayout();
@@ -40,6 +41,7 @@ public:
    bool isLast() const;
 
    PartColumnWidget *getChildItemAt(int i);
+   QString readUpdatePartName(char CRUD, int start = 0, int end = 0);
 signals:
    void sigIsFirst(bool first);
    void sigIsLast(bool last);
@@ -77,6 +79,8 @@ private:
    bool m_playingInternal;
    bool m_validInternal;
    QString partName;
+   QStringList partsNames;
+   QString nameFile;
    QLineEdit *mp_Title;
    QVBoxLayout *l = new QVBoxLayout();
 

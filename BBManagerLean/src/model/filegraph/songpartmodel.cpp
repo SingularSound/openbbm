@@ -463,11 +463,12 @@ void SongPartModel::setPartFileName(const QString &fileName)
 
    // "<=" to copy the extra character '\0'
    for(int i = 0; i <= fileName.count() && i < (MAX_EFFECT_NAME - 1); i++){
-      m_SongPart.partName[i] = charPtr[i];
-   }
+     // m_SongPart.partName[i] = charPtr[i];
+   }//to do write name in file, if dont exist create one with the name as m_SongPart.reserve2
 }
 
 QString SongPartModel::PartFileName()
 {
-   return (char*)m_SongPart.partName;
+    //if there isnt a file created create one
+   return "Part";//(char*)m_SongPart.partName;
 }
