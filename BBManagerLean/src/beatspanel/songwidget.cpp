@@ -1,14 +1,14 @@
 /*
-  	This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound 
- 	BeatBuddy Manager is free software: you can redistribute it and/or modify
+    This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound
+    BeatBuddy Manager is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2 as published by
     the Free Software Foundation.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
@@ -136,7 +136,9 @@ void SongWidget::populate(QModelIndex const& modelIndex)
    for(int i = 0; i < modelIndex.model()->rowCount(modelIndex); i++){
       QModelIndex childIndex = modelIndex.model()->index(i, 0, modelIndex); // NOTE: Widgets are associated to column 0
       if (childIndex.isValid()){
-         p_SongPartWidget = new SongPartWidget(model(), this);
+
+         QString path =  model()->index(modelIndex.row(), AbstractTreeItem::ABSOLUTE_PATH, modelIndex.parent()).data().toString();
+         p_SongPartWidget = new SongPartWidget(model(), this, path);
 
          if (i == 0){
             p_SongPartWidget->setIntro(true);
@@ -150,7 +152,6 @@ void SongWidget::populate(QModelIndex const& modelIndex)
             connect(p_NewPartWidget, SIGNAL(sigAddPartToRow(int)), this, SLOT(slotInsertPart(int)));
             mp_NewPartWidgets->append(p_NewPartWidget);
          }
-
          p_SongPartWidget->populate(childIndex);
          mp_SongPartItems->append(p_SongPartWidget);
          mp_ChildrenItems->append(p_SongPartWidget);
@@ -421,8 +422,8 @@ void SongWidget::rowsInserted(int start, int end)
          mp_NewPartWidgets->append(p_NewPartWidget);
          p_NewPartWidget->show();
 
-
-         p_SongPartWidget = new SongPartWidget(model(), this);
+         QString path =  model()->index(modelIndex().row(), AbstractTreeItem::ABSOLUTE_PATH, modelIndex().parent()).data().toString();
+         p_SongPartWidget = new SongPartWidget(model(), this, path);
          p_SongPartWidget->populate(childIndex);
          mp_ChildrenItems->insert(i, p_SongPartWidget);
          mp_SongPartItems->insert(i,p_SongPartWidget);
@@ -465,6 +466,7 @@ void SongWidget::rowsRemoved(int start, int end)
       if(i == mp_SongPartItems->size()-2){//if the last part(excluding outro) was deleted
           mp_SongPartItems->at(i-1)->setLast(true);
       }
+      mp_SongPartItems->at(i)->readUpdatePartName('D');
       mp_SongPartItems->removeAt(i);
       delete p_SongPart;
 
@@ -590,7 +592,7 @@ void SongWidget::rowsMovedInsert(int start, QList<SongFolderViewItem *> *p_List)
 {
    for(int i = 0; i < p_List->count(); i++){
       mp_ChildrenItems->insert(start++, p_List->at(i));
-      mp_SongPartItems->insert(start++,(SongPartWidget*)p_List->at(i));
+      mp_SongPartItems->insert(start++,(SongPartWidget*)p_List->at(i));//to do this might be inserting in the wrong place, better check this out
       if(p_List->at(i)->parent() != this){
          p_List->at(i)->setParent(this);
       }
@@ -641,4 +643,3 @@ void SongWidget::UpdateAP()
     bool hasOutro = !(mp_SongPartItems->at(size)->getChildItemAt(1)->isPartEmpty());
     mp_SongPartItems->at(size-1)->updateTransMain(hasOutro);
 }
-
