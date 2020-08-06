@@ -1,19 +1,22 @@
 /*
-  	This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound 
- 	BeatBuddy Manager is free software: you can redistribute it and/or modify
+    This software and the content provided for use with it is Copyright © 2014-2020 Singular Sound
+    BeatBuddy Manager is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2 as published by
     the Free Software Foundation.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <QHBoxLayout>
+#include <QFile>
+#include<QDir>
 #include <QDebug>
+#include <QIODevice>
 #include <QPainter>
 #include <QStyleOption>
 #include <QLineEdit>
@@ -29,11 +32,33 @@
 #include "../dialogs/loopCountDialog.h"
 #include <QSettings>
 
-SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
+SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent, QString filepath) :
    SongFolderViewItem(p_Model, parent)
 {
    // Data
+    QString path = filepath.replace("/","\\");
+    filepath.chop(4);
+    path.chop(12);
+    QString fileName = path + filepath.remove(0,filepath.size()-8)  + ".txt";
+    QFile file(fileName);
 
+    if(!file.exists()){
+        //creates it
+        if (file.open(QIODevice::ReadOnly|QIODevice::WriteOnly | QIODevice::Text)){
+            QTextStream txtstream(&file);
+            txtstream << "";
+        file.close();
+        }
+    }else{
+        if (file.open(QFile::ReadOnly | QFile::Text)){
+            QTextStream in(&file);
+            if(file.size() > 0){
+                partsNames = in.readAll().split(',', QString::SkipEmptyParts);
+            }
+            file.close();
+        }
+    }
+   nameFile = fileName;
    m_intro = false;
    m_outro = false;
    m_last = false;
@@ -68,7 +93,6 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent) :
    connect(mp_MoveHandleWidget, SIGNAL(sigDownClicked()), this, SLOT(slotMovePartDownClicked()));
    connect(mp_DeleteHandleWidget, SIGNAL(sigDeleteClicked()), this, SLOT(deleteButtonClicked()));
    connect(mp_DeleteHandleWidget, SIGNAL(sigSubWidgetClicked()), this, SLOT(slotSubWidgetClicked()));
-   connect(mp_LoopCount, SIGNAL(sigSetLoopCount()), this, SLOT(slotLoopCountEntered()));
    connect(mp_LoopCount, SIGNAL(sigSubWidgetClicked()), this, SLOT(slotSubWidgetClicked()));
    connect(mp_Title    , SIGNAL(editingFinished()), this,         SLOT(slotTitleChangeByUI (   )));
    connect(mp_Title    , SIGNAL(selectionChanged()), this,         SLOT(slotTitleChangeByUI (   )));
@@ -87,6 +111,7 @@ void SongPartWidget::paintEvent(QPaintEvent * /*event*/)
 
 void SongPartWidget::populate(QModelIndex const& modelIndex)
 {
+
    // Delete all previous children widgets (if any)
    for(int i = 0; i < mp_ChildrenItems->size(); i++){
       // TODO verify if needs to hide before deleting
@@ -140,19 +165,26 @@ void SongPartWidget::populate(QModelIndex const& modelIndex)
       if (p_PartColumnWidget){
          p_PartColumnWidget->changeToolTip(tr("Add wav file"));
       }
-      
-      mp_LoopCount->setLoopCount(modelIndex.sibling(modelIndex.row(), AbstractTreeItem::LOOP_COUNT).data().toInt());
-      // Disable autopilot by hiding Loop button
-      mp_LoopCount->setVisible(true);
+
    }
-   partName = "Part "+QString::number(modelIndex.row());
+
+   if(partsNames.size() < modelIndex.parent().model()->rowCount(modelIndex.parent())-2 && !m_intro && !m_outro){//check if size is bigger than all children count for the cases of insert between 2
+       //write in the previusly created file
+       //2 scenarios is the first widget on a new song or is an inserted widget in a existing song
+       readUpdatePartName('C',modelIndex.row()-1);
+   }
+   if (!m_intro && !m_outro){
+       //read
+       partName = partsNames[modelIndex.row()-1];
+   }
+
    mp_Title->setText(partName);
    m_playingInternal = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::PLAYING).data().toBool();
    m_validInternal   = modelIndex.sibling(modelIndex.row(), AbstractTreeItem::INVALID).data().toString().isEmpty();
 
    // priority to validity
    if(!m_validInternal){
-     
+
       // Avoid setting the stylesheet twice the same
       // watch out for bug https://bugreports.qt-project.org/browse/QTBUG-20292
       if(m_selectedStyleSheet != STYLE_INVALID){
@@ -412,6 +444,7 @@ void SongPartWidget::slotMovePartUpClicked()
     model()->moveItem(modelIndex(), -1);
     emit sigMoveUp(modelIndex().row(),modelIndex().row()-1);
     emit sigUpdateAP();
+    readUpdatePartName('U',1,0);
 }
 
 void SongPartWidget::slotMovePartDownClicked()
@@ -419,6 +452,7 @@ void SongPartWidget::slotMovePartDownClicked()
     model()->moveItem(modelIndex(), 1);
     emit sigMoveDown(modelIndex().row(),modelIndex().row()+1);
     emit sigUpdateAP();
+    readUpdatePartName('U',0,1);
 }
 
 void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex, int typeId)
@@ -433,16 +467,11 @@ void SongPartWidget::slotSelectTrack(const QByteArray &trackData, int trackIndex
    emit sigSelectTrack(trackData, trackIndex, typeId, modelIndex().row());
 }
 
-void SongPartWidget::slotLoopCountEntered()
-{
-    model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::LOOP_COUNT), mp_LoopCount->getLoopCount());
-}
-
 void SongPartWidget::slotTitleChangeByUI()
 {
     if(mp_Title->text() != partName){
-        qDebug() << "Part Name Entered:" << mp_Title->text();
-        //model()->setData(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::PART_NAME), mp_Title->text());
+        readUpdatePartName('U');
+        partName = mp_Title->text();
     }
 }
 
@@ -483,4 +512,65 @@ void SongPartWidget::updateTransMain(bool hasOutro){
             }
         }
     }
+}
+
+QString SongPartWidget::readUpdatePartName(char CRUD, int start, int end){
+    QFile file(nameFile);
+
+    switch(CRUD){
+    case 'C':
+        if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text |QIODevice::Truncate)){
+
+            //partsNames = in.readAll().split(',', QString::SkipEmptyParts);
+            partsNames.insert(start,"Part " + QString::number(start+1));
+
+            QString Text = partsNames.join(',');
+            QTextStream txtstream(&file);
+            txtstream << Text;
+            file.close();
+        }
+        break;
+    case 'U':
+        //on swap parts or name update
+        readUpdatePartName('X');
+        if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text | QIODevice::Truncate)){
+            if(start == end){
+                partsNames[modelIndex().row()-1] = mp_Title->text();
+            }
+            if(start > 0){
+                //part moved up -1
+                partsNames.swap(modelIndex().row(),modelIndex().row()-1);
+            }
+            if(end > 0){
+                //part moved down +1
+                partsNames.swap(modelIndex().row()-2,modelIndex().row()-1);
+            }
+
+            QString Text = partsNames.join(',');
+            QTextStream txtstream(&file);
+            txtstream << Text;
+            file.close();
+        }
+        break;
+    case 'D':
+        readUpdatePartName('X');
+        if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text | QIODevice::Truncate)){
+            partsNames.removeAt(modelIndex().row()-1);
+            QString Text = partsNames.join(',');
+            QTextStream txtstream(&file);
+            txtstream << Text;
+            file.close();
+        }
+        break;
+    default:
+        if (file.open(QFile::ReadOnly | QFile::Text)){
+            QTextStream in(&file);
+            if(file.size() > 0){
+                partsNames = in.readAll().split(',', QString::SkipEmptyParts);
+            }
+            file.close();
+        }
+        break;
+    }
+    return "";
 }
