@@ -1,6 +1,6 @@
 QT += core gui widgets multimedia network
 
-CONFIG += c++11 debug console
+CONFIG += c++11 console debug
 
 TARGET = BBManagerLean
 QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12

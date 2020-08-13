@@ -39,7 +39,8 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent, QStr
     QString path = filepath.replace("/","\\");
     filepath.chop(4);
     path.chop(12);
-    QString fileName = path + filepath.remove(0,filepath.size()-8)  + ".txt";
+    qDebug() <<path<<"+"<<filepath.remove(0,filepath.size()-8) << "+.txt";
+    QString fileName = path + filepath.remove(0,filepath.size()-8)  + ".txt";//file path + filename
     QFile file(fileName);
 
     if(!file.exists()){
@@ -534,7 +535,7 @@ QString SongPartWidget::readUpdatePartName(char CRUD, int start, int end){
         //on swap parts or name update
         readUpdatePartName('X');
         if (file.open(QFile::ReadOnly |QIODevice::WriteOnly | QFile::Text | QIODevice::Truncate)){
-            if(start == end){
+            if(start == end && !mp_Title->text().isEmpty()){
                 partsNames[modelIndex().row()-1] = mp_Title->text();
             }
             if(start > 0){
