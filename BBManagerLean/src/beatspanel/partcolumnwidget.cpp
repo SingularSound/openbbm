@@ -430,7 +430,7 @@ void PartColumnWidget::updateMinimumSize()
 {
    // Recursively update all children first
    for(int i = 0; i < mp_ChildrenItems->size(); i++) {
-      mp_ChildrenItems->at(i)->updateMinimumSize();
+      mp_ChildrenItems->at(i)->updateMinimumSize();//beat widgets
    }
 
    if(modelIndex().row()==1){
@@ -444,13 +444,13 @@ void PartColumnWidget::updateMinimumSize()
       setMinimumHeight(58);
       // Multi file column with 2 rows of files
    } else if (mp_ChildrenItems->size() > 4){
-      setMinimumHeight(118);
+      setMinimumHeight(138);
       // Multi file column with 1 row of files
    } else {
 #ifdef Q_OS_OSX
       setMinimumHeight(83);
 #else
-      setMinimumHeight(73);
+      setMinimumHeight(93);
 #endif
    }
 }

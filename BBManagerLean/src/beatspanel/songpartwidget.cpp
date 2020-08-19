@@ -78,6 +78,7 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent, QStr
    mp_Title->setObjectName(QStringLiteral("titleEdit"));
    mp_Title->setMinimumHeight(20);
    mp_Title->setToolTip(tr("Set the name of the song part"));
+   mp_Title->setMaxLength(29);
    mp_Title->setStyleSheet("#titleEdit { background-color: transparent;  qproperty-frame: false ; }");
 
    mp_LoopCount = new LoopCountDialog(this);
@@ -276,7 +277,8 @@ void SongPartWidget::updateLayout()
       xPositionMult = nextXPositionMult;
    }
    //Part Name
-   mp_Title->setAlignment(Qt::AlignRight);
+   mp_Title->setAlignment(Qt::AlignLeft);
+   mp_Title->setGeometry(mp_MoveHandleWidget->geometry().x()+mp_MoveHandleWidget->width()+10,mp_Title->y()+0.5,mp_Title->width()*2,mp_Title->height());
 }
 
 void SongPartWidget::dataChanged(const QModelIndex &left, const QModelIndex &right)
