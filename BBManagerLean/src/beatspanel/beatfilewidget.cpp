@@ -652,7 +652,7 @@ void BeatFileWidget::updateLayout()
    // 5 px from upper left corner, 15 px size.
    mp_PlayButton->setGeometry( 4, 12 , 15, 15);
 
-   APBar->setFixedSize(21,15);
+   APBar->setFixedSize(24,17);
    APBar->setAlignment(Qt::AlignCenter);
    leftl->setAlignment(Qt::AlignBottom);
 }
