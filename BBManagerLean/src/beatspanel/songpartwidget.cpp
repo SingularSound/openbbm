@@ -78,6 +78,7 @@ SongPartWidget::SongPartWidget(BeatsProjectModel *p_Model, QWidget *parent, QStr
    mp_Title->setObjectName(QStringLiteral("titleEdit"));
    mp_Title->setMinimumHeight(20);
    mp_Title->setToolTip(tr("Set the name of the song part"));
+   mp_Title->setMaxLength(18);
    mp_Title->setStyleSheet("#titleEdit { background-color: transparent;  qproperty-frame: false ; }");
 
    mp_LoopCount = new LoopCountDialog(this);
