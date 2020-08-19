@@ -642,28 +642,15 @@ void BeatFileWidget::updateMinimumSize()
 
 void BeatFileWidget::updateLayout()
 {
-    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-    if (trackType != MAIN_DRUM_LOOP){
-         // Geometry needs to be set first by parent
-         mp_FileButton->setGeometry( rect() );
-         // 5 px from upper right corner, 12 px size.
-         mp_DeleteButton->setGeometry( rect().width()-17, 5 , 12, 12);
-         // Relative to parent
-         // Nothing to do since contained in Layout
 
-         // 5 px from upper left corner, 15 px size.
-         mp_PlayButton->setGeometry( 5, 5 , 15, 15);
-    }else{
-        //beat is Main should be shorter to fit the part name
-        mp_FileButton->setGeometry( rect().x(), rect().y()+6, rect().width(),  rect().height()-6 );
-        // 5 px from upper right corner, 12 px size.
-        mp_DeleteButton->setGeometry( rect().width()-17, 12 , 12, 12);
-        // Relative to parent
-        // Nothing to do since contained in Layout
+   mp_FileButton->setGeometry( rect().x(), rect().y()+10, rect().width(),  rect().height()-10 );
+   // 5 px from upper right corner, 12 px size.
+   mp_DeleteButton->setGeometry( rect().width()-17, 12 , 12, 12);
+   // Relative to parent
+   // Nothing to do since contained in Layout
 
-        // 5 px from upper left corner, 15 px size.
-        mp_PlayButton->setGeometry( 4, 12 , 15, 15);
-    }
+   // 5 px from upper left corner, 15 px size.
+   mp_PlayButton->setGeometry( 4, 12 , 15, 15);
 
    APBar->setFixedSize(21,15);
    APBar->setAlignment(Qt::AlignCenter);

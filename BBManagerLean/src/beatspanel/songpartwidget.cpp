@@ -277,6 +277,7 @@ void SongPartWidget::updateLayout()
    }
    //Part Name
    mp_Title->setAlignment(Qt::AlignRight);
+   mp_Title->setGeometry(mp_Title->x(),mp_Title->y()+0.5,mp_Title->width(),mp_Title->height());
 }
 
 void SongPartWidget::dataChanged(const QModelIndex &left, const QModelIndex &right)
