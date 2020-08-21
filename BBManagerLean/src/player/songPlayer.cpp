@@ -992,13 +992,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 }
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
-            else {
-                // If there is no drum fill in the current part
-                if(APPtr && APPtr->part[PartIndex].mainLoop.playAt > 0)
-                {
-                   ResetBeatCounter();
-                }
-            }
 
             break;
 
@@ -1347,10 +1340,20 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick /*|| TmpMasterPartTick > DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick*-1*/) {
             SamePart(0);
             SpecialEffectManager();
+            if(PedalPresswDrumFillFlag != 0){
+                //if the pedal was pressed the section must restart
+                ResetBeatCounter();
+                PedalPresswDrumFillFlag = 0;
+            }
         } else if (isEndOfTrack(TmpMasterPartTick, CurrPartPtr/*, loop, loopCount)*/)) {
 
-                    SamePart(2); // do a drumfill, if it exists, and loop again
+            SamePart(2); // do a drumfill, if it exists, and loop again
             SpecialEffectManager();
+            if(PedalPresswDrumFillFlag != 0){
+                //if the pedal was pressed the section must restart
+                ResetBeatCounter();
+                PedalPresswDrumFillFlag = 0;
+            }
         }
         if(idxs.size() == 0 && APPtr)
         {
@@ -1485,7 +1488,6 @@ static void NextPart(void) {
     WasPausedFlag = 0;
     SobrietyDrumTranFill = 0;
     Test = 0;
-    //to do code here if trans fill has extra bars play them here
     
     if (CurrSongPtr->nPart > 0) {
         if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {
