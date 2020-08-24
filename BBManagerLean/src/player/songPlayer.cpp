@@ -1310,6 +1310,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             } else {
 
                     NextPart();
+                    PedalPresswDrumFillFlag = 0;
             }
             SpecialEffectManager();
         }
@@ -1369,9 +1370,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
+
         if (PartIndex < CurrSongPtr->nPart - 1) {
             if (TmpMasterPartTick >= PartStopSyncTick) {
                 NextPart();
+                PedalPresswDrumFillFlag = 0;
                 SpecialEffectManager();
             }
         }
@@ -1484,9 +1487,9 @@ static void NextPart(void) {
     Test = 0;
     
     if (CurrSongPtr->nPart > 0) {
-        if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {
+        if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart && PedalPresswDrumFillFlag != 1) {
             PartIndex = NextPartNumber - 1;
-        } else {
+        } else if(PedalPresswDrumFillFlag != 1){
             PartIndex = (PartIndex + 1) % CurrSongPtr->nPart;
         }
 
