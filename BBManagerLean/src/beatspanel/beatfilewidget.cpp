@@ -1041,8 +1041,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                          sigNum = data.timeSigNum;
                      }
                         APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-                 }else if(newFill){
-                    mp_APBox->setChecked(true);
+
                  }else{
                      APBar->hide();
                      APText->hide();
