@@ -246,8 +246,21 @@ void TrackPtrItem::setAutoPilotValues(QList<QVariant> value)
         }else if( trackType == TRANS_FILL ){
             //Which of the 32?
             AutoPilotDataPartModel * partModel =  apdm->getPartModel(partRow-1);
-            partModel->getTransitionFill()->setPlayAt(value.at(0).toInt());
-            partModel->getTransitionFill()->setPlayFor(value.at(1).toInt());
+            if((!lastCall.isValid() || lastCall.elapsed() > 50))
+            {
+                droppedDrumFill.clear();
+                droppedDrumFill.push_back(0);
+                droppedDrumFill.push_back(partModel->getTransitionFill()->getPlayFor());
+                droppedDrumFill.push_back(partRow-1);
+                partModel->getTransitionFill()->setPlayAt(value.at(0).toInt());
+                partModel->getTransitionFill()->setPlayFor(value.at(1).toInt());
+            }else{//if drag and drop swaps playFors
+                AutoPilotDataPartModel * lastpartModel =  apdm->getPartModel(droppedDrumFill[2]);
+                int crntPlayFor = partModel->getTransitionFill()->getPlayFor();
+                partModel->getTransitionFill()->setPlayFor(droppedDrumFill[1]);
+                lastpartModel->getTransitionFill()->setPlayFor(crntPlayFor);
+            }
+
 
         }else if( trackType == DRUM_FILL){
             int drumFillIndex = row();   //thats the stuff for 0-7
