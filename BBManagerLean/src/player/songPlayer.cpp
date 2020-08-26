@@ -1818,29 +1818,34 @@ static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
 }
 
 static void StopSong(void) {
+    if(PedalPresswDrumFillFlag == 1){
+        MasterTick = 0;
+        ResetBeatCounter();
+        PedalPresswDrumFillFlag = 0;
+        PlayerStatus = PLAYING_MAIN_TRACK;
+    }else{
+        uint8_t status = IntDisable();
+        DrumFillIndex = 0;
+        PartIndex = 0;
+        MasterTick = 0;
+        BeatCounter = 0;
+        NextPartNumber = 0;
+        SobrietyDrumTranFill = 0;
 
-    uint8_t status = IntDisable();
-    DrumFillIndex = 0;
-    PartIndex = 0;
-    MasterTick = 0;
-    BeatCounter = 0;
-    NextPartNumber = 0;
-    SobrietyDrumTranFill = 0;
-    Test = 0;
-//    loop = 0;
-    // Cancel any pending action
-    RequestFlag = REQUEST_DONE;
-    if (CurrSongPtr != NULL ) {
-        PlayerStatus = STOPPED;
-    } else {
-        PlayerStatus = NO_SONG_LOADED;
+        // Cancel any pending action
+        RequestFlag = REQUEST_DONE;
+        if (CurrSongPtr != NULL ) {
+            PlayerStatus = STOPPED;
+        } else {
+            PlayerStatus = NO_SONG_LOADED;
+        }
+        CurrPartPtr = NULL;
+        IntEnable(status);
+
+        SpecialEffectManager();
+        if (SendStopOnEnd) UartMidi_SendStop();
+        GUI_ForceRefresh();
     }
-    CurrPartPtr = NULL;
-    IntEnable(status);
-
-    SpecialEffectManager();
-    if (SendStopOnEnd) UartMidi_SendStop();
-    GUI_ForceRefresh();
 
 }
 
@@ -1971,6 +1976,7 @@ static void  PLAYING_MAIN_TRACK_TO_END_ButtonHandler(BUTTON_EVENT event){
     switch (event){
     case BUTTON_EVENT_PEDAL_RELEASE:
         RequestFlag = OUTRO_CANCEL_REQUEST;
+        PedalPresswDrumFillFlag = 1;
         break;
     default:
         break;
