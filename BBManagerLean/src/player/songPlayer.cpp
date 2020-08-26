@@ -1677,22 +1677,28 @@ static void SamePart(unsigned int nextDrumfill) {
     TmpMasterPartTick = 0;
     MasterTick = 0;
     WasPausedFlag = 0;
-
-    if (nextDrumfill) {
-        if (CurrPartPtr != NULL ) {
-            if (CurrPartPtr->nDrumFill != 0) {
-                if (CurrPartPtr->shuffleFlag) {
-                    DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
-                } else {
-                    DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
+    if(PedalPresswDrumFillFlag == 1){
+        MasterTick = 0;
+        ResetBeatCounter();
+        PedalPresswDrumFillFlag = 0;
+        PlayerStatus = PLAYING_MAIN_TRACK;
+    }else{
+        if (nextDrumfill) {
+            if (CurrPartPtr != NULL ) {
+                if (CurrPartPtr->nDrumFill != 0) {
+                    if (CurrPartPtr->shuffleFlag) {
+                        DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
+                    } else {
+                        DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
+                    }
                 }
             }
         }
+
+        CurrPartPtr = &CurrSongPtr->part[PartIndex];
+
+        PlayerStatus = PLAYING_MAIN_TRACK;
     }
-
-    CurrPartPtr = &CurrSongPtr->part[PartIndex];
-
-    PlayerStatus = PLAYING_MAIN_TRACK;
 }
 
 static unsigned int getNextAPIndex()
