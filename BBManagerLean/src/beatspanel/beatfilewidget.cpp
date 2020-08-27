@@ -863,8 +863,17 @@ bool BeatFileWidget::trackButtonClicked(const QString& dropFileName)
 void BeatFileWidget::ApValueChanged(bool off){
 
     if(APBar->text().toInt() < 1 && !APBar->text().isEmpty()){
-        APBar->setText("1");
+        if(m_dropped){
+            mp_APBox->setChecked(false);
+            APBoxStatusChanged();
+        }else{
+            APBar->setText("1");
+        }
     }else if(!newFill){
+        if(m_dropped){
+            mp_APBox->setChecked(true);
+            APBoxStatusChanged();
+        }
         //set new ap value
         MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
@@ -890,7 +899,10 @@ void BeatFileWidget::APBoxStatusChanged(){
     if(mp_APBox->isChecked()){
         APText->show();
         APBar->show();
-        ApValueChanged(false);
+        if(!m_dropped){
+            ApValueChanged(false);
+        }
+
         if (trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             if(trackType == MAIN_DRUM_LOOP){
                 isfiniteMain = true;
@@ -899,8 +911,9 @@ void BeatFileWidget::APBoxStatusChanged(){
             emit sigMainAPUpdated();
         }
     }else{
-
-        ApValueChanged(true);
+        if(!m_dropped){
+            ApValueChanged(true);
+        }
         if(trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             if(trackType == MAIN_DRUM_LOOP){
                 isfiniteMain = false;
@@ -1082,12 +1095,16 @@ void BeatFileWidget::AdjustAPText()
     QList<int> settings = model()->getAPSettings(modelIndex());
 
     if(settings.size() > 0){
-        int sigNum = (m_PlayAt > 0)?(m_PlayAt-1)/(APBar->text().toInt()-1):0;
+        /*int sigNum = (m_PlayAt > 0)?(m_PlayAt-1)/(APBar->text().toInt()-1):0;*/
+        MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+        int sigNum = data.timeSigNum;
         m_PlayAt = settings.at(0);
         m_PlayFor = settings.at(1);
 
         QString textvalue = (m_PlayAt > 0)?QString::number((m_PlayAt-1)/sigNum+1):QString::number(m_PlayFor);
+        m_dropped = true;//this flag is for the slot signaled on the next line
         APBar->setText(textvalue);
+        m_dropped = false;
 
     }
 }
