@@ -47,6 +47,7 @@ public:
    bool finiteMain();
    void setAsNew(bool value);
    bool isNew();
+   void AdjustAPText();
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);

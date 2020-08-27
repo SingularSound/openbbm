@@ -86,6 +86,10 @@ void BeatFileWidget::drag()
 
     QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
                                                        ,modelIndex().parent())).value<QList<int>>();
+    if(settings.size() < 1){
+        settings.push_back(m_PlayAt);
+        settings.push_back(m_PlayFor);
+    }
     model()->addAPSettingInQueue(settings);
 
     QDrag* drag = new QDrag(this);
@@ -124,6 +128,7 @@ void BeatFileWidget::drag()
     {   //swap with another fill
         path = drag->mimeData()->urls().first().toLocalFile();
         trackButtonClicked(path);
+        AdjustAPText();
     }
     // remove exported file at the end of operation
     if (file.exists()){
@@ -216,6 +221,10 @@ void BeatFileWidget::dropEvent(QDropEvent *event)
 
     QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
                                                    ,modelIndex().parent())).value<QList<int>>();
+    if(settings.size() < 1){
+        settings.push_back(m_PlayAt);
+        settings.push_back(m_PlayFor);
+    }
     model()->addAPSettingInQueue(settings);
 
     if (trackButtonClicked(dropUrl.toLocalFile()))
@@ -224,7 +233,8 @@ void BeatFileWidget::dropEvent(QDropEvent *event)
         urls.append(QUrl::fromLocalFile(path));
         const_cast<QMimeData*>(event->mimeData())->setUrls(urls);
         event->accept();
-    }
+        AdjustAPText();
+    } 
 }
 
 void BeatFileWidget::enterEvent(QEvent*)
@@ -1064,5 +1074,20 @@ void BeatFileWidget::setAsNew(bool value){
 }
 
 bool BeatFileWidget::isNew(){
-        return newFill;
+    return newFill;
+}
+
+void BeatFileWidget::AdjustAPText()
+{
+    QList<int> settings = model()->getAPSettings(modelIndex());
+
+    if(settings.size() > 0){
+        int sigNum = (m_PlayAt > 0)?(m_PlayAt-1)/(APBar->text().toInt()-1):0;
+        m_PlayAt = settings.at(0);
+        m_PlayFor = settings.at(1);
+
+        QString textvalue = (m_PlayAt > 0)?QString::number((m_PlayAt-1)/sigNum+1):QString::number(m_PlayFor);
+        APBar->setText(textvalue);
+
+    }
 }
