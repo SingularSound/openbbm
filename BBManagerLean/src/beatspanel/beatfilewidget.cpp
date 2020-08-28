@@ -1093,8 +1093,9 @@ bool BeatFileWidget::isNew(){
 void BeatFileWidget::AdjustAPText()
 {
     QList<int> settings = model()->getAPSettings(modelIndex());
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     bool off = !mp_APBox->isChecked();
-    if(settings.size() > 0){
+    if(settings.size() > 0 && trackType != INTRO_FILL && trackType!= OUTRO_FILL){
         /*int sigNum = (m_PlayAt > 0)?(m_PlayAt-1)/(APBar->text().toInt()-1):0;*/
         MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
         int sigNum = data.timeSigNum;
