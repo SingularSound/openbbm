@@ -1338,8 +1338,10 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 0, MAIN_PART_ID);
         if(PedalPresswDrumFillFlag == 1 && BeatCounter > 1 && (BeatCounter-1)%MAIN_LOOP_PTR(CurrPartPtr)->timeSigNum ==0){
             //if the pedal was pressed the section must restart
+            MasterTick = 0;
             ResetBeatCounter();
             PedalPresswDrumFillFlag = 0;
+            PlayerStatus = PLAYING_MAIN_TRACK;
         }
         // If its the end of the track
         if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick /*|| TmpMasterPartTick > DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick*-1*/) {
@@ -1370,8 +1372,13 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
-
-        if (PartIndex < CurrSongPtr->nPart - 1) {
+        if(PedalPresswDrumFillFlag != 0){
+            //if the pedal was pressed the section must restart
+            MasterTick = 0;
+            ResetBeatCounter();
+            PedalPresswDrumFillFlag = 0;
+            PlayerStatus = PLAYING_MAIN_TRACK;
+        }else if (PartIndex < CurrSongPtr->nPart - 1) {
             if (TmpMasterPartTick >= PartStopSyncTick) {
                 NextPart();
                 PedalPresswDrumFillFlag = 0;
