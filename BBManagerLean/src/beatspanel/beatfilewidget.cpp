@@ -1093,7 +1093,7 @@ bool BeatFileWidget::isNew(){
 void BeatFileWidget::AdjustAPText()
 {
     QList<int> settings = model()->getAPSettings(modelIndex());
-
+    bool off = !mp_APBox->isChecked();
     if(settings.size() > 0){
         /*int sigNum = (m_PlayAt > 0)?(m_PlayAt-1)/(APBar->text().toInt()-1):0;*/
         MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
@@ -1103,7 +1103,12 @@ void BeatFileWidget::AdjustAPText()
 
         QString textvalue = (m_PlayAt > 0)?QString::number((m_PlayAt-1)/sigNum+1):QString::number(m_PlayFor);
         m_dropped = true;//this flag is for the slot signaled on the next line
-        APBar->setText(textvalue);
+        if(APBar->text() != textvalue){
+            APBar->setText(textvalue);
+        }else if(off && m_PlayAt > 0){//if the incomming On fill had the default value
+            mp_APBox->setChecked(true);
+            APBoxStatusChanged();
+        }
         m_dropped = false;
 
     }
