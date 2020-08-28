@@ -1372,7 +1372,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
-        if(PedalPresswDrumFillFlag != 0){
+        if(PedalPresswDrumFillFlag != 0 && BeatCounter > 1 && (BeatCounter-1)%MAIN_LOOP_PTR(CurrPartPtr)->timeSigNum == 0){
             //if the pedal was pressed the section must restart
             MasterTick = 0;
             ResetBeatCounter();
@@ -1380,9 +1380,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             PlayerStatus = PLAYING_MAIN_TRACK;
         }else if (PartIndex < CurrSongPtr->nPart - 1) {
             if (TmpMasterPartTick >= PartStopSyncTick) {
+
                 NextPart();
                 PedalPresswDrumFillFlag = 0;
                 SpecialEffectManager();
+
             }
         }
         break;
