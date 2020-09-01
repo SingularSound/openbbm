@@ -1422,6 +1422,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     nTick, OUTR_FILL_ID);
 
             // Stop the song after the last sounds have been launched
+            PedalPresswDrumFillFlag = 0;
             StopSong();
         }
 
