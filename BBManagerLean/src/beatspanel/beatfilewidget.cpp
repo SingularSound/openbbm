@@ -86,9 +86,18 @@ void BeatFileWidget::drag()
 
     QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
                                                        ,modelIndex().parent())).value<QList<int>>();
-    if(settings.size() < 1){
-        settings.push_back(m_PlayAt);
-        settings.push_back(m_PlayFor);
+    MIDIPARSER_TrackType type = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+    if(type != INTRO_FILL && type != OUTRO_FILL)
+    {
+        if(settings.size() < 1){
+            settings.push_back(m_PlayAt);
+            settings.push_back(m_PlayFor);
+        }
+    }else{
+        if(settings.size() < 1){
+            settings.push_back(0);
+            settings.push_back(0);
+        }
     }
     model()->addAPSettingInQueue(settings);
 
@@ -1096,7 +1105,6 @@ void BeatFileWidget::AdjustAPText()
     MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     bool off = !mp_APBox->isChecked();
     if(settings.size() > 0 && trackType != INTRO_FILL && trackType!= OUTRO_FILL){
-        /*int sigNum = (m_PlayAt > 0)?(m_PlayAt-1)/(APBar->text().toInt()-1):0;*/
         MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
         int sigNum = data.timeSigNum;
         m_PlayAt = settings.at(0);
@@ -1112,5 +1120,8 @@ void BeatFileWidget::AdjustAPText()
         }
         m_dropped = false;
 
+    }else{
+        m_PlayAt = settings.at(0);
+        m_PlayFor = settings.at(1);
     }
 }
