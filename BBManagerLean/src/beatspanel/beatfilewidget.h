@@ -47,6 +47,7 @@ public:
    bool finiteMain();
    void setAsNew(bool value);
    bool isNew();
+   void AdjustAPText();
 
 signals:
    void sigSelectTrack(const QByteArray &trackData, int trackIndex);
@@ -87,6 +88,7 @@ private:
    QLineEdit *APBar = new QLineEdit();
    QCheckBox *mp_APBox;
    bool m_dragging;
+   bool m_dropped = false;
    bool isfiniteMain;
    bool TransFill = false;
    bool newFill = false;

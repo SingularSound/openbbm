@@ -86,6 +86,19 @@ void BeatFileWidget::drag()
 
     QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
                                                        ,modelIndex().parent())).value<QList<int>>();
+    MIDIPARSER_TrackType type = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+    if(type != INTRO_FILL && type != OUTRO_FILL)
+    {
+        if(settings.size() < 1){
+            settings.push_back(m_PlayAt);
+            settings.push_back(m_PlayFor);
+        }
+    }else{
+        if(settings.size() < 1){
+            settings.push_back(0);
+            settings.push_back(0);
+        }
+    }
     model()->addAPSettingInQueue(settings);
 
     QDrag* drag = new QDrag(this);
@@ -124,6 +137,7 @@ void BeatFileWidget::drag()
     {   //swap with another fill
         path = drag->mimeData()->urls().first().toLocalFile();
         trackButtonClicked(path);
+        AdjustAPText();
     }
     // remove exported file at the end of operation
     if (file.exists()){
@@ -213,9 +227,21 @@ void BeatFileWidget::dropEvent(QDropEvent *event)
         qWarning() << "BeatFileWidget::dropEvent - ERROR 1 - unable to export file.";
         return;
     }
-
+    MIDIPARSER_TrackType type = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
                                                    ,modelIndex().parent())).value<QList<int>>();
+    if(type != INTRO_FILL && type != OUTRO_FILL)
+    {
+        if(settings.size() < 1){
+            settings.push_back(m_PlayAt);
+            settings.push_back(m_PlayFor);
+        }
+    }else{
+        if(settings.size() < 1){
+            settings.push_back(0);
+            settings.push_back(0);
+        }
+    }
     model()->addAPSettingInQueue(settings);
 
     if (trackButtonClicked(dropUrl.toLocalFile()))
@@ -224,7 +250,8 @@ void BeatFileWidget::dropEvent(QDropEvent *event)
         urls.append(QUrl::fromLocalFile(path));
         const_cast<QMimeData*>(event->mimeData())->setUrls(urls);
         event->accept();
-    }
+        AdjustAPText();
+    } 
 }
 
 void BeatFileWidget::enterEvent(QEvent*)
@@ -853,8 +880,17 @@ bool BeatFileWidget::trackButtonClicked(const QString& dropFileName)
 void BeatFileWidget::ApValueChanged(bool off){
 
     if(APBar->text().toInt() < 1 && !APBar->text().isEmpty()){
-        APBar->setText("1");
+        if(m_dropped){
+            mp_APBox->setChecked(false);
+            APBoxStatusChanged();
+        }else{
+            APBar->setText("1");
+        }
     }else if(!newFill){
+        if(m_dropped){
+            mp_APBox->setChecked(true);
+            APBoxStatusChanged();
+        }
         //set new ap value
         MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
@@ -880,7 +916,10 @@ void BeatFileWidget::APBoxStatusChanged(){
     if(mp_APBox->isChecked()){
         APText->show();
         APBar->show();
-        ApValueChanged(false);
+        if(!m_dropped){
+            ApValueChanged(false);
+        }
+
         if (trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             if(trackType == MAIN_DRUM_LOOP){
                 isfiniteMain = true;
@@ -889,8 +928,9 @@ void BeatFileWidget::APBoxStatusChanged(){
             emit sigMainAPUpdated();
         }
     }else{
-
-        ApValueChanged(true);
+        if(!m_dropped){
+            ApValueChanged(true);
+        }
         if(trackType == MAIN_DRUM_LOOP || trackType == TRANS_FILL){
             if(trackType == MAIN_DRUM_LOOP){
                 isfiniteMain = false;
@@ -1042,8 +1082,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                          sigNum = data.timeSigNum;
                      }
                         APBar->setText(QString::number((m_PlayAt-1)/sigNum+1));
-                 }else if(newFill){
-                    mp_APBox->setChecked(true);
+
                  }else{
                      APBar->hide();
                      APText->hide();
@@ -1066,5 +1105,32 @@ void BeatFileWidget::setAsNew(bool value){
 }
 
 bool BeatFileWidget::isNew(){
-        return newFill;
+    return newFill;
+}
+
+void BeatFileWidget::AdjustAPText()
+{
+    QList<int> settings = model()->getAPSettings(modelIndex());
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
+    bool off = !mp_APBox->isChecked();
+    if(settings.size() > 0 && trackType != INTRO_FILL && trackType!= OUTRO_FILL){
+        MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+        int sigNum = data.timeSigNum;
+        m_PlayAt = settings.at(0);
+        m_PlayFor = settings.at(1);
+
+        QString textvalue = (m_PlayAt > 0)?QString::number((m_PlayAt-1)/sigNum+1):QString::number(m_PlayFor);
+        m_dropped = true;//this flag is for the slot signaled on the next line
+        if(APBar->text() != textvalue){
+            APBar->setText(textvalue);
+        }else if(off && m_PlayAt > 0){//if the incomming On fill had the default value
+            mp_APBox->setChecked(true);
+            APBoxStatusChanged();
+        }
+        m_dropped = false;
+
+    }else{
+        m_PlayAt = 0;
+        m_PlayFor = 0;
+    }
 }
