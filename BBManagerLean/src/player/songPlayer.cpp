@@ -999,7 +999,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 
             // If there is drum fills in the current part and they are turned on
-              if (TRANS_FILL_PTR(CurrPartPtr) && APPtr->part[PartIndex].transitionFill.playFor >= 1 ) {
+              if (TRANS_FILL_PTR(CurrPartPtr) && APPtr && APPtr->part[PartIndex].transitionFill.playFor >= 1 ) {
                 if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength){
                     if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength % nTick){
                         TranFillPickUpSyncTickLength = (( 1 + TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength/ nTick) * nTick);
@@ -1041,10 +1041,50 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                      PlayerStatus = (APPtr->part[PartIndex].transitionFill.playAt == 0)?NO_FILL_TRAN:PlayerStatus;
                 }
                 PlayerStatus = TRANFILL_WAITING_TRIG;
-            } else {
+            } else if(TRANS_FILL_PTR(CurrPartPtr)){
+                  if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength){
+                      if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength % nTick){
+                          TranFillPickUpSyncTickLength = (( 1 + TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength/ nTick) * nTick);
+                      } else {
+                          TranFillPickUpSyncTickLength = (( 0 + TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength/ nTick) * nTick);
+                      }
+                  } else {
+                      TranFillPickUpSyncTickLength = 0;
+                  }
+                  if (PlayerStatus == PAUSED){
+                      if (!ActivePauseEnable){
+                          // Use nTick instead of 0 to avoid negative number for master ticks
+                          MasterTick = TRANS_FILL_PTR(CurrPartPtr)->nTick - TranFillPickUpSyncTickLength;
+                          TranFillStartSyncTick = MasterTick;
+
+                      } else {
+                          TranFillStartSyncTick = CalculateStartBarSyncTick(MasterTick,
+                                  MAIN_LOOP_PTR(CurrPartPtr)->barLength,
+                                  AutopilotCueFill ? MAIN_LOOP_PTR(CurrPartPtr)->barLength : MAIN_LOOP_PTR(CurrPartPtr)->trigPos);
+                          TranFillStartSyncTick -= TranFillPickUpSyncTickLength;
+
+                      }
+                  } else {
+                      TranFillStartSyncTick = CalculateStartBarSyncTick(MasterTick,
+                              MAIN_LOOP_PTR(CurrPartPtr)->barLength,
+                              AutopilotCueFill ? MAIN_LOOP_PTR(CurrPartPtr)->barLength : MAIN_LOOP_PTR(CurrPartPtr)->trigPos);
+                      TranFillStartSyncTick -= TranFillPickUpSyncTickLength;
+
+                  }
+                  // Adjust offset of tran fil if it is smaller than one bar
+                  if (TRANS_FILL_PTR(CurrPartPtr)->nTick < TRANS_FILL_PTR(CurrPartPtr)->barLength) {
+
+                      TranFillStartSyncTick += MAIN_LOOP_PTR(CurrPartPtr)->barLength -
+                              (TRANS_FILL_PTR(CurrPartPtr)->nTick % TRANS_FILL_PTR(CurrPartPtr)->barLength);
+                  }
+                  if(APPtr && AutopilotAction == 1 && AutopilotCueFill == 1){
+                       PlayerStatus = (APPtr->part[PartIndex].transitionFill.playAt == 0)?NO_FILL_TRAN:PlayerStatus;
+                  }
+                   PlayerStatus = TRANFILL_WAITING_TRIG;
+            }else{
 
                 // If there is only one part no transition fill since we stay on the same part all the time
-                if (CurrSongPtr->nPart > 1){
+                if (CurrSongPtr->nPart > 1 && APPtr){
                     // Cancel the transition fill request
                     PlayerStatus = NO_FILL_TRAN;
                 }
