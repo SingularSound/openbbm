@@ -227,12 +227,20 @@ void BeatFileWidget::dropEvent(QDropEvent *event)
         qWarning() << "BeatFileWidget::dropEvent - ERROR 1 - unable to export file.";
         return;
     }
-
+    MIDIPARSER_TrackType type = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     QList<int> settings = model()->data(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR
                                                    ,modelIndex().parent())).value<QList<int>>();
-    if(settings.size() < 1){
-        settings.push_back(m_PlayAt);
-        settings.push_back(m_PlayFor);
+    if(type != INTRO_FILL && type != OUTRO_FILL)
+    {
+        if(settings.size() < 1){
+            settings.push_back(m_PlayAt);
+            settings.push_back(m_PlayFor);
+        }
+    }else{
+        if(settings.size() < 1){
+            settings.push_back(0);
+            settings.push_back(0);
+        }
     }
     model()->addAPSettingInQueue(settings);
 
@@ -1121,7 +1129,7 @@ void BeatFileWidget::AdjustAPText()
         m_dropped = false;
 
     }else{
-        m_PlayAt = settings.at(0);
-        m_PlayFor = settings.at(1);
+        m_PlayAt = 0;
+        m_PlayFor = 0;
     }
 }
