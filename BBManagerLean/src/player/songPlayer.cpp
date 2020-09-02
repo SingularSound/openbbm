@@ -992,13 +992,6 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                 }
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
-            else {
-                // If there is no drum fill in the current part
-                if(APPtr && APPtr->part[PartIndex].mainLoop.playAt > 0)
-                {
-                   ResetBeatCounter();
-                }
-            }
 
             break;
 
@@ -1317,6 +1310,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             } else {
 
                     NextPart();
+                    PedalPresswDrumFillFlag = 0;
             }
             SpecialEffectManager();
         }
@@ -1342,14 +1336,20 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
-
+        if(PedalPresswDrumFillFlag == 1 && BeatCounter > 1 && (BeatCounter-1)%MAIN_LOOP_PTR(CurrPartPtr)->timeSigNum ==0){
+            //if the pedal was pressed the section must restart
+            MasterTick = 0;
+            ResetBeatCounter();
+            PedalPresswDrumFillFlag = 0;
+            PlayerStatus = PLAYING_MAIN_TRACK;
+        }
         // If its the end of the track
         if (TmpMasterPartTick >= MAIN_LOOP_PTR(CurrPartPtr)->nTick /*|| TmpMasterPartTick > DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick*-1*/) {
             SamePart(0);
             SpecialEffectManager();
         } else if (isEndOfTrack(TmpMasterPartTick, CurrPartPtr/*, loop, loopCount)*/)) {
 
-                    SamePart(2); // do a drumfill, if it exists, and loop again
+            SamePart(2); // do a drumfill, if it exists, and loop again
             SpecialEffectManager();
         }
         if(idxs.size() == 0 && APPtr)
@@ -1372,10 +1372,19 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
         TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio,
                 0, MAIN_PART_ID);
-        if (PartIndex < CurrSongPtr->nPart - 1) {
+        if(PedalPresswDrumFillFlag != 0 && BeatCounter > 1 && (BeatCounter-1)%MAIN_LOOP_PTR(CurrPartPtr)->timeSigNum == 0){
+            //if the pedal was pressed the section must restart
+            MasterTick = 0;
+            ResetBeatCounter();
+            PedalPresswDrumFillFlag = 0;
+            PlayerStatus = PLAYING_MAIN_TRACK;
+        }else if (PartIndex < CurrSongPtr->nPart - 1) {
             if (TmpMasterPartTick >= PartStopSyncTick) {
+
                 NextPart();
+                PedalPresswDrumFillFlag = 0;
                 SpecialEffectManager();
+
             }
         }
         break;
@@ -1413,6 +1422,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     nTick, OUTR_FILL_ID);
 
             // Stop the song after the last sounds have been launched
+            PedalPresswDrumFillFlag = 0;
             StopSong();
         }
 
@@ -1485,12 +1495,11 @@ static void NextPart(void) {
     WasPausedFlag = 0;
     SobrietyDrumTranFill = 0;
     Test = 0;
-    //to do code here if trans fill has extra bars play them here
     
     if (CurrSongPtr->nPart > 0) {
-        if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart) {
+        if (NextPartNumber > 0 && NextPartNumber <= CurrSongPtr->nPart && PedalPresswDrumFillFlag != 1) {
             PartIndex = NextPartNumber - 1;
-        } else {
+        } else if(PedalPresswDrumFillFlag != 1){
             PartIndex = (PartIndex + 1) % CurrSongPtr->nPart;
         }
 
@@ -1678,22 +1687,28 @@ static void SamePart(unsigned int nextDrumfill) {
     TmpMasterPartTick = 0;
     MasterTick = 0;
     WasPausedFlag = 0;
-
-    if (nextDrumfill) {
-        if (CurrPartPtr != NULL ) {
-            if (CurrPartPtr->nDrumFill != 0) {
-                if (CurrPartPtr->shuffleFlag) {
-                    DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
-                } else {
-                    DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
+    if(PedalPresswDrumFillFlag == 1){
+        MasterTick = 0;
+        ResetBeatCounter();
+        PedalPresswDrumFillFlag = 0;
+        PlayerStatus = PLAYING_MAIN_TRACK;
+    }else{
+        if (nextDrumfill) {
+            if (CurrPartPtr != NULL ) {
+                if (CurrPartPtr->nDrumFill != 0) {
+                    if (CurrPartPtr->shuffleFlag) {
+                        DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
+                    } else {
+                        DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
+                    }
                 }
             }
         }
+
+        CurrPartPtr = &CurrSongPtr->part[PartIndex];
+
+        PlayerStatus = PLAYING_MAIN_TRACK;
     }
-
-    CurrPartPtr = &CurrSongPtr->part[PartIndex];
-
-    PlayerStatus = PLAYING_MAIN_TRACK;
 }
 
 static unsigned int getNextAPIndex()
@@ -1819,29 +1834,34 @@ static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
 }
 
 static void StopSong(void) {
+    if(PedalPresswDrumFillFlag == 1){
+        MasterTick = 0;
+        ResetBeatCounter();
+        PedalPresswDrumFillFlag = 0;
+        PlayerStatus = PLAYING_MAIN_TRACK;
+    }else{
+        uint8_t status = IntDisable();
+        DrumFillIndex = 0;
+        PartIndex = 0;
+        MasterTick = 0;
+        BeatCounter = 0;
+        NextPartNumber = 0;
+        SobrietyDrumTranFill = 0;
 
-    uint8_t status = IntDisable();
-    DrumFillIndex = 0;
-    PartIndex = 0;
-    MasterTick = 0;
-    BeatCounter = 0;
-    NextPartNumber = 0;
-    SobrietyDrumTranFill = 0;
-    Test = 0;
-//    loop = 0;
-    // Cancel any pending action
-    RequestFlag = REQUEST_DONE;
-    if (CurrSongPtr != NULL ) {
-        PlayerStatus = STOPPED;
-    } else {
-        PlayerStatus = NO_SONG_LOADED;
+        // Cancel any pending action
+        RequestFlag = REQUEST_DONE;
+        if (CurrSongPtr != NULL ) {
+            PlayerStatus = STOPPED;
+        } else {
+            PlayerStatus = NO_SONG_LOADED;
+        }
+        CurrPartPtr = NULL;
+        IntEnable(status);
+
+        SpecialEffectManager();
+        if (SendStopOnEnd) UartMidi_SendStop();
+        GUI_ForceRefresh();
     }
-    CurrPartPtr = NULL;
-    IntEnable(status);
-
-    SpecialEffectManager();
-    if (SendStopOnEnd) UartMidi_SendStop();
-    GUI_ForceRefresh();
 
 }
 
@@ -1972,6 +1992,7 @@ static void  PLAYING_MAIN_TRACK_TO_END_ButtonHandler(BUTTON_EVENT event){
     switch (event){
     case BUTTON_EVENT_PEDAL_RELEASE:
         RequestFlag = OUTRO_CANCEL_REQUEST;
+        PedalPresswDrumFillFlag = 1;
         break;
     default:
         break;

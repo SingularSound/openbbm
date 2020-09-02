@@ -1063,6 +1063,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
                     mp_APBox->show();
                     APText->setText("Manual Trigger Only");
                     APBar->hide();
+                    emit sigPartEmpty(true);
                 }else{
                     if(!newFill){
                        mp_APBox->hide();
