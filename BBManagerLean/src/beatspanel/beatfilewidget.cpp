@@ -1092,6 +1092,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
         mp_APBox->hide();
         APBar->hide();
         APText->hide();
+        PostText->hide();
     }
 
     newFill =false;
