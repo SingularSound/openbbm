@@ -94,6 +94,10 @@ void BeatFileWidget::drag()
             if(type != TRANS_FILL){
                 MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
                 settings.push_back(data.nTick/data.barLength);//saves bar length in case of trans fill drop
+                m_PlayFor  = data.nTick/data.barLength;
+                QList<QVariant> set2 = QList<QVariant>() << m_PlayAt << m_PlayFor;
+                model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
+                                 ,QVariant(set2),Qt::EditRole);
             }else{
                 settings.push_back(m_PlayFor);
             }
@@ -105,6 +109,7 @@ void BeatFileWidget::drag()
             settings.push_back(0);
         }
     }
+
     model()->addAPSettingInQueue(settings);
 
     QDrag* drag = new QDrag(this);
