@@ -783,9 +783,6 @@ void PartColumnWidget::slotMainAPUpdated(){
 
 void PartColumnWidget::parentAPBoxStatusChanged(int sigNum, bool hasMain)
 {
-    QVariant labelVatiant = modelIndex().data();
-    QString label = labelVatiant.toString();
-
     for(int i = 0; i < mp_BeatFileItems->size();i++){
         if(justInserted && i == mp_BeatFileItems->size()-1){
             //if this fill was recently inserted to this part should reset beat->m_playAt
@@ -794,7 +791,7 @@ void PartColumnWidget::parentAPBoxStatusChanged(int sigNum, bool hasMain)
         }
         mp_BeatFileItems->at(i)->parentAPBoxStatusChanged(sigNum, hasMain);
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-        updateAPText(label.contains("Main") && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL,sigNum,i);
+        updateAPText(trackType == MAIN_DRUM_LOOP && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL,sigNum,i);
         mp_BeatFileItems->at(i)->setAsNew(false);
     }
 }
