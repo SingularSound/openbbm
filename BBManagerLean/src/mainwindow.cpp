@@ -1982,7 +1982,7 @@ void MainWindow::slotSavePrjAs()
    QString defaultFileName = mp_beatsModel->projectFileFI().fileName().replace(QRegularExpression("[ \\\"/<|>:*_?]+"), "_");
    // remove extension
    defaultFileName = QFileInfo(defaultFileName).baseName();
-   QDir defaultDir(mp_MasterWorkspace->userLibrary()->libProjects()->currentPath());
+   QDir defaultDir(mp_MasterWorkspace->userLibrary()->libProjects()->dir().absolutePath());
    QFileInfo defaultFI(defaultDir.absoluteFilePath(defaultFileName));
 
     QFileDialog dlg(
@@ -1991,7 +1991,7 @@ void MainWindow::slotSavePrjAs()
         nullptr,
         BMFILES_SAVE_PROJECT_DIALOG_FILTER);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(mp_MasterWorkspace->userLibrary()->libProjects()->currentPath());
+    dlg.setDirectory(mp_MasterWorkspace->userLibrary()->libProjects()->dir().absolutePath());
     QString last_dir = defaultFI.absolutePath();
     connect(&dlg, &FileDialog::directoryEntered, [&dlg, &last_dir](const QString& name) {
         if (!BeatsProjectModel::isProjectFolder(name)) {
