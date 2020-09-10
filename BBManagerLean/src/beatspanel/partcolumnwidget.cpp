@@ -791,7 +791,9 @@ void PartColumnWidget::parentAPBoxStatusChanged(int sigNum, bool hasMain)
         }
         mp_BeatFileItems->at(i)->parentAPBoxStatusChanged(sigNum, hasMain);
         MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-        updateAPText(trackType == MAIN_DRUM_LOOP && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL,sigNum,i);
+        if(trackType != DRUM_FILL){
+            updateAPText(trackType == MAIN_DRUM_LOOP && modelIndex().siblingAtRow(2).model()->rowCount(modelIndex().siblingAtRow(2)) > 0,false,trackType == OUTRO_FILL,sigNum,i);
+        }
         mp_BeatFileItems->at(i)->setAsNew(false);
     }
 }

@@ -91,7 +91,17 @@ void BeatFileWidget::drag()
     {
         if(settings.size() < 1){
             settings.push_back(m_PlayAt);
-            settings.push_back(m_PlayFor);
+            if(type != TRANS_FILL){
+                MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
+                settings.push_back(data.nTick/data.barLength);//saves bar length in case of trans fill drop
+                m_PlayFor  = data.nTick/data.barLength;
+                QList<QVariant> set2 = QList<QVariant>() << m_PlayAt << m_PlayFor;
+                model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
+                                 ,QVariant(set2),Qt::EditRole);
+            }else{
+                settings.push_back(m_PlayFor);
+            }
+
         }
     }else{
         if(settings.size() < 1){
@@ -99,6 +109,7 @@ void BeatFileWidget::drag()
             settings.push_back(0);
         }
     }
+
     model()->addAPSettingInQueue(settings);
 
     QDrag* drag = new QDrag(this);
@@ -879,6 +890,7 @@ bool BeatFileWidget::trackButtonClicked(const QString& dropFileName)
 }
 void BeatFileWidget::ApValueChanged(bool off){
 
+    MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
     if(APBar->text().toInt() < 1 && !APBar->text().isEmpty()){
         if(m_dropped){
             mp_APBox->setChecked(false);
@@ -886,6 +898,15 @@ void BeatFileWidget::ApValueChanged(bool off){
         }else{
             APBar->setText("1");
         }
+    }else if(trackType == TRANS_FILL){
+        if(m_dropped){
+            mp_APBox->setChecked(true);
+            APBoxStatusChanged();
+        }
+         m_PlayFor = (!off)?APBar->text().toInt():0;
+         QList<QVariant> settings = QList<QVariant>() << m_PlayAt << m_PlayFor;
+         model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
+                          ,QVariant(settings),Qt::EditRole);
     }else if(!newFill){
         if(m_dropped){
             mp_APBox->setChecked(true);
@@ -893,12 +914,8 @@ void BeatFileWidget::ApValueChanged(bool off){
         }
         //set new ap value
         MIDIPARSER_MidiTrack data(modelIndex().sibling(modelIndex().row(), AbstractTreeItem::RAW_DATA).data().toByteArray());
-        MIDIPARSER_TrackType trackType = (MIDIPARSER_TrackType)model()->index(modelIndex().row(), AbstractTreeItem::TRACK_TYPE, modelIndex().parent()).data().toInt();
-        if(trackType == TRANS_FILL){
-            m_PlayFor = (!off)?APBar->text().toInt():0;
-        }else{
-            m_PlayAt = (!off)?(APBar->text().toInt()-1)*data.timeSigNum+1:0;
-        }
+        m_PlayAt = (!off)?(APBar->text().toInt()-1)*data.timeSigNum+1:0;
+
 
         QList<QVariant> settings = QList<QVariant>() << m_PlayAt << m_PlayFor;
         model()->setData(model()->index(modelIndex().row(), AbstractTreeItem::PLAY_AT_FOR, modelIndex().parent())
@@ -1092,6 +1109,7 @@ void BeatFileWidget::updateAPText(bool hasTrans, bool hasMain, bool hasOutro, in
         mp_APBox->hide();
         APBar->hide();
         APText->hide();
+        PostText->hide();
     }
 
     newFill =false;

@@ -1097,7 +1097,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                         MAIN_LOOP_PTR(CurrPartPtr)->barLength);
 
                 if(TRANS_FILL_PTR(CurrPartPtr)->nTick > TRANS_FILL_PTR(CurrPartPtr)->barLength &&
-                   !(MasterTick/(SongPlayer_getbarLength() / TRANS_FILL_PTR(CurrPartPtr)->timeSigNum) >= TRANS_FILL_PTR(CurrPartPtr)->timeSigNum)){
+                   !(MasterTick/(SongPlayer_getbarLength() / TRANS_FILL_PTR(CurrPartPtr)->timeSigNum) >= TRANS_FILL_PTR(CurrPartPtr)->timeSigNum) && AutopilotCueFill){
                     //longer than 1 bar trans fill when main loop is on the first bar
                    TranFillStopSyncTick *= TRANS_FILL_PTR(CurrPartPtr)->nTick / TRANS_FILL_PTR(CurrPartPtr)->barLength;
                 }
@@ -1188,7 +1188,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 
         // If still waiting for trigger
-        if (TmpMasterPartTick <= DrumFillStartSyncTick) {
+        if ((TmpMasterPartTick + DrumFillPickUpSyncTickLength) <= DrumFillStartSyncTick) {
             TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio, 0, MAIN_PART_ID);
 
             // If its the end of the track
@@ -1849,7 +1849,7 @@ static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t en
             return;
     }
     //check if done playing pick up notes to adjust beat counter
-    if(DrumFillPickUpSyncTickLength > 0 && track->event[track->index].tick >= 0){
+    if(DrumFillPickUpSyncTickLength > 0 && track->event[track->index].tick >= 0 && PlayerStatus != DRUMFILL_WAITING_TRIG){
         TmpMasterPartTick -=DrumFillPickUpSyncTickLength;//This avoids displacing the beat
         DrumFillPickUpSyncTickLength = 0;
         if(playingPickUp){//if it played pick up notes, on pedal press pick up notes might not play

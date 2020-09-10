@@ -1940,11 +1940,16 @@ bool MainWindow::slotOpenPrj(const QString& default_path)
     // 4 - refresh change model
     createBeatsModels(projectFileName);
     refreshMenus();
-
+    qDebug() <<mp_MasterWorkspace->userLibrary()->libProjects()->dir().absolutePath()<<mp_MasterWorkspace->userLibrary()->libProjects()->currentPath();
     if (save && QMessageBox::Yes == QMessageBox::question(this, tr("Open Project"), tr("It looks like you are loading a project directly from your SD card.\n\n"
                                                                                        "We highly recommend to save a copy of it on your computer - as this will not only serve as backup in case your SD card gets lost or damaged, "
                                                                                        "but having a copy will also help you work more efficiently in the future, and you will be able to create backup SD cards to keep with you when travelling.\n\n"
                                                                                        "Save a copy of your project now?")/*.arg(mp_fileMenu->title().replace("&", "")).arg(mp_savePrjAs->text().replace("&", ""))*/)) {
+        slotSavePrjAs();
+    }else if(mp_MasterWorkspace->userLibrary()->libProjects()->dir().absolutePath() != mp_MasterWorkspace->userLibrary()->libProjects()->currentPath() && QMessageBox::Yes == QMessageBox::question(this, tr("Open Project"), tr("It looks like you are loading a project from a personal directory.\n\n"
+                                                                                       "We highly recommend to save a copy of it in the workspace (default) directory."
+                                                                                       "It will help you work more efficiently in the future.\n\n"
+                                                                                       "Save a copy of your project now?"))){
         slotSavePrjAs();
     }
     return true;
