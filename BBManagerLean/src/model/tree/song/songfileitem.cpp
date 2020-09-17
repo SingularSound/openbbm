@@ -346,6 +346,7 @@ void SongFileItem::verifyFile()
 
 void SongFileItem::verifyAutoPilot()
 {
+    auto songName = data(NAME).toString();
     SongFileModel * sfm = static_cast<SongFileModel *>(filePart());
     AutoPilotDataModel* apdm = static_cast<AutoPilotDataModel *>(sfm->getAutoPilotDataModel());
     SongModel * sm = static_cast<SongFileModel *>(filePart())->getSongModel();
@@ -369,7 +370,7 @@ void SongFileItem::verifyAutoPilot()
         setData(AUTOPILOT_VALID, true);
     } else {
         setData(AUTOPILOT_VALID, false);
-        warningMsg = "Invalid AutoPilot Settings:" + warningMsg;
+        warningMsg = "Invalid AutoPilot Settings on "+ songName +":" + warningMsg;
         QMessageBox::warning(nullptr, tr("Invalid AutoPilot Settings"), tr(warningMsg.toStdString().c_str()));
     }
 }
