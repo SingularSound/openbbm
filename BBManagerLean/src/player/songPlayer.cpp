@@ -757,7 +757,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
             extra = (TRANS_FILL_PTR(CurrPartPtr)->nTick /TRANS_FILL_PTR(CurrPartPtr)->barLength > 1)?APPtr->part[PartIndex].transitionFill.playFor: extra;
         }
 
-		if (PlayerStatus == PLAYING_MAIN_TRACK) {
+        if (PlayerStatus == PLAYING_MAIN_TRACK) {
             uint32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
             if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter && CurrPartPtr->nDrumFill > 0) {
 				RequestFlag = DRUMFILL_REQUEST;
@@ -1706,11 +1706,12 @@ static void CheckAndCountBeat(void) {
 static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPosition){
     auto Drumpart = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex);//if there is a drumfill
     if(Drumpart){
-        bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
+        bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;//if is last beat before drumfill
         bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
+        bool isShorter = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick < MAIN_LOOP_PTR(CurrPartPtr)->barLength;
         addedTick = ticksPerCount-newTickPosition;
-
-        if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
+        //should only do this right before the drumfill starts playing
+        if((addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes && !isShorter) || (isShorter && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt < BeatCounter && !((TmpMasterPartTick + DrumFillPickUpSyncTickLength) <= DrumFillStartSyncTick))){
             newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
             MasterTick += addedTick;
         }else {
