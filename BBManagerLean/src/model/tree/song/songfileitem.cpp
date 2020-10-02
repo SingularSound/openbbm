@@ -370,7 +370,7 @@ void SongFileItem::verifyAutoPilot()
         setData(AUTOPILOT_VALID, true);
     } else {
         setData(AUTOPILOT_VALID, false);
-        warningMsg = "Invalid AutoPilot Settings on "+ songName +":" + warningMsg;
+        warningMsg = "Invalid AutoPilot Settings on  song \""+ songName +"\":" + warningMsg;
         QMessageBox::warning(nullptr, tr("Invalid AutoPilot Settings"), tr(warningMsg.toStdString().c_str()));
     }
 }
