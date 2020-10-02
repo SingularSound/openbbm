@@ -346,7 +346,7 @@ void SongFileItem::verifyFile()
 
 void SongFileItem::verifyAutoPilot()
 {
-    auto songName = data(NAME).toString();
+    QString songName = data(NAME).toString();
     SongFileModel * sfm = static_cast<SongFileModel *>(filePart());
     AutoPilotDataModel* apdm = static_cast<AutoPilotDataModel *>(sfm->getAutoPilotDataModel());
     SongModel * sm = static_cast<SongFileModel *>(filePart())->getSongModel();
