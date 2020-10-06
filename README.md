@@ -9,19 +9,15 @@
 ## Building in MacOS X
 
 ### Initial Setup
-To build BBManager you'll need the [current suported version of qt](https://doc.qt.io/qt-5/macos.html) installed.
+You will need the latest version of qt to build the BeatBuddy Manager. You can get it from homebrew using `brew install qt`. Make sure to follow all instructions, as there may be issues with symlink creation that require you to add the binary directory to your path manually.
 
-To successfully run BBManager, you need a local installation of libquazip and libMinini.
+Ideally, set up Qt Creator and configure it to work with your installation of Qt. This will allow you to run the project from the IDE without any further work.
 
-Those should be installed at the ~/lib directory after running the `make install` command, because the OS looks for shared libraries there without any configuration; the files to be moved into that directory can be found in BBManager/libs/quazip/macx/release and BBManager/libs/minIni/macx/release respectively.
+If yo decide not to set up Qt Creator, you will need to provide suitable binaries of libquazip and libminIni to be loaded dynamically.
 
 ### Building and Deploying
-The project beatbuddy-manager-lite.pro will hold all project of the BeatBuddy Manager, so in order to run the application the project file is **BBManagerLean/BBManagerLean.pro** as this will run the BeatBuddy Manager. In BBManager/project you can build by running `qmake && make clean && make all`. The BBManager.app will be in the same directory, and you can run this to test the app.
 
-While dependencies don't change, future builds can be done with just `make`.
-
-To pack for deployment - ie: to share with other people - you need to run `BBManager/mac_deployment/deploy.sh` with `BBManager/project/BBManager.app` as an argument; this will make the dynamic libraries be loaded from the BBManager.app bundle, instead of them being sought elsewhere in the system.
-
+The deployment script has been temporarily decomissioned; we will bring it back soon. In order to distribute the app you need to make sure to build it and include the libraries in the bundle, making sure they point at the included dependencies as needed.
 
 ## Setting Up in Windows
 
