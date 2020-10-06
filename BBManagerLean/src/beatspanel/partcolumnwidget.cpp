@@ -817,7 +817,7 @@ void PartColumnWidget::updateAPText(bool hasTrans,bool hasMain,bool hasOutro, in
 }
 
 int PartColumnWidget::getNumSignature(){
-    if(mp_BeatFileItems->size()>0&& !mp_BeatFileItems->at(0)->isNew()){
+    if(mp_BeatFileItems->size() > 0 && !mp_BeatFileItems->at(0)->isNew()){
         QModelIndex child = mp_BeatFileItems->at(0)->modelIndex();//to get the main loop data
         QByteArray trackData = child.sibling(child.row(), AbstractTreeItem::RAW_DATA).data().toByteArray();
         return ((MIDIPARSER_MidiTrack)trackData).timeSigNum;
