@@ -21,8 +21,9 @@
 #include <QDebug>
 #include <QStaticText>
 #include <QtCore/qmath.h>
-
-
+#ifdef Q_OS_MACX
+#include <QPainterPath>
+#endif
 VMScreen::VMScreen(QWidget *parent) :
    QWidget(parent)
 {

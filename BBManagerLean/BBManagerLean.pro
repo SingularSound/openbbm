@@ -9,18 +9,18 @@ QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
 macx {
    LIBS += -framework AppKit
 
-   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/Application_Icon.icns
-   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BeatBuddy_Project_Folder.icns
-   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BBP.icns
-   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BBZ.icns
-   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/DRM.icns
-   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BBS.icns
-   ICON_FILES.path  += Contents/Resources
-   QMAKE_BUNDLE_DATA += ICON_FILES
-   QMAKE_INFO_PLIST   = ./mac_deployment/Bundle_src/Content/Info.plist
+#   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/Application_Icon.icns
+#   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BeatBuddy_Project_Folder.icns
+#   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BBP.icns
+#   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BBZ.icns
+#   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/DRM.icns
+#   ICON_FILES.files += ./mac_deployment/Bundle_src/Content/Resources/BBS.icns
+#   ICON_FILES.path  += Contents/Resources
+#   QMAKE_BUNDLE_DATA += ICON_FILES
+#   QMAKE_INFO_PLIST   = ./mac_deployment/Bundle_src/Content/Info.plist
 
-   LIBS       += -L./libs/quazip/macx/release/ -lquazip
-   LIBS       += -L./libs/minIni/macx/release/ -lminIni
+   LIBS       += -L$$PWD/libs/quazip/macx/release/ -lquazip
+   LIBS       += -L$$PWD/libs/minIni/macx/release/ -lminIni
    DEPENDPATH += $$PWD/./libs/quazip/macx/release
    DEPENDPATH += $$PWD/./libs/minIni/macx/release
 
