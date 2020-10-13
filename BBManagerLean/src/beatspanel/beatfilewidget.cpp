@@ -545,9 +545,11 @@ BeatFileWidget::BeatFileWidget(BeatsProjectModel* p_Model, QWidget* parent)
    APBar = new QLineEdit(this);
    APBar->setValidator( new QIntValidator(1, 99, this) );
    APText = new QLabel(this);
+   APText->setObjectName(QStringLiteral("APText1"));
    APBar->setText("1");
    PostText = new QLabel(this);
    PostText->setText("Bars");
+   PostText->setObjectName(QStringLiteral("APText2"));
    APText->setText("Trigger at bar");
    leftl->addWidget(APText);
    leftl->addWidget(APBar);
@@ -623,7 +625,7 @@ void BeatFileWidget::populate(QModelIndex const& modelIndex)
          mp_FileButton->setStyleSheet("#beatFileButton{"
                                       "color: white;}"
                                       "#beatFileButton:pressed{"
-                                      "color: white;}");
+                                      "color: black;}");
       }
    } else {
 
@@ -735,7 +737,11 @@ void BeatFileWidget::dataChanged(const QModelIndex &left, const QModelIndex &rig
                // watch out for bug https://bugreports.qt-project.org/browse/QTBUG-20292
                if(m_selectedStyleSheet != STYLE_NONE){
                   m_selectedStyleSheet = STYLE_NONE;
-                  mp_FileButton->setStyleSheet("QPushButton::menu-indicator{image:url(:/drawable/1x1.png)}");
+                  mp_FileButton->setStyleSheet("QPushButton::menu-indicator{image:url(:/drawable/1x1.png)}"
+                                               "#APText1{"
+                                               " color : gray;}"
+                                               "#APText2{"
+                                               " color : gray;}");
                }
             }
             break;
