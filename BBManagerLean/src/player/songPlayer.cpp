@@ -1082,12 +1082,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                   }
                    PlayerStatus = TRANFILL_WAITING_TRIG;
             }else{
-
-                // If there is only one part no transition fill since we stay on the same part all the time
-                if (CurrSongPtr->nPart > 1 && APPtr){
-                    // Cancel the transition fill request
-                    PlayerStatus = NO_FILL_TRAN;
-                }
+               // Cancel the transition fill request
+               PlayerStatus = NO_FILL_TRAN;
             }
             break;
 

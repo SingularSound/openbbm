@@ -9,38 +9,36 @@
 ## Building in MacOS X
 
 ### Initial Setup
-To build BBManager you'll need the [current suported version of qt](https://doc.qt.io/qt-5/macos.html) installed.
+You will need the latest version of qt to build the BeatBuddy Manager. You can get it from homebrew using `brew install qt`. Make sure to follow all instructions, as there may be issues with symlink creation that require you to add the binary directory to your path manually.
 
-To successfully run BBManager, you need a local installation of libquazip and libMinini.
+Ideally, set up Qt Creator and configure it to work with your installation of Qt. This will allow you to run the project from the IDE without any further work.
 
-Those should be installed at the ~/lib directory after running the `make install` command, because the OS looks for shared libraries there without any configuration; the files to be moved into that directory can be found in BBManager/libs/quazip/macx/release and BBManager/libs/minIni/macx/release respectively.
+If yo decide not to set up Qt Creator, you will need to provide suitable binaries of libquazip and libminIni to be loaded dynamically.
 
 ### Building and Deploying
-The project beatbuddy-manager-lite.pro will hold all project of the BeatBuddy Manager, so in order to run the application the project file is **BBManagerLean/BBManagerLean.pro** as this will run the BeatBuddy Manager. In BBManager/project you can build by running `qmake && make clean && make all`. The BBManager.app will be in the same directory, and you can run this to test the app.
 
-While dependencies don't change, future builds can be done with just `make`.
+The deployment script has been temporarily decomissioned; we will bring it back soon. In order to distribute the app you need to make sure to build it and include the libraries in the bundle, making sure they point at the included dependencies as needed.
 
-To start using the BBManager you can download the default drumsets from [here](https://mybeatbuddy.s3.amazonaws.com/BeatBuddy_Default_Content_v2.0.zip).
+## Setting Up in Windows
 
-To pack for deployment - ie: to share with other people - you need to run `BBManager/mac_deployment/deploy.sh` with `BBManager/project/BBManager.app` as an argument; this will make the dynamic libraries be loaded from the BBManager.app bundle, instead of them being sought elsewhere in the system.
-
-
-## Building in Windows
-
-### Initial Setup
+### Setting Up Qt
 To build BBMnager you'll need Qt 5.12.4 or up.
+To obtain Qt, download the installer from [their official site](https://www.qt.io/download-qt-installer) and install. This includes Qt and its IDE, Qt Creator.
 
-To successfully run BBManager, you'll need `Desktop Qt 5.12.4 MSVC2015 64bit` Kit as your kit selection. 
+#### Setting your build kit
+To successfully run BBManager, you'll need `Desktop Qt 5.12.4 MSVC2015 64bit` as your kit selection; this can be found on the Kits menu which you can find by navigating through the menu bar: Tools->Options->Kits.
 
-##### Setting your kit
-On Tools->Options->Kits make sure it's using `Microsoft Visual C++ Compiler 14.0 (amd64)` or up for C and C++, if you don't see it on the drop down options you can download Microsoft Visual Studio and choose Desktop development with C++ making sure the installation includes all the MSVC optionals. Or create it manually, by setting its path to  `C:\Program Files (x86)\Wndows Kits\10\Debuggers\x64\cdb.exe`, setting the make path to `C:\Qt\Tools\QtCreator\bin` selecting the jom.exe file, and the qt mkspecs to `C:\Qt\Tools\msvc2015_64\mkspecs`. 
+Make sure the selected kit's compilers for both C and C++ are `Microsoft Visual C++ Compiler 14.0 (amd64)`. If they are missing from the drop down options, you may download them through Microsoft Visual Studio's installer.
+
+##### Setting Microsoft Visual C++ Compiler
+Get Microsoft Visual Studio's Installer from [their official site](https://visualstudio.microsoft.com/downloads/) and execute it. On the installer, when prompted, select Desktop development with C++, and make sure the installation includes all the MSVC optionals. This should automatically add the desired compiler to Qt's kit's compilers' dropdowns.
+
+You may also add the compiler manually (in the same Options->Kits window); setting its path to `C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe`, setting the make path to `C:\Qt\Tools\QtCreator\bin` selecting the jom.exe file, and the qt mkspecs to `C:\Qt\Tools\msvc2015_64\mkspecs`. 
 
 Finally make sure your `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64` folder has a rc.exe and a rcdll.dll files, if they don't exists copy them from `C:\Program Files (x86)\Windows Kits\10\bin\VERSION\x64`.
 
 ### Building and Deploying
 The project file is `BBManagerLean/BBManagerLean.pro`. When opening the project select the corresponding kit, Clean, Build, and Run.
-
-To start using the BBManager you can download the default drumsets from [here](https://mybeatbuddy.s3.amazonaws.com/BeatBuddy_Default_Content_v2.0.zip).
 
 To pack for deployment - ie: to share with other people make the .pro file is set for release, and set the Build(The computer above the Run button on the Qt Creator) to 'Release' and build the application. Go to the folder containing the .exe and delete all but the .exe file, open the command prompt and run `windeployqt.exe --quick .` this will generate all the necessary .dll, and it is ready.
 
@@ -88,6 +86,17 @@ And then build:
     make clean && make all
 
 It will produce the `BBManagerLean/BBManagerLean`.
+
+
+## Default Files
+Once OpenBBManager compiles correctly, you must add the default drumsets.
+You may get all of the default files, including drumsets, from [here](https://mybeatbuddy.s3.amazonaws.com/BeatBuddy_Default_Content_v2.0.zip).
+
+That file also contains the BeatBuddy's bundled songs' midi sources, which are also handy for comparing the virtual machine to the Beat Buddy.
+
+To install these files, you must find the OpenBBManager's `user_lib` folder, and drag the zipped files inside that folder. (You can find this folder through the OpenBBManager by navigating through File->Open Project, and on the dialog going one folder up).
+
+To use a drumset (to listen to the songs), you must then check its checkmark (on the left panel, on the Drum Sets tab). Once checked, the drumset will appear on the list at the top bar, and playing a song will use that selected drumset.
 
 ## Contributing
 

@@ -37,7 +37,7 @@ Comments and answers to these questions inside the Pull Request should always sh
 
 ## Contact with Developers
 
-   If you have any questions about the source code, need to discuss a feature you want to implement, or a bug you want to fix, please write an email to julissa@singularsound.com.
+   If you have any questions about the source code, need to discuss a feature you want to implement, or a bug you want to fix, please write an email to irving@singularsound.com.
    
    
    
