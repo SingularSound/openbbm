@@ -1271,9 +1271,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         break;
 
     case DRUMFILL_ACTIVE:
+
         TrackPlay(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex),
                 MasterTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength,
-                TmpMasterPartTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength , ratio, 0,
+                (DrumFillPickUpSyncTickLength > 0 && DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick < MAIN_LOOP_PTR(CurrPartPtr)->barLength)?
+                      TmpMasterPartTick - DrumFillStartSyncTick:TmpMasterPartTick - DrumFillStartSyncTick - DrumFillPickUpSyncTickLength , ratio, 0,
                 DRUM_FILL_ID);
 
         // Drumfill end detector
@@ -1802,7 +1804,7 @@ static bool isEndOfTrack(int pos, SONG_SongPartStruct *CurrPartPtr/*, int loop, 
 static void TrackPlay(MIDIPARSER_MidiTrack *track, int32_t startTick, int32_t endTick, float ratio,
         int32_t manualOffset, uint32_t partID) {
     float delay;
-     playingPickUp = (startTick < 0)? true : false;
+     playingPickUp = (startTick < 0 && DrumFillPickUpSyncTickLength > 0)? true : false;
 
     // if the index of the song is outside the array of event, put it to the last value
     if (track->index >= track->event.size())
