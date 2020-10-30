@@ -1870,7 +1870,7 @@ static int32_t CalculateStartBarSyncTick(uint32_t tickPos,
 }
 
 static void StopSong(void) {
-    if(PedalPresswDrumFillFlag == 1){
+    if(PedalPresswDrumFillFlag == 1 && MultiTapCounter == 0){
         MasterTick = 0;
         ResetBeatCounter();
         PedalPresswDrumFillFlag = 0;
