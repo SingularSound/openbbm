@@ -1184,7 +1184,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
 
 
         // If still waiting for trigger
-        if ((TmpMasterPartTick + DrumFillPickUpSyncTickLength) <= DrumFillStartSyncTick) {
+        if (TmpMasterPartTick <= DrumFillStartSyncTick) {
             TrackPlay(MAIN_LOOP_PTR(CurrPartPtr), MasterTick, TmpMasterPartTick, ratio, 0, MAIN_PART_ID);
 
             // If its the end of the track
@@ -1703,7 +1703,13 @@ static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPo
     auto Drumpart = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex);//if there is a drumfill
     if(Drumpart){
         bool hasPickUpNotes= DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick < 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0;
-        bool isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1;
+        bool isLastBeat = false;
+        if(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick < MAIN_LOOP_PTR(CurrPartPtr)->barLength){
+            //if the fill is shorter and is already waiting for trig
+            isLastBeat = (PlayerStatus == DRUMFILL_WAITING_TRIG && TmpMasterPartTick+DrumFillPickUpSyncTickLength > DrumFillStartSyncTick)?true:false;
+        }else{
+            isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1 && CurrPartPtr->nDrumFill > 0;
+        }
         addedTick = ticksPerCount-newTickPosition;
 
         if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
