@@ -1685,7 +1685,7 @@ static void CheckAndCountBeat(void) {
         unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
         unsigned int newTickPosition = (MasterTick % ticksPerCount);
         CalculateMainTrim(ticksPerCount, newTickPosition);
-        bool shouldcount =  newTickPosition <= currentLoopTick || newEnd != 0 || BeatCounter ==0;
+        bool shouldcount =  newTickPosition <= currentLoopTick || BeatCounter == 0;
 
         if (shouldcount) {
             BeatCounter++;
@@ -1710,7 +1710,7 @@ static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPo
         }else{
             isLastBeat = BeatCounter == APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt-1 && CurrPartPtr->nDrumFill > 0;
         }
-        addedTick = ticksPerCount-newTickPosition;
+        addedTick = ticksPerCount - newTickPosition;
 
         if(addedTick < std::abs(DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick) && isLastBeat && hasPickUpNotes){
             newEnd = DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->event[0].tick;//send a message to start next beat but take master tick to the next one
