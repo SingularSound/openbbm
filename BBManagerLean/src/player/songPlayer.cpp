@@ -2176,6 +2176,10 @@ static void  DRUMFILL_ACTIVE_ButtonHandler(BUTTON_EVENT event){
             MultiTapCounter = 0;
         }
         break;
+    case BUTTON_EVENT_PEDAL_RELEASE:
+        RequestFlag = DRUMFILL_REQUEST;
+        PedalPresswDrumFillFlag = 1;
+        break;
     default:
         break;
     }
