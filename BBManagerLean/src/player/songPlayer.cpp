@@ -1041,7 +1041,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                      PlayerStatus = (APPtr->part[PartIndex].transitionFill.playAt == 0)?NO_FILL_TRAN:PlayerStatus;
                 }
                 PlayerStatus = TRANFILL_WAITING_TRIG;
-            } else if(TRANS_FILL_PTR(CurrPartPtr)){
+            } else if(TRANS_FILL_PTR(CurrPartPtr) && APPtr && APPtr->part[PartIndex].transitionFill.playFor >0){
                   if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength){
                       if (TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength % nTick){
                           TranFillPickUpSyncTickLength = (( 1 + TRANS_FILL_PTR(CurrPartPtr)->pickupNotesLength/ nTick) * nTick);
@@ -1071,7 +1071,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                       TranFillStartSyncTick -= TranFillPickUpSyncTickLength;
 
                   }
-                  // Adjust offset of tran fil if it is smaller than one bar
+                  // Adjust offset of tran fill if it is smaller than one bar
                   if (TRANS_FILL_PTR(CurrPartPtr)->nTick < TRANS_FILL_PTR(CurrPartPtr)->barLength) {
 
                       TranFillStartSyncTick += MAIN_LOOP_PTR(CurrPartPtr)->barLength -
