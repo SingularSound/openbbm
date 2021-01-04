@@ -202,6 +202,7 @@ static int TranFillPickUpSyncTickLength;
 static uint8_t PedalPressFlag; // Important to eliminate drumfill when quitting tap windows by the long pedal press
 static uint8_t PedalPresswDrumFillFlag = 0;
 static uint8_t TransPedalPressFlag = FALSE;
+static int PedalPresswDrumFillBar = -1;//todo reset on new part and song stop
 static uint8_t WasPausedFlag;
 static uint8_t MultiTapCounter;
 static uint8_t WasLongPressed;
@@ -1286,9 +1287,12 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
             if(PedalPresswDrumFillFlag != 0){
-                //if the pedal was pressed the section must restart
-                ResetBeatCounter();
+                //if the pedal was pressed 2bars ago the section must restart
+                //ResetBeatCounter();
                 PedalPresswDrumFillFlag = 0;
+                //calc reset beat after pedal press here
+                int beats = TmpMasterPartTick/480;
+                PedalPresswDrumFillBar = BeatCounter + beats;
             }
             SamePart(TRUE);
             SpecialEffectManager();
@@ -1730,7 +1734,6 @@ static void SamePart(unsigned int nextDrumfill) {
     MasterTick = 0;
     WasPausedFlag = 0;
     if(PedalPresswDrumFillFlag == 1){
-        MasterTick = 0;
         ResetBeatCounter();
         PedalPresswDrumFillFlag = 0;
         PlayerStatus = PLAYING_MAIN_TRACK;

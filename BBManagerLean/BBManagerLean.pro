@@ -1,6 +1,6 @@
 QT += core gui widgets multimedia network
 
-CONFIG += c++11 debug
+CONFIG += c++11 debug console
 
 
 TARGET = BBManagerLean
