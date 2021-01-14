@@ -145,6 +145,7 @@ static void StopSong(void);
 static void FirstPart(void);
 static void IntroPart(void);
 static void CheckAndCountBeat(void);
+static void CheckReset(void);
 static void CalculateMainTrim(unsigned int ticksPerCount, unsigned int newTickPosition);
 
 static void PauseUnpauseHandler(void);
@@ -202,7 +203,7 @@ static int TranFillPickUpSyncTickLength;
 static uint8_t PedalPressFlag; // Important to eliminate drumfill when quitting tap windows by the long pedal press
 static uint8_t PedalPresswDrumFillFlag = 0;
 static uint8_t TransPedalPressFlag = FALSE;
-static int PedalPresswDrumFillBar = -1;//todo reset on new part and song stop
+static uint8_t PedalPresswDrumFillBar = 0;
 static uint8_t WasPausedFlag;
 static uint8_t MultiTapCounter;
 static uint8_t WasLongPressed;
@@ -757,7 +758,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
         if(PlayerStatus == TRANFILL_ACTIVE && TRANS_FILL_PTR(CurrPartPtr)){
             extra = (TRANS_FILL_PTR(CurrPartPtr)->nTick /TRANS_FILL_PTR(CurrPartPtr)->barLength > 1)?APPtr->part[PartIndex].transitionFill.playFor: extra;
         }
-
+        qDebug()<< APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt;
 		if (PlayerStatus == PLAYING_MAIN_TRACK) {
             uint32_t tmpBeatCounter = APPtr->part[PartIndex].mainLoop.playFor > 0 ? BeatCounter % APPtr->part[PartIndex].mainLoop.playFor : BeatCounter;
             if (APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt > 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex].playAt == tmpBeatCounter && CurrPartPtr->nDrumFill > 0) {
@@ -974,7 +975,8 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DrumFillPickUpSyncTickLength = 0;
                 }
                 //Extends the section on autopilot if pedal pressed
-                if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
+                //TODO remove all of this
+                /*if(AutopilotAction == 0 && AutopilotCueFill == 0 && APPtr){
                     //the beat will be restarted at the end of the drumfill
                     if (CurrPartPtr->shuffleFlag) {
                         if (CurrPartPtr->nDrumFill != 0) {
@@ -984,12 +986,11 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                         fillAPIndex();
                     }
 
-                    //Check if previous drum fill was off the AP but should play manually
-                    if(DrumFillIndex != 0 && APPtr->part[PartIndex].drumFill[DrumFillIndex-1].playAt == 0)
-                    {
-                        DrumFillIndex --;
-                    }
-
+                }*/
+                //Check if previous drum fill was off the AP but should play manually
+                if(DrumFillIndex != 0 && APPtr && APPtr->part[PartIndex].drumFill[DrumFillIndex-1].playAt == 0)
+                {
+                    DrumFillIndex --;
                 }
                 PlayerStatus = DRUMFILL_WAITING_TRIG;
             }
@@ -1286,14 +1287,7 @@ void SongPlayer_processSong(float ratio, int32_t nTick) {
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick,
                     DRUM_FILL_PTR(CurrPartPtr, DrumFillIndex)->nTick
                     + POST_EVENT_MAX_TICK, ratio, nTick, DRUM_FILL_ID);
-            if(PedalPresswDrumFillFlag != 0){
-                //if the pedal was pressed 2bars ago the section must restart
-                //ResetBeatCounter();
-                PedalPresswDrumFillFlag = 0;
-                //calc reset beat after pedal press here
-                int beats = TmpMasterPartTick/480;
-                PedalPresswDrumFillBar = BeatCounter + beats;
-            }
+
             SamePart(TRUE);
             SpecialEffectManager();
         }
@@ -1678,6 +1672,26 @@ static void IntroPart(void) {
 }
 
 /**
+ * @brief CheckReset
+ * if the pedal was pressed 2 bars ago the section must restart
+ */
+static void CheckReset(unsigned char num)
+{
+    if(PedalPresswDrumFillBar > 0 && BeatCounter == (num*1)+PedalPresswDrumFillBar){
+        PedalPresswDrumFillBar = 0;
+        ResetBeatCounter();
+        if (CurrPartPtr->shuffleFlag) {
+            if (CurrPartPtr->nDrumFill != 0) {
+                DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
+            }
+        } else {
+            fillAPIndex();
+            DrumFillIndex = 0;
+        }
+    }
+}
+
+/**
  * @brief CheckAndCountBeat
  * Check the current state of the loop and adds a beat to the beat counter if needed
  */
@@ -1688,12 +1702,13 @@ static void CheckAndCountBeat(void) {
         SongPlayer_getTimeSignature(&timeSignature);
         unsigned int ticksPerCount = (SongPlayer_getbarLength() / timeSignature.num);
         unsigned int newTickPosition = (MasterTick % ticksPerCount);
+        CheckReset(timeSignature.num);
         CalculateMainTrim(ticksPerCount, newTickPosition);
         bool shouldcount =  newTickPosition <= currentLoopTick || BeatCounter == 0;
 
         if (shouldcount) {
             BeatCounter++;
-              qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num;
+              qDebug() << MasterTick << "CBeat" << BeatCounter << timeSignature.num << PedalPresswDrumFillBar;
         }
         currentLoopTick = (newEnd != 0)? newTickPosition + addedTick: newTickPosition;
         addedTick = 0;
@@ -1734,26 +1749,24 @@ static void SamePart(unsigned int nextDrumfill) {
     MasterTick = 0;
     WasPausedFlag = 0;
     if(PedalPresswDrumFillFlag == 1){
-        ResetBeatCounter();
         PedalPresswDrumFillFlag = 0;
-        PlayerStatus = PLAYING_MAIN_TRACK;
-    }else{
-        if (nextDrumfill) {
-            if (CurrPartPtr != NULL ) {
-                if (CurrPartPtr->nDrumFill != 0) {
-                    if (CurrPartPtr->shuffleFlag) {
-                        DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
-                    } else {
-                        DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
-                    }
+        PedalPresswDrumFillBar = BeatCounter;
+    }
+    if (nextDrumfill) {
+        if (CurrPartPtr != NULL ) {
+            if (CurrPartPtr->nDrumFill != 0) {
+                if (CurrPartPtr->shuffleFlag) {
+                    DrumFillIndex = rand() % CurrPartPtr->nDrumFill;
+                } else {
+                    DrumFillIndex = (APPtr)?getNextAPIndex():(DrumFillIndex + 1) % CurrPartPtr->nDrumFill;
                 }
             }
         }
-
-        CurrPartPtr = &CurrSongPtr->part[PartIndex];
-
-        PlayerStatus = PLAYING_MAIN_TRACK;
     }
+
+    CurrPartPtr = &CurrSongPtr->part[PartIndex];
+
+    PlayerStatus = PLAYING_MAIN_TRACK;
 }
 
 static unsigned int getNextAPIndex()
